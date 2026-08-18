@@ -39,13 +39,15 @@ function Menu({ label, items, openId, setOpenId }) {
 export default function Transport() {
   const {
     project, dispatch, engine, ui, setUi, play, stop, setMode,
-    newProject, saveFile, openFile, exportWav, canUndo, canRedo, playing, busy,
+    newProject, saveFile, openFile, exportWav, exportStems, exportMidiFile, importMidiFile,
+    canUndo, canRedo, playing, busy,
   } = useStudio();
   const [openId, setOpenId] = useState(null);
   const [editTempo, setEditTempo] = useState(null);
   const timeRef = useRef(null);
   const meterL = useRef(null);
   const fileRef = useRef(null);
+  const midiRef = useRef(null);
   const tempoDrag = useRef(null);
 
   useRaf(() => {
@@ -79,6 +81,10 @@ export default function Transport() {
     { sep: true },
     { label: 'Exportera monster (WAV)', onClick: () => exportWav('pattern') },
     { label: 'Exportera hela laten (WAV)', onClick: () => exportWav('song') },
+    { label: 'Exportera stems (WAV per mixerkanal)', onClick: () => exportStems() },
+    { sep: true },
+    { label: 'Exportera MIDI', onClick: () => exportMidiFile() },
+    { label: 'Importera MIDI...', onClick: () => midiRef.current && midiRef.current.click() },
   ];
 
   const editItems = [
@@ -185,6 +191,13 @@ export default function Transport() {
         />
       </div>
 
+      <input
+        ref={midiRef}
+        type="file"
+        accept=".mid,.midi,audio/midi"
+        className={s.hiddenFile}
+        onChange={(e) => { const f = e.target.files && e.target.files[0]; if (f) importMidiFile(f); e.target.value = ''; }}
+      />
       <input
         ref={fileRef}
         type="file"

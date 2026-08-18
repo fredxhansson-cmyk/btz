@@ -1,13 +1,129 @@
-import React, { useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import s from '../../styles/studio.module.css';
 import { useStudio } from '../../lib/studio/StudioContext';
+import { clamp } from '../../lib/studio/constants';
 import { INSTRUMENTS, INSTRUMENT_LIST, defaultParams, mergedParams } from '../../lib/studio/audio/instruments';
 import Knob, { ParamGrid } from './Knob';
 
-export default function PluginPanel() {
-  const { project, dispatch, engine, setUi, setHint } = useStudio();
-  const channel = project.channels.find((c) => c.id === project.selectedChannel);
+function Waveform({ channel }) {
+  const { engine, dispatch, project, loadSampleFile, setHint } = useStudio();
+  const ref = useRef(null);
   const fileRef = useRef(null);
+  const drag = useRef(null);
+  const [over, setOver] = useState(false);
+  const [, bump] = useState(0);
+  const sample = channel.sampleId ? (project.samples || {})[channel.sampleId] : null;
+  const decoded = channel.sampleId ? engine.buffers[channel.sampleId] : null;
+  const start = channel.params.start == null ? 0 : channel.params.start;
+  const end = channel.params.end == null ? 1 : channel.params.end;
+
+  useEffect(() => engine.subscribe(() => bump((n) => n + 1)), [engine]);
+
+  const draw = useCallback(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    if (!w || !h) return;
+    if (canvas.width !== Math.floor(w * dpr)) {
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+    }
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = over ? '#232a24' : '#15171b';
+    ctx.fillRect(0, 0, w, h);
+    if (!decoded) {
+      ctx.fillStyle = '#6d747e';
+      ctx.font = '11px system-ui, sans-serif';
+      ctx.fillText(sample ? 'Avkodar…' : 'Dra en ljudfil hit eller klicka pa "Ladda sample"', 10, h / 2);
+      return;
+    }
+    const pk = decoded.peaks;
+    const mid = h / 2;
+    for (let i = 0; i < pk.length; i++) {
+      const x = (i / pk.length) * w;
+      const bh = pk[i] * (h / 2 - 4);
+      const inside = i / pk.length >= Math.min(start, end) && i / pk.length <= Math.max(start, end);
+      ctx.fillStyle = inside ? channel.color : '#3a3f47';
+      ctx.fillRect(x, mid - bh, Math.max(1, w / pk.length - 0.5), bh * 2);
+    }
+    [start, end].forEach((m, i) => {
+      const x = clamp(m, 0, 1) * w;
+      ctx.fillStyle = i === 0 ? '#7ee787' : '#ff5a5a';
+      ctx.fillRect(x - 1, 0, 2, h);
+    });
+    ctx.fillStyle = '#8d949e';
+    ctx.font = '9px ui-monospace, monospace';
+    ctx.fillText(`${sample ? sample.name : ''} · ${decoded.fwd.duration.toFixed(2)}s`, 8, 12);
+  }, [channel.color, decoded, end, over, sample, start]);
+
+  useEffect(() => { draw(); }, [draw]);
+
+  const onDown = (e) => {
+    if (!decoded) return;
+    const rect = ref.current.getBoundingClientRect();
+    const x = clamp((e.clientX - rect.left) / rect.width, 0, 1);
+    const which = Math.abs(x - start) < Math.abs(x - end) ? 'start' : 'end';
+    drag.current = which;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dispatch({ type: 'channel.param', id: channel.id, key: which, value: x, live: true });
+  };
+  const onMove = (e) => {
+    if (!drag.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const x = clamp((e.clientX - rect.left) / rect.width, 0, 1);
+    dispatch({ type: 'channel.param', id: channel.id, key: drag.current, value: x, live: true });
+  };
+
+  return (
+    <div className={s.waveBox}>
+      <canvas
+        ref={ref}
+        className={s.wave}
+        onPointerDown={onDown}
+        onPointerMove={onMove}
+        onPointerUp={() => { drag.current = null; }}
+        onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setOver(true); }}
+        onDragLeave={() => setOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setOver(false);
+          const f = e.dataTransfer.files && e.dataTransfer.files[0];
+          if (f) loadSampleFile(f, channel.id);
+        }}
+      />
+      <div className={s.waveBtns}>
+        <button type="button" className={s.btn} onClick={() => fileRef.current.click()}>Ladda sample…</button>
+        {channel.sampleId && (
+          <button
+            type="button"
+            className={s.btn}
+            onClick={() => { dispatch({ type: 'sample.remove', sampleId: channel.sampleId }); setHint('Sample borttagen.'); }}
+          >Ta bort</button>
+        )}
+        <span className={s.dim}>Dra i grona/roda markorerna for start och slut</span>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="audio/*"
+          className={s.hiddenFile}
+          onChange={(e) => {
+            const f = e.target.files && e.target.files[0];
+            if (f) loadSampleFile(f, channel.id);
+            e.target.value = '';
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+export default function PluginPanel() {
+  const { project, dispatch, engine, setUi } = useStudio();
+  const channel = project.channels.find((c) => c.id === project.selectedChannel);
   if (!channel) return null;
   const inst = INSTRUMENTS[channel.inst];
 
@@ -43,29 +159,10 @@ export default function PluginPanel() {
         </select>
         <button type="button" className={s.btn} onClick={() => engine.preview(channel.id)}>Testa</button>
         <button type="button" className={s.btn} onClick={() => dispatch({ type: 'channel.clone', id: channel.id })}>Klona</button>
-        {inst && inst.needsSample && (
-          <>
-            <button type="button" className={s.btn} onClick={() => fileRef.current.click()}>Ladda sample…</button>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="audio/*"
-              className={s.hiddenFile}
-              onChange={async (e) => {
-                const f = e.target.files && e.target.files[0];
-                if (!f) return;
-                try {
-                  await engine.loadSample(channel.id, f);
-                  setHint(`Sample "${f.name}" laddad i ${channel.name}. (Sparas inte i projektfilen.)`);
-                } catch (err) {
-                  setHint('Kunde inte avkoda ljudfilen.');
-                }
-                e.target.value = '';
-              }}
-            />
-          </>
-        )}
+
       </div>
+
+      {inst && inst.needsSample && <Waveform channel={channel} />}
 
       <div className={s.pluginBody}>
         <div className={s.pluginMix}>

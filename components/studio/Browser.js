@@ -18,7 +18,7 @@ function Section({ title, children, defaultOpen = true }) {
 }
 
 export default function Browser() {
-  const { project, dispatch, setUi, setHint, ui } = useStudio();
+  const { project, dispatch, setUi, setHint, ui, midiInputs, loadSampleFile } = useStudio();
 
   const cats = INSTRUMENT_LIST.reduce((acc, inst) => {
     (acc[inst.cat] = acc[inst.cat] || []).push(inst);
@@ -77,6 +77,33 @@ export default function Browser() {
         <button type="button" className={s.sideAdd} onClick={() => dispatch({ type: 'pattern.add' })}>
           + Nytt monster
         </button>
+      </Section>
+
+      <Section title="Samples" defaultOpen={false}>
+        {Object.values(project.samples || {}).map((sm) => {
+          const used = project.channels.filter((c) => c.sampleId === sm.id);
+          return (
+            <div key={sm.id} className={s.sideItem}>
+              <span className={s.swatch} style={{ background: '#ffd8a8' }} />
+              <span className={s.laneText}>{sm.name}</span>
+              <span className={s.dim}>{(sm.bytes / 1024).toFixed(0)}kB{used.length ? '' : ' ·oanvand'}</span>
+            </div>
+          );
+        })}
+        {!Object.keys(project.samples || {}).length && (
+          <div className={s.helpBox}>Dra en ljudfil hit (eller var som helst i studion) for att skapa en sampler-kanal.</div>
+        )}
+      </Section>
+
+      <Section title="MIDI" defaultOpen={false}>
+        {midiInputs && midiInputs.length ? midiInputs.map((m) => (
+          <div key={m.id} className={s.sideItem}>
+            <span className={s.swatch} style={{ background: '#7ee787' }} />
+            <span className={s.laneText}>{m.name}</span>
+          </div>
+        )) : (
+          <div className={s.helpBox}>Inga MIDI-enheter anslutna. Koppla in ett keyboard och ladda om sidan.</div>
+        )}
       </Section>
 
       <Section title="Hjalp" defaultOpen={false}>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import s from '../../styles/studio.module.css';
 import { StudioProvider, useStudio } from '../../lib/studio/StudioContext';
 import Transport from './Transport';
@@ -39,8 +39,9 @@ function isTyping(el) {
 function Workspace() {
   const {
     project, dispatch, engine, ui, setUi, togglePlay, saveFile,
-    recordNote, finishRecordedNote,
+    recordNote, finishRecordedNote, loadSampleFile,
   } = useStudio();
+  const [dropping, setDropping] = useState(false);
   const held = useRef(new Map());
   const projectRef = useRef(project);
   projectRef.current = project;
@@ -112,8 +113,27 @@ function Workspace() {
     };
   }, [dispatch, engine, recordNote, finishRecordedNote, saveFile, setUi, togglePlay]);
 
+  const onDrop = (e) => {
+    const files = [...(e.dataTransfer.files || [])].filter((f) => f.type.startsWith('audio/') || /\.(wav|mp3|ogg|flac|m4a|aac)$/i.test(f.name));
+    if (!files.length) return;
+    e.preventDefault();
+    setDropping(false);
+    files.slice(0, 8).forEach((f) => loadSampleFile(f));
+    setUi({ view: 'rack' });
+  };
+
   return (
-    <div className={s.app}>
+    <div
+      className={s.app}
+      onDragOver={(e) => { e.preventDefault(); setDropping(true); }}
+      onDragLeave={(e) => { if (e.currentTarget === e.target) setDropping(false); }}
+      onDrop={onDrop}
+    >
+      {dropping && (
+        <div className={s.dropHint}>
+          <div className={s.dropCard}>Slapp ljudfiler for att skapa sampler-kanaler</div>
+        </div>
+      )}
       <Transport />
       <div className={s.tabs}>
         {TABS.map((t) => (
