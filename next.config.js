@@ -1,13 +1,37 @@
 /** @type {import('next').NextConfig} */
+const csp = [
+  "default-src 'self'",
+  "img-src 'self' data: blob:",
+  "media-src 'self' data: blob:",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self' data:",
+  "connect-src 'self' data: blob:",
+  "worker-src 'self' blob:",
+  "frame-ancestors 'none'",
+].join('; ');
+
 const nextConfig = {
   compress: true,
   poweredByHeader: false,
-  generateEtags: true,
-  images: { domains: ['axiom-engine-production-54c3.up.railway.app','m.media-amazon.com','images-eu.ssl-images-amazon.com','images-na.ssl-images-amazon.com'] },
+  reactStrictMode: true,
   async headers() {
-    return [{ source: '/(.*)', headers: [
-      { key: 'Content-Security-Policy', value: "default-src 'self'; img-src 'self' data: https://axiom-engine-production-54c3.up.railway.app https://m.media-amazon.com https://images-eu.ssl-images-amazon.com https://images-na.ssl-images-amazon.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cloud.umami.is; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://cloud.umami.is; frame-ancestors 'none'" },
-    ]}];
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'Content-Security-Policy', value: csp },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'same-origin' },
+        ],
+      },
+      {
+        // The service worker must never be served from a stale cache.
+        source: '/sw.js',
+        headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }],
+      },
+    ];
   },
-}
-module.exports = nextConfig
+};
+
+module.exports = nextConfig;

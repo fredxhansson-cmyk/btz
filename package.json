@@ -1,6 +1,8 @@
 {
-  "name": "loparskoguiden",
+  "name": "flow-studio",
   "version": "1.0.0",
+  "private": true,
+  "description": "FLOW Studio - musikstudio i webblasaren",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,7 +11,6 @@
   "dependencies": {
     "next": "14.0.0",
     "react": "^18",
-    "react-dom": "^18",
-    "resend": "^3.0.0"
+    "react-dom": "^18"
   }
 }

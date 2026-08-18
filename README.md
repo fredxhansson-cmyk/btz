@@ -1,24 +1,43 @@
-# loparskorguiden
+# FLOW Studio
 
-## FLOW Studio
+Musikstudio som kors direkt i webblasaren — trummaskin, piano roll, playlist,
+mixer, automation, mastering, inspelning och ett eget ljudbibliotek. Fungerar
+pa dator, mobil och surfplatta, och gar att installera som app.
 
-Repot innehaller ocksa **FLOW Studio** — en musikstudio som kors i webblasaren.
-Den ar en **egen, fristaende app** i mappen [`flow-studio/`](flow-studio/) och
-har inget gemensamt med den har sajten forutom repot, sa den kan publiceras pa
-en egen adress.
+Det har ar en **fristaende Next.js-app** och kan peka mot en egen domän
+(t.ex. `flowstudio.se`).
+
+## Kora lokalt
 
 ```bash
-cd flow-studio
 npm install
-npm run dev      # http://localhost:3000
+npm run dev
 ```
 
-Step sequencer, piano roll med ackord- och skalverktyg, trummaskin, playlist,
-automation, mixer med sends och elva effekter, tio instrument, sampler,
-inspelning fran mikrofon och instrument, mastering med LUFS-matning, MIDI in/ut
-och export till WAV och stems. Dessutom ett eget ljudbibliotek pa 71 ljud och
-10 trumkit, elva genremallar och **FLOW Brain** — en lokal generator som skapar
-nya ljud och beats och lar sig av det du behaller.
+Oppna sedan **http://localhost:3000** — studion ligger pa startsidan, ingen
+sokvag efter.
 
-Se [flow-studio/README.md](flow-studio/README.md) och
-[flow-studio/DOCS.md](flow-studio/DOCS.md).
+Om porten ar upptagen: `npm run dev -- -p 3001` och oppna
+`http://localhost:3001`.
+
+## Bygga och kora skarpt
+
+```bash
+npm run build
+npm start
+```
+
+## Publicera pa egen adress
+
+Appen ar en vanlig Next.js-app utan backend, sa den kan ligga hos vilken
+statisk/Node-host som helst.
+
+* **Vercel**: skapa ett nytt projekt fran repot (Root Directory = repo-roten).
+  Peka sedan din domän dit.
+* **Netlify**: build `npm run build`.
+* **Egen server**: `npm run build && npm start` bakom en reverse proxy.
+
+Kor den over https i skarp drift — mikrofoninspelning, installation som app och
+offline-lage kraver saker kontext (localhost raknas som sakert vid utveckling).
+
+Full funktionsbeskrivning finns i [DOCS.md](DOCS.md).
