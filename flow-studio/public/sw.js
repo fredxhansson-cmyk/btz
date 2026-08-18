@@ -1,11 +1,9 @@
 // FLOW Studio service worker.
 //
-// Keeps the studio installable and usable offline. Everything outside /studio
-// is deliberately passed straight through, so the rest of the site behaves
-// exactly as it did before.
-const CACHE = 'flow-studio-v1';
+// Keeps the studio installable and usable offline.
+const CACHE = 'flow-studio-v2';
 const CORE = [
-  '/studio',
+  '/',
   '/flow-clock.worklet.js',
   '/manifest.webmanifest',
   '/icon-192.png',
@@ -40,17 +38,17 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  // The studio page itself: network first so a new build always wins, with the
-  // cached shell as the offline fallback.
-  if (request.mode === 'navigate' && url.pathname.startsWith('/studio')) {
+  // The app shell: network first so a new build always wins, with the cached
+  // copy as the offline fallback.
+  if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
         .then((res) => {
           const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put('/studio', copy));
+          caches.open(CACHE).then((c) => c.put('/', copy));
           return res;
         })
-        .catch(() => caches.match('/studio').then((hit) => hit || Response.error())),
+        .catch(() => caches.match('/').then((hit) => hit || Response.error())),
     );
     return;
   }

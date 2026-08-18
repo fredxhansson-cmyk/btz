@@ -31,8 +31,7 @@ export default function StudioPage() {
     <>
       <Head>
         <title>FLOW Studio — musikstudio i webblasaren</title>
-        <meta name="description" content="En musikstudio som kors direkt i webblasaren: trummaskin, step sequencer, piano roll, playlist, mixer, automation och ett eget ljudbibliotek. Fungerar pa dator, mobil och surfplatta." />
-        <meta name="robots" content="noindex" />
+        <meta name="description" content="Musikstudio som kors direkt i webblasaren: trummaskin, piano roll, mixer, mastering, inspelning och ett eget ljudbibliotek. Fungerar pa dator, mobil och surfplatta — aven offline." />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#16181c" />
         <meta name="mobile-web-app-capable" content="yes" />

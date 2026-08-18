@@ -1,12 +1,14 @@
 # FLOW Studio
 
 En FL Studio-inspirerad musikstudio (DAW) som kors helt i webblasaren, byggd pa
-Web Audio API och React. Ligger pa rutten **`/studio`** i Next.js-appen.
+Web Audio API och React. Egen fristaende app i mappen **`flow-studio/`** —
+studion ligger pa startsidan (`/`).
 
 ```bash
+cd flow-studio
 npm install
 npm run dev
-# oppna http://localhost:3000/studio
+# oppna http://localhost:3000
 ```
 
 Studion ar en **PWA**: den kan installeras pa hemskarmen (dator, mobil och
@@ -297,8 +299,9 @@ lib/studio/
     render.js           offline-rendering + WAV-encoder
 components/studio/      UI (Transport, Browser, ChannelRack, PianoRoll,
                         DrumMachine, Playlist, Mixer, PluginPanel, Knob)
-pages/studio.js         klientrenderad sida
+pages/index.js          klientrenderad sida (studion pa /)
 public/flow-clock.worklet.js  klocka pa ljudtraden
+public/sw.js            service worker for offline-lage
 styles/studio.module.css
 ```
 
