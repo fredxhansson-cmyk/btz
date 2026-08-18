@@ -45,6 +45,37 @@ monstret, dra for att flytta, dra i hogerkanten for att forlanga (monstret
 upprepas), hogerklicka for att ta bort. Klick i linjalen spelar laten fran den
 takten.
 
+### Trummaskin (F8)
+En egen trummaskin ovanpa samma monsterdata som resten av programmet — allt du
+programmerar har syns ocksa i Channel Rack, Piano Roll och Playlist.
+
+* **12 pads** i MPC-layout (kick nere till vanster). Klicka for att spela,
+  hogerklicka for mute. Paden lyser nar den triggas under uppspelning.
+* **Kit-presets**: FLOW-808, FLOW-909, Acoustic, Trap och LoFi. Ett kit byter
+  ljud pa befintliga pads via deras roll (kick forblir kick) och skapar de pads
+  som saknas, utan att rora dina programmerade traffar.
+* **Stegeditor** for vald pad: klick = traff, `Shift`+klick = accent,
+  dra upp/ner pa ett steg = velocity, hogerklick = roll (2–4 traffar inom
+  samma steg, med stigande velocity).
+* **Choke-grupper**: pads i samma grupp klipper varandra, sa en stangd hihat
+  tystar en oppen. Fungerar likadant live som vid WAV-export.
+* **Verktyg**: Slumpa beat (rollmedveten sannolikhet per steg), Euclid
+  (jamnt fordelade traffar), Humanisera (slumpar timing ±3 ticks och velocity
+  ±15 %), Dubbla (dubblar monsterlangden och kopierar beatet), Rensa pad och
+  Rensa alla.
+* **Snabbrattar** for vald pad: level, pan och de viktigaste
+  instrumentparametrarna (tune, decay, punch, snap …).
+* **Oversikt** langst ner visar alla pads samtidigt.
+* Med **REC** aktiverat spelas pad-traffar in kvantiserade till narmaste steg.
+
+Pad-tangenter nar trummaskinen ar oppen:
+
+```
+Q W E R   ->  Low Tom  Mid Tom  Hi Tom  Cymbal
+A S D F   ->  Rim      Shaker   Tamb    Open Hat
+Z X C V   ->  Kick     Snare    Clap    Closed Hat
+```
+
 ### Mixer (F9)
 Master plus atta insert-kanaler (fler kan laggas till) med fader, pan, mute,
 solo, niva-meter och en seriell effektkedja per kanal. Varje effekt kan
@@ -82,11 +113,12 @@ Distortion, 3-bands parametrisk EQ och kompressor/limiter.
 | Tangent | Funktion |
 | --- | --- |
 | `Mellanslag` | play / stop |
-| `F5` / `F6` / `F7` / `F9` | Playlist / Channel Rack / Piano Roll / Mixer |
+| `F5` / `F6` / `F7` / `F8` / `F9` | Playlist / Channel Rack / Piano Roll / Trummaskin / Mixer |
 | `Ctrl+Z` / `Ctrl+Y` | angra / gor om |
 | `Ctrl+S` | spara projektfil |
 | `Z S X D C V G B H N J M` | nedre oktaven pa datortangentbordet |
 | `Q 2 W 3 E R 5 T 6 Y 7 U` | ovre oktaven |
+| `Z X C V / A S D F / Q W E R` | pads (nar trummaskinen ar oppen) |
 | `Pil upp` / `Pil ner` | byt oktav |
 | `Delete` | ta bort markerade noter (piano roll) |
 
@@ -102,6 +134,7 @@ lib/studio/
   constants.js          tick-upplosning (PPQ 96), fargpalett, hjalpfunktioner
   project.js            datamodellen + demo-latten
   reducer.js            all projektredigering + undo/redo-historik
+  drums.js              pad-roller, kit-presets och rytmverktyg
   sequencer.js          monster/playlist -> tick-indexerade eventkartor
   StudioContext.js      React-context, autospar, fil-I/O, export
   audio/
@@ -109,10 +142,11 @@ lib/studio/
     instruments.js      instrumentdefinitioner (rena rost-fabriker)
     effects.js          effektdefinitioner
     graph.js            mixer-grafen (kanaler -> inserts -> master)
+    trigger.js          gemensam nottrigger med choke-grupper
     engine.js           realtidsmotor med lookahead-schemalaggare
     render.js           offline-rendering + WAV-encoder
 components/studio/      UI (Transport, Browser, ChannelRack, PianoRoll,
-                        Playlist, Mixer, PluginPanel, Knob)
+                        DrumMachine, Playlist, Mixer, PluginPanel, Knob)
 pages/studio.js         klientrenderad sida
 styles/studio.module.css
 ```
@@ -120,6 +154,11 @@ styles/studio.module.css
 **Tid.** Allt raknas i ticks med `PPQ = 96` (ett steg = 24 ticks, en takt =
 384 ticks). Schemalaggaren tittar 160 ms framat var 20:e ms och lagger ut
 noter pa AudioContext-klockan, sa timingen paverkas inte av React-renderingar.
+
+**En datamodell.** Trummaskinens pads ar vanliga kanaler med en `role`, sa
+samma traffar syns i stegsequencern, piano rollen och arrangemanget. Rolls ar
+helt enkelt flera noter inom ett steg, vilket gor att de fungerar overallt utan
+specialfall i motorn.
 
 **Samma kod live och vid export.** Instrument och effekter ar rena funktioner
 som tar emot en `AudioContext`, sa `renderProject()` bygger om exakt samma graf

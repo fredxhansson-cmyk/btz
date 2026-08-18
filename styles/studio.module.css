@@ -365,3 +365,112 @@
   .chanLeft, .chanLeftSpacer { width: 200px; }
   .timeBox { display: none; }
 }
+
+/* ----------------------------------------------------------- drum machine */
+.dmBody { flex: 1; min-height: 0; display: flex; }
+.padWrap {
+  width: 330px; flex: none; padding: 12px; background: #1e2126;
+  border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px;
+}
+.padGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+.pad {
+  position: relative; height: 68px; border-radius: 6px; cursor: pointer; overflow: hidden;
+  background: linear-gradient(180deg, #2f343c, #23272e);
+  border: 1px solid var(--line); box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+  display: flex; flex-direction: column; justify-content: flex-end; padding: 6px;
+  --lit: 0;
+}
+.pad:hover { border-color: #5b626c; }
+.pad:active { transform: translateY(1px); }
+.padSel { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(255,138,31,0.4), inset 0 1px 0 rgba(255,255,255,0.08); }
+.padMuted { opacity: 0.42; }
+.padEmpty { background: #212429; border-style: dashed; cursor: default; opacity: 0.45; }
+.padGlow {
+  position: absolute; inset: 0; background: var(--pad, #fff);
+  opacity: calc(var(--lit) * 0.85); pointer-events: none; transition: none;
+}
+.padName {
+  position: relative; font-size: 11px; color: #e7ebf0; line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6); pointer-events: none;
+}
+.padKey {
+  position: absolute; top: 6px; left: 7px; font-size: 9px; color: #8d949e;
+  font-family: ui-monospace, monospace; border: 1px solid #3d434b; border-radius: 3px;
+  padding: 0 3px; pointer-events: none;
+}
+.padChoke {
+  position: absolute; top: 6px; right: 7px; font-size: 8px; color: #ffd8a8;
+  background: rgba(255,138,31,0.18); border-radius: 3px; padding: 1px 3px; pointer-events: none;
+}
+.padHint { font-size: 10.5px; color: #7d848e; line-height: 1.6; }
+.padHint b { color: var(--accent); font-weight: 600; }
+
+.dmMain { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.dmLaneHead {
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  border-bottom: 1px solid var(--line); background: #23262c;
+}
+.dmPadName { font-size: 13px; color: #eef1f5; }
+
+.dmSteps {
+  position: relative; display: flex; gap: 4px; padding: 14px 12px;
+  overflow-x: auto; border-bottom: 1px solid #1a1c21; --step: 0;
+}
+.bigStep {
+  position: relative; width: var(--stepw, 38px); height: 60px; flex: none; cursor: pointer;
+  background: #2a2e35; border: 1px solid #191c21; border-radius: 5px; overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); --v: 0.9;
+}
+.bigStep:hover { border-color: #656c76; }
+.bigStepBeat { background: #31353d; }
+.bigStepBar { background: #383d46; }
+.bigStepFill {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 0;
+  background: var(--pad, var(--accent)); pointer-events: none;
+}
+.bigStepOn .bigStepFill { height: calc(var(--v) * 100%); }
+.bigStepOn { border-color: rgba(0,0,0,0.65); }
+.bigStepNum {
+  position: absolute; top: 3px; left: 0; right: 0; text-align: center;
+  font-size: 8.5px; color: #767d87; font-family: ui-monospace, monospace; pointer-events: none;
+}
+.bigStepOn .bigStepNum { color: rgba(0,0,0,0.65); }
+.rollDots {
+  position: absolute; bottom: 3px; left: 0; right: 0; display: flex; gap: 2px;
+  justify-content: center; pointer-events: none;
+}
+.rollDots i { width: 3px; height: 3px; border-radius: 50%; background: rgba(0,0,0,0.7); }
+.stepCursor {
+  position: absolute; top: 8px; bottom: 8px; width: var(--stepw, 38px);
+  left: calc(12px + var(--step) * (var(--stepw, 38px) + 4px));
+  border: 1px solid rgba(255,138,31,0.9); border-radius: 5px;
+  background: rgba(255,138,31,0.12); pointer-events: none; opacity: 0;
+}
+
+.dmKnobs {
+  display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+  border-bottom: 1px solid #1a1c21; flex-wrap: wrap;
+}
+.dmOverview { flex: 1; min-height: 0; overflow: auto; padding: 8px 12px; }
+.ovRow { display: flex; align-items: center; gap: 8px; height: 22px; }
+.ovSel { background: rgba(255,138,31,0.08); border-radius: 4px; }
+.ovName {
+  width: 118px; flex: none; display: flex; align-items: center; gap: 6px;
+  background: transparent; border: 0; color: #9aa1ab; font-size: 10.5px;
+  cursor: pointer; text-align: left; padding: 0 4px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ovName:hover { color: #fff; }
+.ovSteps { display: flex; gap: 2px; }
+.ovStep { width: 12px; height: 12px; border-radius: 2px; background: #2a2e35; }
+.ovBeat { background: #343941; }
+.ovOn { box-shadow: inset 0 0 0 1px rgba(0,0,0,0.4); }
+.numInput {
+  width: 46px; background: #14161a; border: 1px solid var(--line); color: var(--accent);
+  border-radius: 4px; padding: 3px 5px; font-family: ui-monospace, monospace; font-size: 11px;
+}
+.dmTools {
+  display: flex; align-items: center; gap: 7px; padding: 6px 12px;
+  background: #1f2228; border-bottom: 1px solid var(--line); flex-wrap: wrap;
+}
+.toolLabel { font-size: 10px; letter-spacing: 1.2px; color: #626973; margin-right: 4px; }

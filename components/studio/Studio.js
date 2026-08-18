@@ -7,8 +7,10 @@ import ChannelRack from './ChannelRack';
 import PianoRoll from './PianoRoll';
 import Playlist from './Playlist';
 import Mixer from './Mixer';
+import DrumMachine from './DrumMachine';
 import PluginPanel from './PluginPanel';
 import { clamp } from '../../lib/studio/constants';
+import { ROLES, padChannels } from '../../lib/studio/drums';
 
 const KEYMAP = {
   z: 0, s: 1, x: 2, d: 3, c: 4, v: 5, g: 6, b: 7, h: 8, n: 9, j: 10, m: 11, ',': 12, l: 13, '.': 14,
@@ -19,8 +21,12 @@ const TABS = [
   { id: 'playlist', label: 'Playlist', hint: 'F5' },
   { id: 'rack', label: 'Channel Rack', hint: 'F6' },
   { id: 'piano', label: 'Piano Roll', hint: 'F7' },
+  { id: 'drums', label: 'Trummaskin', hint: 'F8' },
   { id: 'mixer', label: 'Mixer', hint: 'F9' },
 ];
+
+/** Letter key -> drum pad role, matching the pad grid layout. */
+const PAD_KEYS = ROLES.reduce((acc, r) => { acc[r.key] = r.id; return acc; }, {});
 
 function isTyping(el) {
   if (!el) return false;
@@ -34,6 +40,13 @@ function Workspace() {
     recordNote, finishRecordedNote,
   } = useStudio();
   const held = useRef(new Map());
+  const projectRef = useRef(project);
+  projectRef.current = project;
+  // Kept in refs so the key listener never works from a stale closure.
+  const viewRef = useRef(ui.view);
+  viewRef.current = ui.view;
+  const octaveRef = useRef(ui.octave);
+  octaveRef.current = ui.octave;
 
   useEffect(() => {
     const down = (e) => {
@@ -44,6 +57,7 @@ function Workspace() {
       if (e.key === 'F5') { e.preventDefault(); setUi({ view: 'playlist' }); return; }
       if (e.key === 'F6') { e.preventDefault(); setUi({ view: 'rack' }); return; }
       if (e.key === 'F7') { e.preventDefault(); setUi({ view: 'piano' }); return; }
+      if (e.key === 'F8') { e.preventDefault(); setUi({ view: 'drums' }); return; }
       if (e.key === 'F9') { e.preventDefault(); setUi({ view: 'mixer' }); return; }
       if ((e.ctrlKey || e.metaKey) && k === 's') { e.preventDefault(); saveFile(); return; }
       if ((e.ctrlKey || e.metaKey) && k === 'z') {
@@ -57,10 +71,22 @@ function Workspace() {
       if (e.key === 'ArrowDown') { setUi((u) => ({ octave: clamp(u.octave - 1, 0, 8) })); return; }
       if (k === 'r' && !KEYMAP[k]) { /* r is also a piano key, handled below */ }
 
+      // In the drum machine the letter keys are pads instead of a piano.
+      if (viewRef.current === 'drums') {
+        const role = PAD_KEYS[k];
+        if (!role || e.repeat || held.current.has(k)) return;
+        const ch = padChannels(projectRef.current).get(role);
+        if (!ch) return;
+        engine.preview(ch.id, 60, 1);
+        const rec = recordNote(60, 1, ch.id);
+        held.current.set(k, { key: 60, rec, pad: true });
+        return;
+      }
+
       const semis = KEYMAP[k];
       if (semis == null || e.repeat || held.current.has(k)) return;
-      const key = clamp((ui.octave + 1) * 12 + semis, 0, 127);
-      engine.noteOn(project.selectedChannel, key, 0.9);
+      const key = clamp((octaveRef.current + 1) * 12 + semis, 0, 127);
+      engine.noteOn(projectRef.current.selectedChannel, key, 0.9);
       const rec = recordNote(key, 0.9);
       held.current.set(k, { key, rec });
     };
@@ -70,7 +96,8 @@ function Workspace() {
       const info = held.current.get(k);
       if (!info) return;
       held.current.delete(k);
-      engine.noteOff(project.selectedChannel, info.key);
+      if (info.pad) return;
+      engine.noteOff(projectRef.current.selectedChannel, info.key);
       finishRecordedNote(info.rec);
     };
 
@@ -80,7 +107,7 @@ function Workspace() {
       window.removeEventListener('keydown', down);
       window.removeEventListener('keyup', up);
     };
-  }, [dispatch, engine, project.selectedChannel, recordNote, finishRecordedNote, saveFile, setUi, togglePlay, ui.octave]);
+  }, [dispatch, engine, recordNote, finishRecordedNote, saveFile, setUi, togglePlay]);
 
   return (
     <div className={s.app}>
@@ -113,6 +140,7 @@ function Workspace() {
             {ui.view === 'playlist' && <Playlist />}
             {ui.view === 'rack' && <ChannelRack />}
             {ui.view === 'piano' && <PianoRoll />}
+            {ui.view === 'drums' && <DrumMachine />}
             {ui.view === 'mixer' && <Mixer />}
           </div>
           {ui.pluginOpen && <PluginPanel />}
