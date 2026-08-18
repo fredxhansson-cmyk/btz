@@ -227,7 +227,7 @@ export default function Automation() {
       label: t.label,
       color: COLORS[(lanes.length * 3) % COLORS.length],
     });
-    setHint(`Automationsbana for ${t.label} tillagd.`);
+    setHint(`Automation lane for ${t.label} added.`);
   };
 
   useEffect(() => {
@@ -238,7 +238,7 @@ export default function Automation() {
     if (!lane) return;
     const cycles = Math.max(1, Math.round(len / barLen));
     commit(shapePoints(kind, len, kind === 'up' || kind === 'down' ? 1 : cycles));
-    setHint(`Fyllde banan med ${kind}.`);
+    setHint(`Filled the lane with ${kind}.`);
   };
 
   const current = lane && meta
@@ -253,13 +253,13 @@ export default function Automation() {
           {project.patterns.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
         <div className={s.group}>
-          <span className={s.dim}>Ny bana</span>
+          <span className={s.dim}>New lane</span>
           <select
             className={s.selectWide}
             value={pick}
             onChange={(e) => { addLane(e.target.value); setPick(''); }}
           >
-            <option value="">Valj parameter…</option>
+            <option value="">Choose parameter…</option>
             {Object.entries(groups).map(([group, list]) => (
               <optgroup key={group} label={group}>
                 {list.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
@@ -277,36 +277,36 @@ export default function Automation() {
         {meta && (
           <span className={s.dim}>
             {meta.label}: {current == null ? '—' : current.toFixed(2)}{meta.spec.unit ? ` ${meta.spec.unit}` : ''}
-            {meta.perNote ? ' · gäller från nästa not' : ''}
+            {meta.perNote ? ' · applies from the next note' : ''}
           </span>
         )}
       </div>
 
       <div className={s.dmTools}>
-        <span className={s.toolLabel}>Fyll</span>
-        <button type="button" className={s.btn} disabled={!lane} onClick={() => shape('up')}>Ramp upp</button>
-        <button type="button" className={s.btn} disabled={!lane} onClick={() => shape('down')}>Ramp ner</button>
-        <button type="button" className={s.btn} disabled={!lane} onClick={() => shape('sine')}>LFO sinus</button>
-        <button type="button" className={s.btn} disabled={!lane} onClick={() => shape('saw')}>LFO sag</button>
-        <button type="button" className={s.btn} disabled={!lane} onClick={() => shape('square')}>LFO fyrkant</button>
+        <span className={s.toolLabel}>Fill</span>
+        <button type="button" className={s.btn} disabled={!lane} onClick={() => shape('up')}>Ramp up</button>
+        <button type="button" className={s.btn} disabled={!lane} onClick={() => shape('down')}>Ramp down</button>
+        <button type="button" className={s.btn} disabled={!lane} onClick={() => shape('sine')}>LFO sine</button>
+        <button type="button" className={s.btn} disabled={!lane} onClick={() => shape('saw')}>LFO saw</button>
+        <button type="button" className={s.btn} disabled={!lane} onClick={() => shape('square')}>LFO square</button>
         <button type="button" className={s.btn} disabled={!lane} onClick={() => shape('pump')}>Pump (sidechain)</button>
         <div className={s.spacer} />
         <button
           type="button" className={s.btn} disabled={!lane}
           onClick={() => commit([{ t: 0, v: 0.5 }])}
-        >Nollstall bana</button>
+        >Reset lane</button>
       </div>
 
       <div className={s.autoBody}>
         <div className={s.laneList}>
-          {lanes.length === 0 && <div className={s.emptyFx}>Ingen automation i detta monster. Valj en parameter ovan.</div>}
+          {lanes.length === 0 && <div className={s.emptyFx}>No automation in this pattern. Choose a parameter above.</div>}
           {lanes.map((l) => {
             const t = targets.find((x) => x.id === l.target);
             return (
               <div key={l.id} className={l.id === selId ? `${s.laneItem} ${s.sel}` : s.laneItem}>
                 <button type="button" className={s.laneName} onClick={() => setUi({ autoLane: l.id })}>
                   <span className={s.swatch} style={{ background: l.color }} />
-                  <span className={s.laneText}>{t ? t.label : l.label || 'Okand parameter'}</span>
+                  <span className={s.laneText}>{t ? t.label : l.label || 'Unknown parameter'}</span>
                 </button>
                 <span className={s.dim}>{(l.points || []).length}p</span>
                 <button
@@ -317,7 +317,7 @@ export default function Automation() {
             );
           })}
           {lanes.some((l) => !targets.find((x) => x.id === l.target)) && (
-            <div className={s.warnBox}>En bana pekar pa en parameter som inte finns langre.</div>
+            <div className={s.warnBox}>A lane points to a parameter that no longer exists.</div>
           )}
         </div>
 
@@ -336,7 +336,7 @@ export default function Automation() {
 
       <div className={s.rackFoot}>
         <span className={s.dim}>
-          Klick = ny punkt · dra = flytta · hogerklick = ta bort · automation foljer monstret i bade PAT och SONG
+          Click = new point · drag = move · right-click = delete · automation follows the pattern in both PAT and SONG
         </span>
       </div>
     </div>

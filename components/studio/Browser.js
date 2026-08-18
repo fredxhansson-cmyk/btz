@@ -32,7 +32,7 @@ function SoundRow({ sound, onRemove }) {
       <button
         type="button"
         className={s.previewBtn}
-        title="Lyssna"
+        title="Preview"
         onPointerDown={(e) => { e.stopPropagation(); engine.previewSound(sound); }}
       >▸</button>
       <button
@@ -41,10 +41,10 @@ function SoundRow({ sound, onRemove }) {
         onClick={() => {
           dispatch({ type: 'sound.add', sound });
           engine.previewSound(sound);
-          setHint(`${sound.name} tillagd som kanal.`);
+          setHint(`${sound.name} added as a channel.`);
           setUi({ view: 'rack', browserOpen: false });
         }}
-        title={`Lagg till ${sound.name}${sound.tags && sound.tags.length ? ` · ${sound.tags.join(', ')}` : ''}`}
+        title={`Add ${sound.name}${sound.tags && sound.tags.length ? ` · ${sound.tags.join(', ')}` : ''}`}
       >
         <span className={s.swatch} style={{ background: soundColor(sound) }} />
         <span className={s.laneText}>{sound.name}</span>
@@ -72,7 +72,7 @@ export default function Browser() {
       <div className={s.sideTop}>
         <input
           className={s.search}
-          placeholder="Sok ljud, t.ex. 808, pad, acid…"
+          placeholder="Search sounds, e.g. 808, pad, acid…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -89,13 +89,13 @@ export default function Browser() {
 
       {query ? (
         <div className={s.sideList}>
-          <div className={s.sideCaption}>{results.length} traffar</div>
+          <div className={s.sideCaption}>{results.length} matches</div>
           {results.map((sd) => <SoundRow key={sd.id} sound={sd} onRemove={sd.user ? dropUser : null} />)}
-          {!results.length && <div className={s.helpBox}>Inga ljud matchade.</div>}
+          {!results.length && <div className={s.helpBox}>No sounds matched.</div>}
         </div>
       ) : (
         <>
-          <Section title="Trummor" defaultOpen count={DRUM_SOUNDS.length}>
+          <Section title="Drums" defaultOpen count={DRUM_SOUNDS.length}>
             {DRUM_CATS.map((cat) => (
               <div key={cat} className={s.catBlock}>
                 <div className={s.catLabel}>{cat}</div>
@@ -113,24 +113,24 @@ export default function Browser() {
             ))}
           </Section>
 
-          <Section title="AI-ljud" count={aiSounds.length}>
+          <Section title="AI sounds" count={aiSounds.length}>
             {aiSounds.map((sd) => <SoundRow key={sd.id} sound={sd} onRemove={dropUser} />)}
             {!aiSounds.length && (
               <div className={s.helpBox}>
-                Oppna <b>FLOW Brain</b> och generera ljud — de du sparar hamnar har och
-                biblioteket vaxer ju mer du anvander programmet.
+                Open <b>FLOW Brain</b> and generate sounds — the ones you save land here and
+                the library grows the more you use the app.
               </div>
             )}
           </Section>
 
-          <Section title="Mina ljud" count={mySounds.length}>
+          <Section title="My sounds" count={mySounds.length}>
             {mySounds.map((sd) => <SoundRow key={sd.id} sound={sd} onRemove={dropUser} />)}
             {!mySounds.length && (
-              <div className={s.helpBox}>Skruva pa ett ljud och tryck "Spara ljud" i instrumentpanelen.</div>
+              <div className={s.helpBox}>Tweak a sound and press "Save sound" in the instrument panel.</div>
             )}
           </Section>
 
-          <Section title="Trumkit" count={KITS.length}>
+          <Section title="Drum kits" count={KITS.length}>
             {KITS.map((k) => (
               <button
                 key={k.id}
@@ -139,7 +139,7 @@ export default function Browser() {
                 title={k.desc}
                 onClick={() => {
                   dispatch({ type: 'kit.apply', kitId: k.id });
-                  setHint(`Kit "${k.name}" laddat — ${k.desc}`);
+                  setHint(`Kit "${k.name}" loaded — ${k.desc}`);
                   setUi({ view: 'drums', browserOpen: false });
                 }}
               >
@@ -149,7 +149,7 @@ export default function Browser() {
             ))}
           </Section>
 
-          <Section title="Ljudmotorer" count={INSTRUMENT_LIST.length}>
+          <Section title="Sound engines" count={INSTRUMENT_LIST.length}>
             {INSTRUMENT_LIST.map((inst) => (
               <button
                 key={inst.id}
@@ -157,7 +157,7 @@ export default function Browser() {
                 className={s.sideItem}
                 onClick={() => {
                   dispatch({ type: 'sound.add', sound: { inst: inst.id, name: inst.name, params: defaultParams(inst.id), cat: inst.cat } });
-                  setHint(`${inst.name} tillagd med grundinstallning.`);
+                  setHint(`${inst.name} added with default settings.`);
                   setUi({ view: 'rack', browserOpen: false });
                 }}
               >
@@ -167,7 +167,7 @@ export default function Browser() {
             ))}
           </Section>
 
-          <Section title="Monster" defaultOpen count={project.patterns.length}>
+          <Section title="Patterns" defaultOpen count={project.patterns.length}>
             {project.patterns.map((p) => (
               <div key={p.id} className={p.id === project.activePattern ? `${s.sideItem} ${s.sel}` : s.sideItem}>
                 <button
@@ -175,7 +175,7 @@ export default function Browser() {
                   className={s.sideItemMain}
                   onClick={() => dispatch({ type: 'pattern.select', id: p.id })}
                   onDoubleClick={() => {
-                    const name = window.prompt('Monstrets namn', p.name);
+                    const name = window.prompt('Pattern name', p.name);
                     if (name) dispatch({ type: 'pattern.update', id: p.id, patch: { name } });
                   }}
                 >
@@ -191,18 +191,18 @@ export default function Browser() {
               </div>
             ))}
             <button type="button" className={s.sideAdd} onClick={() => dispatch({ type: 'pattern.add' })}>
-              + Nytt monster
+              + New pattern
             </button>
           </Section>
 
-          <Section title="Mallar" count={TEMPLATES.length}>
+          <Section title="Templates" count={TEMPLATES.length}>
             {TEMPLATES.map((t) => (
               <button
                 key={t.id}
                 type="button"
                 className={s.sideItem}
                 onClick={() => {
-                  if (window.confirm(`Ladda mallen "${t.name}"? Nuvarande projekt ersatts.`)) {
+                  if (window.confirm(`Load the template "${t.name}"? The current project will be replaced.`)) {
                     loadTemplate(t.id);
                     setUi({ browserOpen: false });
                   }
@@ -223,7 +223,7 @@ export default function Browser() {
               </div>
             ))}
             {!Object.keys(project.samples || {}).length && (
-              <div className={s.helpBox}>Dra en ljudfil hit for att skapa en sampler-kanal.</div>
+              <div className={s.helpBox}>Drag an audio file here to create a sampler channel.</div>
             )}
           </Section>
 
@@ -234,16 +234,16 @@ export default function Browser() {
                 <span className={s.laneText}>{m.name}</span>
               </div>
             )) : (
-              <div className={s.helpBox}>Inga MIDI-enheter anslutna.</div>
+              <div className={s.helpBox}>No MIDI devices connected.</div>
             )}
           </Section>
 
-          <Section title="Hjalp">
+          <Section title="Help">
             <div className={s.helpBox}>
               <p><b>F5</b> Playlist · <b>F6</b> Rack · <b>F7</b> Piano</p>
-              <p><b>F8</b> Trummor · <b>F9</b> Mixer · <b>F10</b> Automation</p>
-              <p><b>?</b> alla kortkommandon</p>
-              <p>Oktav: {ui.octave}</p>
+              <p><b>F8</b> Drums · <b>F9</b> Mixer · <b>F10</b> Automation</p>
+              <p><b>?</b> all keyboard shortcuts</p>
+              <p>Octave: {ui.octave}</p>
             </div>
           </Section>
         </>

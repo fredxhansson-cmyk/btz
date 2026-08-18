@@ -78,27 +78,27 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
   }, [dispatch]);
 
   const fileItems = [
-    { label: 'Nytt tomt projekt', onClick: () => newProject(false) },
-    { label: 'Ladda demo-projekt', onClick: () => newProject(true) },
+    { label: 'New empty project', onClick: () => newProject(false) },
+    { label: 'Load demo project', onClick: () => newProject(true) },
     { sep: true },
-    { label: 'Oppna .flow.json...', onClick: () => fileRef.current && fileRef.current.click() },
-    { label: 'Spara projekt', hint: 'Ctrl+S', onClick: saveFile },
+    { label: 'Open .flow.json...', onClick: () => fileRef.current && fileRef.current.click() },
+    { label: 'Save project', hint: 'Ctrl+S', onClick: saveFile },
     { sep: true },
-    { label: 'Exportera monster (WAV)', onClick: () => exportWav('pattern') },
-    { label: 'Exportera hela laten (WAV)', onClick: () => exportWav('song') },
-    { label: 'Exportera stems (WAV per mixerkanal)', onClick: () => exportStems() },
+    { label: 'Export pattern (WAV)', onClick: () => exportWav('pattern') },
+    { label: 'Export full track (WAV)', onClick: () => exportWav('song') },
+    { label: 'Export stems (WAV per mixer channel)', onClick: () => exportStems() },
     { sep: true },
-    { label: 'Exportera MIDI', onClick: () => exportMidiFile() },
-    { label: 'Importera MIDI...', onClick: () => midiRef.current && midiRef.current.click() },
+    { label: 'Export MIDI', onClick: () => exportMidiFile() },
+    { label: 'Import MIDI...', onClick: () => midiRef.current && midiRef.current.click() },
   ];
 
   const editItems = [
-    { label: 'Angra', hint: 'Ctrl+Z', disabled: !canUndo, onClick: () => dispatch({ type: 'undo' }) },
-    { label: 'Gor om', hint: 'Ctrl+Y', disabled: !canRedo, onClick: () => dispatch({ type: 'redo' }) },
+    { label: 'Undo', hint: 'Ctrl+Z', disabled: !canUndo, onClick: () => dispatch({ type: 'undo' }) },
+    { label: 'Redo', hint: 'Ctrl+Y', disabled: !canRedo, onClick: () => dispatch({ type: 'redo' }) },
     { sep: true },
-    { label: 'Nytt monster', onClick: () => dispatch({ type: 'pattern.add' }) },
-    { label: 'Duplicera monster', onClick: () => dispatch({ type: 'pattern.clone', id: project.activePattern }) },
-    { label: 'Rensa playlist', onClick: () => dispatch({ type: 'clip.clear' }) },
+    { label: 'New pattern', onClick: () => dispatch({ type: 'pattern.add' }) },
+    { label: 'Duplicate pattern', onClick: () => dispatch({ type: 'pattern.clone', id: project.activePattern }) },
+    { label: 'Clear playlist', onClick: () => dispatch({ type: 'clip.clear' }) },
   ];
 
   useEffect(() => {
@@ -115,8 +115,8 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
       </div>
 
       <div className={s.menu}>
-        <Menu label="Fil" items={fileItems} openId={openId} setOpenId={setOpenId} />
-        <Menu label="Redigera" items={editItems} openId={openId} setOpenId={setOpenId} />
+        <Menu label="File" items={fileItems} openId={openId} setOpenId={setOpenId} />
+        <Menu label="Edit" items={editItems} openId={openId} setOpenId={setOpenId} />
       </div>
 
       <div className={s.sep} />
@@ -126,20 +126,20 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
           type="button"
           className={playing ? `${s.tbtn} ${s.playOn}` : s.tbtn}
           onClick={() => (playing ? stop() : play())}
-          title="Play / Stop (mellanslag)"
+          title="Play / Stop (space)"
         >▶</button>
-        <button type="button" className={s.tbtn} onClick={stop} title="Stopp">■</button>
+        <button type="button" className={s.tbtn} onClick={stop} title="Stop">■</button>
         <button
           type="button"
           className={ui.recording ? `${s.tbtn} ${s.recOn}` : s.tbtn}
           onClick={() => setUi({ recording: !ui.recording })}
-          title="Spela in fran tangentbordet (R)"
+          title="Record from keyboard (R)"
         >●</button>
         <button
           type="button"
           className={s.micBtn}
           onClick={() => onOpenRecord && onOpenRecord()}
-          title="Spela in fran mikrofon eller instrument"
+          title="Record from microphone or instrument"
         >🎙</button>
       </div>
 
@@ -159,7 +159,7 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
         onPointerMove={onTempoMove}
         onPointerUp={() => { tempoDrag.current = null; }}
         onDoubleClick={() => setEditTempo(String(project.bpm))}
-        title="Dra for att andra tempo, dubbelklicka for att skriva"
+        title="Drag to change tempo, double-click to type"
       >
         {editTempo === null ? (
           <div className={s.tempoVal}>{project.bpm.toFixed(1)}</div>
@@ -184,7 +184,7 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
         type="button"
         className={`${ui.metronome ? `${s.btn} ${s.on}` : s.btn} ${s.deskOnly}`}
         onClick={() => setUi({ metronome: !ui.metronome })}
-        title="Metronom"
+        title="Metronome"
       >MET</button>
 
       <div className={`${s.group} ${s.deskOnly}`}>
@@ -195,7 +195,7 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
             const [num, den] = e.target.value.split('/').map(Number);
             dispatch({ type: 'patch', patch: { sig: { num, den } } });
           }}
-          title="Taktart"
+          title="Time signature"
         >
           {['4/4', '3/4', '5/4', '6/8', '7/8', '12/8', '6/4', '2/4'].map((v) => <option key={v} value={v}>{v}</option>)}
         </select>
@@ -203,8 +203,8 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
           type="button"
           className={project.countIn ? `${s.btn} ${s.on}` : s.btn}
           onClick={() => dispatch({ type: 'patch', patch: { countIn: ((project.countIn || 0) + 1) % 3 } })}
-          title="Inraknings-takter fore inspelning"
-        >{project.countIn ? `${project.countIn} takt${project.countIn > 1 ? 'er' : ''} in` : 'Ingen inrakning'}</button>
+          title="Count-in bars before recording"
+        >{project.countIn ? `${project.countIn} bar${project.countIn > 1 ? 's' : ''} in` : 'No count-in'}</button>
       </div>
 
       <div className={s.spacer} />
@@ -217,12 +217,12 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
             type="button"
             className={sheet ? `${s.moreBtn} ${s.on}` : s.moreBtn}
             onClick={() => setSheet((v) => !v)}
-            title="Mer"
+            title="More"
           >⋯</button>
           {sheet && (
             <div className={s.sheet} onPointerDown={(e) => e.stopPropagation()}>
               <div className={s.sheetGroup}>
-                <div className={s.sheetLabel}>FIL</div>
+                <div className={s.sheetLabel}>FILE</div>
                 {fileItems.filter((i) => !i.sep).map((it) => (
                   <button key={it.label} type="button" className={s.sheetItem} onClick={() => { setSheet(false); it.onClick(); }}>
                     {it.label}
@@ -230,7 +230,7 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
                 ))}
               </div>
               <div className={s.sheetGroup}>
-                <div className={s.sheetLabel}>REDIGERA</div>
+                <div className={s.sheetLabel}>EDIT</div>
                 {editItems.filter((i) => !i.sep).map((it) => (
                   <button
                     key={it.label} type="button" className={s.sheetItem} disabled={it.disabled}
@@ -241,7 +241,7 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
               <div className={s.sheetGroup}>
                 <div className={s.sheetLabel}>TRANSPORT</div>
                 <button type="button" className={s.sheetItem} onClick={() => { setSheet(false); if (onOpenRecord) onOpenRecord(); }}>
-                  Spela in ljud…
+                  Record audio…
                 </button>
                 <button type="button" className={s.sheetItem} onClick={() => { setSheet(false); if (onOpenAi) onOpenAi(); }}>
                   FLOW Brain (AI)…
@@ -251,7 +251,7 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
                     type="button"
                     className={ui.metronome ? `${s.btn} ${s.on}` : s.btn}
                     onClick={() => setUi({ metronome: !ui.metronome })}
-                  >Metronom</button>
+                  >Metronome</button>
                   <select
                     className={s.select}
                     value={`${project.sig ? project.sig.num : 4}/${project.sig ? project.sig.den : 4}`}
@@ -266,7 +266,7 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
                     type="button"
                     className={project.countIn ? `${s.btn} ${s.on}` : s.btn}
                     onClick={() => dispatch({ type: 'patch', patch: { countIn: ((project.countIn || 0) + 1) % 3 } })}
-                  >{project.countIn ? `${project.countIn} takt in` : 'Ingen inrakning'}</button>
+                  >{project.countIn ? `${project.countIn} bar in` : 'No count-in'}</button>
                 </div>
                 <div className={s.sheetRow}>
                   <Knob

@@ -5,57 +5,57 @@ const GROUPS = [
   {
     title: 'Transport',
     rows: [
-      ['Mellanslag', 'Spela / stoppa'],
-      ['R', 'Aktivera inspelning (via knappen)'],
-      ['Klick i linjalen', 'Spela fran den takten'],
-      ['Shift + dra i playlistens linjal', 'Satt loopregion'],
+      ['Space', 'Play / stop'],
+      ['R', 'Arm recording (via the button)'],
+      ['Click in the ruler', 'Play from that bar'],
+      ['Shift + drag in the playlist ruler', 'Set loop region'],
     ],
   },
   {
-    title: 'Vyer',
+    title: 'Views',
     rows: [
       ['F5', 'Playlist'],
       ['F6', 'Channel Rack'],
       ['F7', 'Piano Roll'],
-      ['F8', 'Trummaskin'],
+      ['F8', 'Drum Machine'],
       ['F9', 'Mixer'],
       ['F10', 'Automation'],
-      ['?', 'Denna hjalp'],
+      ['?', 'This help'],
     ],
   },
   {
     title: 'Piano Roll',
     rows: [
-      ['Klick / dra', 'Rita not, dra hogerkanten for langd'],
-      ['Ctrl + dra', 'Marquee-markering'],
-      ['Ctrl+C / X / V / D', 'Kopiera / klipp / klistra / duplicera'],
-      ['Ctrl+A', 'Markera allt'],
-      ['Ctrl+Q', 'Kvantisera markering'],
-      ['Pil upp/ner', 'Transponera (Shift = oktav)'],
-      ['Pil vanster/hoger', 'Flytta i tid'],
-      ['Delete', 'Ta bort markerade noter'],
+      ['Click / drag', 'Draw a note, drag the right edge for length'],
+      ['Ctrl + drag', 'Marquee selection'],
+      ['Ctrl+C / X / V / D', 'Copy / cut / paste / duplicate'],
+      ['Ctrl+A', 'Select all'],
+      ['Ctrl+Q', 'Quantize selection'],
+      ['Arrow up/down', 'Transpose (Shift = octave)'],
+      ['Arrow left/right', 'Move in time'],
+      ['Delete', 'Delete selected notes'],
     ],
   },
   {
-    title: 'Trummaskin',
+    title: 'Drum Machine',
     rows: [
-      ['Z X C V / A S D F / Q W E R', 'Spela pads'],
-      ['Klick', 'Traff pa/av'],
-      ['Shift + klick', 'Accent'],
-      ['Dra upp/ner', 'Velocity'],
-      ['Hogerklick', 'Roll (2-4 traffar)'],
+      ['Z X C V / A S D F / Q W E R', 'Play pads'],
+      ['Click', 'Hit on/off'],
+      ['Shift + click', 'Accent'],
+      ['Drag up/down', 'Velocity'],
+      ['Right-click', 'Roll (2-4 hits)'],
     ],
   },
   {
-    title: 'Ovrigt',
+    title: 'Other',
     rows: [
-      ['Ctrl+Z / Ctrl+Y', 'Angra / gor om'],
-      ['Ctrl+S', 'Spara projektfil'],
-      ['Z S X D C V G B H N J M', 'Piano, nedre oktaven'],
-      ['Q 2 W 3 E R 5 T 6 Y 7 U', 'Piano, ovre oktaven'],
-      ['Pil upp/ner (utan markering)', 'Byt oktav'],
-      ['Dra in ljudfiler', 'Skapar sampler-kanaler'],
-      ['Ctrl + hjul', 'Zooma i piano roll och playlist'],
+      ['Ctrl+Z / Ctrl+Y', 'Undo / redo'],
+      ['Ctrl+S', 'Save project file'],
+      ['Z S X D C V G B H N J M', 'Piano, lower octave'],
+      ['Q 2 W 3 E R 5 T 6 Y 7 U', 'Piano, upper octave'],
+      ['Arrow up/down (with no selection)', 'Change octave'],
+      ['Drag in audio files', 'Creates sampler channels'],
+      ['Ctrl + wheel', 'Zoom in the piano roll and playlist'],
     ],
   },
 ];
@@ -65,7 +65,7 @@ export default function HelpOverlay({ onClose }) {
     <div className={s.modalBack} onPointerDown={onClose}>
       <div className={s.modal} onPointerDown={(e) => e.stopPropagation()}>
         <div className={s.modalHead}>
-          <span className={s.pluginTitle}>Kortkommandon</span>
+          <span className={s.pluginTitle}>Keyboard Shortcuts</span>
           <div className={s.spacer} />
           <button type="button" className={s.xBtn} onClick={onClose}>×</button>
         </div>

@@ -46,7 +46,7 @@ export default function AiPanel({ onClose }) {
     setBrain(b);
     setAiCount(aiSoundCount());
     setBatch((list) => list.map((x) => (x.id === sound.id ? { ...x, kept: true } : x)));
-    setHint(`"${sound.name}" sparad i biblioteket — modellen lart sig av den.`);
+    setHint(`"${sound.name}" saved to the library — the model has learned from it.`);
   };
 
   const addChannel = (sound) => {
@@ -69,7 +69,7 @@ export default function AiPanel({ onClose }) {
     const byRole = padChannels(project);
     const roles = ROLES.map((r) => r.id).filter((r) => byRole.has(r));
     if (!roles.length) {
-      setHint('Lagg till trumkanaler forst (t.ex. via ett kit i Browser).');
+      setHint('Add drum channels first (e.g. via a kit in the Browser).');
       return;
     }
     const steps = patternSteps(pattern);
@@ -84,7 +84,7 @@ export default function AiPanel({ onClose }) {
         : fresh;
     }
     dispatch({ type: 'notes.setMany', patternId: pattern.id, byChannel });
-    setHint(variation ? 'Varierade beatet utifran din stil.' : 'Nytt beat genererat utifran din stil.');
+    setHint(variation ? 'Varied the beat based on your style.' : 'New beat generated based on your style.');
     setUi({ view: 'drums' });
   };
 
@@ -93,7 +93,7 @@ export default function AiPanel({ onClose }) {
     learnFromProject(b, project, 1);
     saveBrain(b);
     setBrain(b);
-    setHint('Modellen har lart sig av det har projektet.');
+    setHint('The model has learned from this project.');
   };
 
   return (
@@ -101,13 +101,13 @@ export default function AiPanel({ onClose }) {
       <div className={s.modal} onPointerDown={(e) => e.stopPropagation()}>
         <div className={s.modalHead}>
           <span className={s.pluginTitle}>FLOW Brain</span>
-          <span className={s.dim}>genererar ljud och beats — och lar sig av det du behaller. Allt sparas lokalt.</span>
+          <span className={s.dim}>generates sounds and beats — and learns from what you keep. Everything is saved locally.</span>
           <div className={s.spacer} />
           <button type="button" className={s.xBtn} onClick={onClose}>×</button>
         </div>
 
         <div className={s.aiTabs}>
-          {[['sounds', 'Ljud'], ['beat', 'Beat'], ['brain', `Lart sig (${Math.round(summary.stats.kept)})`]].map(([id, label]) => (
+          {[['sounds', 'Sounds'], ['beat', 'Beat'], ['brain', `Learned (${Math.round(summary.stats.kept)})`]].map(([id, label]) => (
             <button
               key={id}
               type="button"
@@ -133,15 +133,15 @@ export default function AiPanel({ onClose }) {
             </div>
             <div className={s.recRow}>
               <label className={s.checkRow}>
-                Vagat
+                Daring
                 <input
                   type="range" min={0.3} max={2.2} step={0.1} value={temp}
                   onChange={(e) => setTemp(Number(e.target.value))}
                 />
                 <span className={s.dim}>{temp.toFixed(1)}</span>
               </label>
-              <button type="button" className={`${s.btn} ${s.on}`} onClick={() => generate(8)}>Generera 8 ljud</button>
-              <span className={s.dim}>{aiCount} AI-ljud i biblioteket</span>
+              <button type="button" className={`${s.btn} ${s.on}`} onClick={() => generate(8)}>Generate 8 sounds</button>
+              <span className={s.dim}>{aiCount} AI sounds in the library</span>
             </div>
 
             <div className={s.aiGrid}>
@@ -153,17 +153,17 @@ export default function AiPanel({ onClose }) {
                   </div>
                   <div className={s.aiCardBtns}>
                     <button type="button" className={s.previewBtn} onClick={() => engine.previewSound(sd)}>▸</button>
-                    <button type="button" className={s.btn} title="Spara i biblioteket" onClick={() => keep(sd, 2)}>♥</button>
-                    <button type="button" className={s.btn} title="Lagg till som kanal" onClick={() => addChannel(sd)}>+</button>
-                    <button type="button" className={s.xBtn} title="Slang" onClick={() => skip(sd)}>×</button>
+                    <button type="button" className={s.btn} title="Save to library" onClick={() => keep(sd, 2)}>♥</button>
+                    <button type="button" className={s.btn} title="Add as channel" onClick={() => addChannel(sd)}>+</button>
+                    <button type="button" className={s.xBtn} title="Discard" onClick={() => skip(sd)}>×</button>
                   </div>
                 </div>
               ))}
               {!batch.length && (
                 <div className={s.helpBox}>
-                  Tryck "Generera 8 ljud". Ju fler du sparar med ♥ eller lagger till med +,
-                  desto mer traffsakert blir det — modellen lar sig dina varden for tonhojd,
-                  decay, drive och allt annat.
+                  Press "Generate 8 sounds". The more you save with ♥ or add with +,
+                  the more accurate it gets — the model learns your values for pitch,
+                  decay, drive and everything else.
                 </div>
               )}
             </div>
@@ -174,29 +174,29 @@ export default function AiPanel({ onClose }) {
           <div className={s.aiBody}>
             <div className={s.recRow}>
               <label className={s.checkRow}>
-                Tathet
+                Density
                 <input
                   type="range" min={0.4} max={1.8} step={0.1} value={amount}
                   onChange={(e) => setAmount(Number(e.target.value))}
                 />
                 <span className={s.dim}>{amount.toFixed(1)}</span>
               </label>
-              <button type="button" className={`${s.btn} ${s.on}`} onClick={() => makeBeat(false)}>Generera nytt beat</button>
-              <button type="button" className={s.btn} onClick={() => makeBeat(true)}>Variera det jag har</button>
+              <button type="button" className={`${s.btn} ${s.on}`} onClick={() => makeBeat(false)}>Generate new beat</button>
+              <button type="button" className={s.btn} onClick={() => makeBeat(true)}>Vary what I have</button>
             </div>
             <div className={s.helpBox}>
-              Beatet skrivs till det aktiva monstret och anvander de trumkanaler som finns.
-              Modellen vaktar var du brukar lagga dina traffar per instrument — ju fler beats
-              du gor, desto mer later det som du.
+              The beat is written to the active pattern and uses the drum channels that exist.
+              The model keeps track of where you usually place your hits per instrument — the more beats
+              you make, the more it sounds like you.
             </div>
             <div className={s.grooveGrid}>
               {summary.grooves.map((g) => (
                 <div key={g.role} className={s.grooveRow}>
                   <span className={s.grooveName}>{g.role}</span>
-                  <span className={s.dim}>{g.n} inlarda</span>
+                  <span className={s.dim}>{g.n} learned</span>
                 </div>
               ))}
-              {!summary.grooves.length && <span className={s.dim}>Inget inlart an — gor ett beat sa lar den sig.</span>}
+              {!summary.grooves.length && <span className={s.dim}>Nothing learned yet — make a beat and it will learn.</span>}
             </div>
           </div>
         )}
@@ -204,35 +204,35 @@ export default function AiPanel({ onClose }) {
         {tab === 'brain' && (
           <div className={s.aiBody}>
             <div className={s.recRow}>
-              <button type="button" className={s.btn} onClick={learnNow}>Lar av det har projektet nu</button>
+              <button type="button" className={s.btn} onClick={learnNow}>Learn from this project now</button>
               <button
                 type="button"
                 className={s.btn}
                 onClick={() => {
-                  if (window.confirm('Nollstalla allt modellen lart sig? Dina sparade ljud finns kvar.')) {
+                  if (window.confirm('Reset everything the model has learned? Your saved sounds will remain.')) {
                     setBrain(resetBrain());
-                    setHint('Modellen nollstalld.');
+                    setHint('Model reset.');
                   }
                 }}
-              >Nollstall inlarning</button>
+              >Reset learning</button>
             </div>
             <div className={s.statGrid}>
-              <div className={s.statBox}><b>{Math.round(summary.stats.kept)}</b><span>ljud inlarda</span></div>
-              <div className={s.statBox}><b>{Math.round(summary.stats.generated)}</b><span>genererade</span></div>
-              <div className={s.statBox}><b>{Math.round(summary.stats.liked || 0)}</b><span>gillade</span></div>
-              <div className={s.statBox}><b>{Math.round(summary.stats.projects)}</b><span>projekt-pass</span></div>
-              <div className={s.statBox}><b>{aiCount}</b><span>AI-ljud sparade</span></div>
+              <div className={s.statBox}><b>{Math.round(summary.stats.kept)}</b><span>sounds learned</span></div>
+              <div className={s.statBox}><b>{Math.round(summary.stats.generated)}</b><span>generated</span></div>
+              <div className={s.statBox}><b>{Math.round(summary.stats.liked || 0)}</b><span>liked</span></div>
+              <div className={s.statBox}><b>{Math.round(summary.stats.projects)}</b><span>project passes</span></div>
+              <div className={s.statBox}><b>{aiCount}</b><span>AI sounds saved</span></div>
             </div>
             <div className={s.recRow}>
               {summary.sounds.map((x) => (
                 <span key={x.cat} className={s.chip}>{x.cat}: {x.n}</span>
               ))}
-              {!summary.sounds.length && <span className={s.dim}>Inget inlart an.</span>}
+              {!summary.sounds.length && <span className={s.dim}>Nothing learned yet.</span>}
             </div>
             <div className={s.helpBox}>
-              Modellen ar en lokal statistisk modell over syntesparametrar och stegpositioner —
-              den kors i din webblasare, skickar ingenting nagonstans och blir bara battre ju mer
-              du anvander programmet.
+              The model is a local statistical model over synthesis parameters and step positions —
+              it runs in your browser, sends nothing anywhere and only gets better the more
+              you use the app.
             </div>
           </div>
         )}

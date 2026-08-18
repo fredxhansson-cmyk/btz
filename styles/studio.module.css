@@ -666,7 +666,11 @@
 .touch .mixerBody { overflow-y: auto; }
 
 /* compact touch header + overflow sheet */
-.touch .menu, .touch .timeBox, .touch .masterBox, .touch .sep, .touch .deskOnly { display: none; }
+.touch .timeBox, .touch .masterBox, .touch .sep, .touch .deskOnly { display: none; }
+/* Keep the File/Edit menu bar reachable in the compact layout — the dropdowns
+   work with a tap and are the only way to reach export, open and save. */
+.touch .menu { display: flex; }
+.touch .menuBtn { padding: 7px 10px; font-size: 13px; }
 .touch .header { min-height: 52px; gap: 8px; flex-wrap: nowrap; overflow: visible; }
 .touch .tempoVal, .touch .tempoInput { font-size: 15px; min-width: 62px; }
 .deskOnly { display: inherit; }

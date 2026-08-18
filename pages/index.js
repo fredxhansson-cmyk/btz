@@ -10,7 +10,7 @@ const Studio = dynamic(() => import('../components/studio/Studio'), {
       height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: '#16181c', color: '#8b929c', fontFamily: 'system-ui, sans-serif',
     }}>
-      Laddar FLOW Studio…
+      Loading FLOW Studio…
     </div>
   ),
 });
@@ -30,8 +30,8 @@ export default function StudioPage() {
   return (
     <>
       <Head>
-        <title>FLOW Studio — musikstudio i webblasaren</title>
-        <meta name="description" content="Musikstudio som kors direkt i webblasaren: trummaskin, piano roll, mixer, mastering, inspelning och ett eget ljudbibliotek. Fungerar pa dator, mobil och surfplatta — aven offline." />
+        <title>FLOW Studio — music studio in the browser</title>
+        <meta name="description" content="A music studio that runs right in your browser: drum machine, piano roll, mixer, mastering, recording and a built-in sound library. Works on desktop, mobile and tablet — even offline." />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#16181c" />
         <meta name="mobile-web-app-capable" content="yes" />

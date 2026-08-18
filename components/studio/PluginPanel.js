@@ -39,7 +39,7 @@ function Waveform({ channel }) {
     if (!decoded) {
       ctx.fillStyle = '#6d747e';
       ctx.font = '11px system-ui, sans-serif';
-      ctx.fillText(sample ? 'Avkodar…' : 'Dra en ljudfil hit eller klicka pa "Ladda sample"', 10, h / 2);
+      ctx.fillText(sample ? 'Decoding…' : 'Drag an audio file here or click "Load sample"', 10, h / 2);
       return;
     }
     const pk = decoded.peaks;
@@ -98,15 +98,15 @@ function Waveform({ channel }) {
         }}
       />
       <div className={s.waveBtns}>
-        <button type="button" className={s.btn} onClick={() => fileRef.current.click()}>Ladda sample…</button>
+        <button type="button" className={s.btn} onClick={() => fileRef.current.click()}>Load sample…</button>
         {channel.sampleId && (
           <button
             type="button"
             className={s.btn}
-            onClick={() => { dispatch({ type: 'sample.remove', sampleId: channel.sampleId }); setHint('Sample borttagen.'); }}
-          >Ta bort</button>
+            onClick={() => { dispatch({ type: 'sample.remove', sampleId: channel.sampleId }); setHint('Sample removed.'); }}
+          >Remove</button>
         )}
-        <span className={s.dim}>Dra i grona/roda markorerna for start och slut</span>
+        <span className={s.dim}>Drag the green/red markers for start and end</span>
         <input
           ref={fileRef}
           type="file"
@@ -159,14 +159,14 @@ export default function PluginPanel() {
           <option value="">Master</option>
           {project.inserts.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
         </select>
-        <button type="button" className={s.btn} onClick={() => engine.preview(channel.id)}>Testa</button>
-        <button type="button" className={s.btn} onClick={() => dispatch({ type: 'channel.clone', id: channel.id })}>Klona</button>
+        <button type="button" className={s.btn} onClick={() => engine.preview(channel.id)}>Test</button>
+        <button type="button" className={s.btn} onClick={() => dispatch({ type: 'channel.clone', id: channel.id })}>Clone</button>
         <button
           type="button"
           className={s.btn}
-          title="Spara instrumentets installningar i biblioteket under Mina ljud"
+          title="Save the instrument's settings to the library under My Sounds"
           onClick={() => {
-            const name = window.prompt('Namn pa ljudet', channel.name);
+            const name = window.prompt('Sound name', channel.name);
             if (!name) return;
             saveUserSound({
               id: uid('us'),
@@ -175,12 +175,12 @@ export default function PluginPanel() {
               inst: channel.inst,
               params: { ...mergedParams(channel) },
               kind: inst && inst.cat === 'Drums' ? 'drum' : 'inst',
-              tags: ['eget'],
+              tags: ['own'],
             });
             setUi({ soundsVersion: (ui.soundsVersion || 0) + 1 });
-            setHint(`"${name}" sparat i biblioteket under Mina ljud.`);
+            setHint(`"${name}" saved to the library under My Sounds.`);
           }}
-        >Spara ljud</button>
+        >Save sound</button>
 
       </div>
 
@@ -189,7 +189,7 @@ export default function PluginPanel() {
       <div className={s.pluginBody}>
         <div className={s.pluginMix}>
           <Knob
-            label="Volym" color="#7ee787"
+            label="Volume" color="#7ee787"
             spec={{ min: 0, max: 1.2, def: 0.8 }}
             value={channel.vol}
             onChange={(v, live) => dispatch({ type: 'channel.update', id: channel.id, patch: { vol: v }, live, key: 'vol' })}

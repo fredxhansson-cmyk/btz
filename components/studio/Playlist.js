@@ -302,7 +302,7 @@ export default function Playlist() {
     <div className={s.panel}>
       <div className={s.panelHead}>
         <span className={s.panelTitle}>Playlist</span>
-        <span className={s.dim}>Placerar:</span>
+        <span className={s.dim}>Placing:</span>
         <select
           className={s.select}
           value={project.activePattern}
@@ -318,22 +318,22 @@ export default function Playlist() {
         </div>
         <button type="button" className={s.btn} onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 1.25, 0.02, 1.2); draw(); }}>+</button>
         <button type="button" className={s.btn} onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 0.8, 0.02, 1.2); draw(); }}>−</button>
-        <button type="button" className={s.btn} onClick={() => play('song')}>Spela laten</button>
+        <button type="button" className={s.btn} onClick={() => play('song')}>Play song</button>
         <button
           type="button"
           className={project.loop !== false && project.loopEnd > project.loopStart ? `${s.btn} ${s.on}` : s.btn}
           onClick={() => dispatch({ type: 'patch', patch: { loop: project.loop === false } })}
-          title="Shift+dra i linjalen for att satta loopregion"
+          title="Shift+drag in the ruler to set a loop region"
         >Loop</button>
         {project.loopEnd > project.loopStart && (
           <button
             type="button"
             className={s.btn}
             onClick={() => dispatch({ type: 'patch', patch: { loopStart: 0, loopEnd: 0 } })}
-          >Rensa loop</button>
+          >Clear loop</button>
         )}
         <div className={s.spacer} />
-        <span className={s.dim}>{project.playlist.length} klipp · {bars} takter</span>
+        <span className={s.dim}>{project.playlist.length} clips · {bars} bars</span>
       </div>
       <div className={s.canvasWrap} ref={wrapRef}>
         <canvas

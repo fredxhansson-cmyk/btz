@@ -350,7 +350,7 @@ export default function PianoRoll() {
     }
 
     if (hit) {
-      // long press on touch removes the note, like a right click does
+      // long press on touch removes the note, like a right-click does
       press.current.start(e, () => {
         dispatch({ type: 'note.remove', patternId: pattern.id, channelId: channel.id, ids: [hit.id] });
         sel.current.delete(hit.id);
@@ -465,7 +465,7 @@ export default function PianoRoll() {
     if (dr && dr.mode === 'audition') engine.noteOff(channel.id, dr.key);
     if (dr && dr.mode === 'marquee') {
       marquee.current = null;
-      setHint(`${sel.current.size} noter markerade.`);
+      setHint(`${sel.current.size} notes selected.`);
     }
     drag.current = null;
     bump((n) => n + 1);
@@ -520,7 +520,7 @@ export default function PianoRoll() {
         if (!list.length) return;
         e.preventDefault();
         clipboard = list.map((n) => ({ ...n }));
-        setHint(`${clipboard.length} noter kopierade.`);
+        setHint(`${clipboard.length} notes copied.`);
         return;
       }
       if (mod && e.key.toLowerCase() === 'x') {
@@ -539,7 +539,7 @@ export default function PianoRoll() {
         const pasted = cloneNotes(clipboard, at - base);
         setNotes([...notes, ...pasted]);
         sel.current = new Set(pasted.map((n) => n.id));
-        setHint(`${pasted.length} noter inklistrade.`);
+        setHint(`${pasted.length} notes pasted.`);
         return;
       }
       if (mod && e.key.toLowerCase() === 'd') {
@@ -553,7 +553,7 @@ export default function PianoRoll() {
       }
       if (mod && e.key.toLowerCase() === 'q') {
         e.preventDefault();
-        applyToSelection((l) => quantizeNotes(l, snapTicks(ui.snap), qStrength), 'Kvantiserat.');
+        applyToSelection((l) => quantizeNotes(l, snapTicks(ui.snap), qStrength), 'Quantized.');
         return;
       }
       if (!mod && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && sel.current.size) {
@@ -586,7 +586,7 @@ export default function PianoRoll() {
           {project.patterns.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
         <div className={s.modeSw}>
-          {[['draw', 'Rita'], ['select', 'Markera'], ['erase', 'Radera']].map(([id, label]) => (
+          {[['draw', 'Draw'], ['select', 'Select'], ['erase', 'Erase']].map(([id, label]) => (
             <button
               key={id}
               type="button"
@@ -602,13 +602,13 @@ export default function PianoRoll() {
           </select>
         </div>
         <div className={s.group}>
-          <span className={s.dim}>Ackord</span>
+          <span className={s.dim}>Chord</span>
           <select className={s.select} value={ui.chord || 'none'} onChange={(e) => setUi({ chord: e.target.value })}>
             {CHORDS.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </div>
         <div className={s.group}>
-          <span className={s.dim}>Skala</span>
+          <span className={s.dim}>Scale</span>
           <select className={s.select} value={ui.scaleRoot || 0} onChange={(e) => setUi({ scaleRoot: Number(e.target.value) })}>
             {NOTE_NAMES.map((n, i) => <option key={n} value={i}>{n}</option>)}
           </select>
@@ -619,20 +619,20 @@ export default function PianoRoll() {
             type="button"
             className={ui.scaleSnap ? `${s.btn} ${s.on}` : s.btn}
             onClick={() => setUi({ scaleSnap: !ui.scaleSnap })}
-            title="Tvinga nya noter till skalan"
-          >Lås</button>
+            title="Force new notes into the scale"
+          >Lock</button>
         </div>
         <div className={s.spacer} />
         <button type="button" className={ui.ghosts === false ? s.btn : `${s.btn} ${s.on}`} onClick={() => setUi({ ghosts: ui.ghosts === false })}>Ghosts</button>
         <button type="button" className={s.btn} onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 1.25, 0.08, 4); draw(); }}>+</button>
         <button type="button" className={s.btn} onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 0.8, 0.08, 4); draw(); }}>−</button>
-        <span className={s.dim}>{notes.length} noter</span>
+        <span className={s.dim}>{notes.length} notes</span>
       </div>
 
       <div className={s.dmTools}>
-        <span className={s.toolLabel}>Verktyg</span>
+        <span className={s.toolLabel}>Tools</span>
         <div className={s.group}>
-          <button type="button" className={s.btn} onClick={() => applyToSelection((l) => quantizeNotes(l, snapTicks(ui.snap), qStrength), 'Kvantiserat.')}>Kvantisera</button>
+          <button type="button" className={s.btn} onClick={() => applyToSelection((l) => quantizeNotes(l, snapTicks(ui.snap), qStrength), 'Quantized.')}>Quantize</button>
           <input
             className={s.numInput} type="number" min={0} max={100} step={5}
             value={Math.round(qStrength * 100)}
@@ -640,36 +640,36 @@ export default function PianoRoll() {
           />
           <span className={s.dim}>%</span>
         </div>
-        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => strumNotes(l, Math.round(snapTicks(ui.snap) / 2)), 'Strum.')}>Strum</button>
-        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => arpeggiateNotes(l, snapTicks(ui.snap), 'up', 1), 'Arpeggierat.')}>Arpeggiera</button>
-        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => humanizeVelocity(l), 'Humaniserat.')}>Humanisera</button>
-        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => randomizeVelocity(l), 'Slumpad velocity.')}>Slumpa vel</button>
+        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => strumNotes(l, Math.round(snapTicks(ui.snap) / 2)), 'Strummed.')}>Strum</button>
+        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => arpeggiateNotes(l, snapTicks(ui.snap), 'up', 1), 'Arpeggiated.')}>Arpeggiate</button>
+        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => humanizeVelocity(l), 'Humanized.')}>Humanize</button>
+        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => randomizeVelocity(l), 'Randomized velocity.')}>Randomize vel</button>
         <button type="button" className={s.btn} onClick={() => applyToSelection((l) => legatoNotes(l, notes), 'Legato.')}>Legato</button>
-        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => invertNotes(l), 'Inverterat.')}>Invertera</button>
-        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => reverseNotes(l), 'Bakvant.')}>Vänd</button>
+        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => invertNotes(l), 'Inverted.')}>Invert</button>
+        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => reverseNotes(l), 'Reversed.')}>Reverse</button>
         <div className={s.group}>
-          <button type="button" className={s.btn} onClick={() => applyToSelection((l) => transposeNotes(l, 12))}>Okt +</button>
-          <button type="button" className={s.btn} onClick={() => applyToSelection((l) => transposeNotes(l, -12))}>Okt −</button>
+          <button type="button" className={s.btn} onClick={() => applyToSelection((l) => transposeNotes(l, 12))}>Oct +</button>
+          <button type="button" className={s.btn} onClick={() => applyToSelection((l) => transposeNotes(l, -12))}>Oct −</button>
         </div>
         <div className={s.spacer} />
         <div className={s.group}>
           <span className={s.toolLabel}>Arp</span>
           <button type="button" className={arp.on ? `${s.btn} ${s.on}` : s.btn} onClick={() => setArp({ on: !arp.on })}>
-            {arp.on ? 'PÅ' : 'AV'}
+            {arp.on ? 'ON' : 'OFF'}
           </button>
           <select className={s.select} value={arp.rate} onChange={(e) => setArp({ rate: e.target.value })}>
             {['1/4', '1/8', '1/8T', '1/16', '1/16T', '1/32'].map((r) => <option key={r} value={r}>{r}</option>)}
           </select>
           <select className={s.select} value={arp.mode} onChange={(e) => setArp({ mode: e.target.value })}>
-            {[['up', 'Upp'], ['down', 'Ner'], ['updown', 'Upp/ner'], ['random', 'Slump'], ['chord', 'Ackord']].map(([id, l]) => (
+            {[['up', 'Up'], ['down', 'Down'], ['updown', 'Up/down'], ['random', 'Random'], ['chord', 'Chord']].map(([id, l]) => (
               <option key={id} value={id}>{l}</option>
             ))}
           </select>
           <select className={s.select} value={arp.octaves} onChange={(e) => setArp({ octaves: Number(e.target.value) })}>
-            {[1, 2, 3, 4].map((o) => <option key={o} value={o}>{o} okt</option>)}
+            {[1, 2, 3, 4].map((o) => <option key={o} value={o}>{o} oct</option>)}
           </select>
         </div>
-        <button type="button" className={s.btn} onClick={() => { dispatch({ type: 'pattern.clearChannel', patternId: pattern.id, channelId: channel.id }); sel.current.clear(); }}>Rensa kanal</button>
+        <button type="button" className={s.btn} onClick={() => { dispatch({ type: 'pattern.clearChannel', patternId: pattern.id, channelId: channel.id }); sel.current.clear(); }}>Clear channel</button>
       </div>
 
       <div className={s.canvasWrap} ref={wrapRef}>

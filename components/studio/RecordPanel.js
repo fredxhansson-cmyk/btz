@@ -45,7 +45,7 @@ export default function RecordPanel({ onClose }) {
       setArmed(true);
       setDevices(await listAudioInputs());
     } catch (e) {
-      setError(e.message || 'Kunde inte oppna ingangen.');
+      setError(e.message || 'Could not open the input.');
       setArmed(false);
     }
   }, [deviceId, engine, gain, monitor]);
@@ -108,7 +108,7 @@ export default function RecordPanel({ onClose }) {
         peaks: peaks(buffer, 600),
         name: `Take ${new Date().toISOString().slice(11, 19).replace(/:/g, '')}.wav`,
       });
-      setHint(`Inspelning klar: ${buffer.duration.toFixed(2)} s.`);
+      setHint(`Recording done: ${buffer.duration.toFixed(2)} s.`);
     } catch (e) {
       setRec(false);
       setError(e.message);
@@ -122,8 +122,8 @@ export default function RecordPanel({ onClose }) {
     const target = mode === 'channel' ? null : project.selectedChannel;
     dispatch({ type: 'sample.add', sample, channelId: target, newChannel: mode === 'channel' });
     setHint(mode === 'channel'
-      ? `Inspelningen lades till som ny sampler-kanal (${(sample.bytes / 1024).toFixed(0)} kB).`
-      : 'Inspelningen lades i den valda kanalen.');
+      ? `Recording added as a new sampler channel (${(sample.bytes / 1024).toFixed(0)} kB).`
+      : 'Recording added to the selected channel.');
     setTake(null);
   };
 
@@ -131,8 +131,8 @@ export default function RecordPanel({ onClose }) {
     <div className={s.modalBack} onPointerDown={onClose}>
       <div className={s.modal} onPointerDown={(e) => e.stopPropagation()}>
         <div className={s.modalHead}>
-          <span className={s.pluginTitle}>Spela in ljud</span>
-          <span className={s.dim}>mikrofon, gitarr, keyboard — allt som gar in i ljudkortet</span>
+          <span className={s.pluginTitle}>Record audio</span>
+          <span className={s.dim}>microphone, guitar, keyboard — anything that goes into your audio interface</span>
           <div className={s.spacer} />
           <button type="button" className={s.xBtn} onClick={onClose}>×</button>
         </div>
@@ -140,18 +140,18 @@ export default function RecordPanel({ onClose }) {
         <div className={s.recBody}>
           <div className={s.recRow}>
             <select className={s.selectWide} value={deviceId} onChange={(e) => setDeviceId(e.target.value)}>
-              <option value="">Standardingang</option>
+              <option value="">Default input</option>
               {devices.map((d) => <option key={d.id} value={d.id}>{d.label}</option>)}
             </select>
             <button type="button" className={armed ? `${s.btn} ${s.on}` : s.btn} onClick={enable}>
-              {armed ? 'Ingang aktiv' : 'Aktivera ingang'}
+              {armed ? 'Input active' : 'Enable input'}
             </button>
             <button
               type="button"
               className={monitor ? `${s.btn} ${s.on}` : s.btn}
               onClick={() => { setMonitor((m) => { engine.setMonitor(!m); return !m; }); }}
-              title="Lyssna pa ingangen medan du spelar (anvand horlurar)"
-            >Medhorning</button>
+              title="Monitor the input while you play (use headphones)"
+            >Monitoring</button>
             <Knob
               size={30} label="Gain" color="#7ee787"
               spec={{ min: 0, max: 4, def: 1 }}
@@ -168,19 +168,19 @@ export default function RecordPanel({ onClose }) {
               className={rec ? `${s.recBtn} ${s.recBtnOn}` : s.recBtn}
               onClick={() => (rec ? stopRec() : startRec())}
             >
-              {rec ? `■ Stoppa (${elapsed.toFixed(1)}s)` : '● Spela in'}
+              {rec ? `■ Stop (${elapsed.toFixed(1)}s)` : '● Record'}
             </button>
             <label className={s.checkRow}>
               <input type="checkbox" checked={withTransport} onChange={(e) => setWithTransport(e.target.checked)} />
-              Spela upp latten medan jag spelar in
+              Play the song while I record
             </label>
             <label className={s.checkRow}>
               <input type="checkbox" checked={trim} onChange={(e) => setTrim(e.target.checked)} />
-              Trimma tystnad
+              Trim silence
             </label>
             <label className={s.checkRow}>
               <input type="checkbox" checked={normalize} onChange={(e) => setNormalize(e.target.checked)} />
-              Normalisera
+              Normalize
             </label>
           </div>
 
@@ -195,15 +195,15 @@ export default function RecordPanel({ onClose }) {
                 value={take.name}
                 onChange={(e) => setTake({ ...take, name: e.target.value })}
               />
-              <button type="button" className={s.btn} onClick={() => engine.previewSample && engine.previewSample(take.buffer)}>Lyssna</button>
-              <button type="button" className={`${s.btn} ${s.on}`} onClick={() => keep('channel')}>Skapa kanal</button>
-              <button type="button" className={s.btn} onClick={() => keep('selected')}>Lagg i vald kanal</button>
-              <button type="button" className={s.btn} onClick={() => setTake(null)}>Kasta</button>
+              <button type="button" className={s.btn} onClick={() => engine.previewSample && engine.previewSample(take.buffer)}>Preview</button>
+              <button type="button" className={`${s.btn} ${s.on}`} onClick={() => keep('channel')}>Create channel</button>
+              <button type="button" className={s.btn} onClick={() => keep('selected')}>Add to selected channel</button>
+              <button type="button" className={s.btn} onClick={() => setTake(null)}>Discard</button>
             </div>
           ) : (
             <div className={s.helpBox}>
-              Tips: anvand horlurar nar medhorning ar pa, annars rundgang. Inspelningen sparas som
-              WAV i projektet och kan spelas med tonhojd fran piano rollen.
+              Tip: use headphones when monitoring is on, otherwise you'll get feedback. The recording is saved as
+              WAV in the project and can be played back with pitch from the piano roll.
             </div>
           )}
         </div>

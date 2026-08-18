@@ -31,7 +31,7 @@ const TABS = [
   { id: 'playlist', label: 'Playlist', hint: 'F5' },
   { id: 'rack', label: 'Channel Rack', hint: 'F6' },
   { id: 'piano', label: 'Piano Roll', hint: 'F7' },
-  { id: 'drums', label: 'Trummaskin', hint: 'F8' },
+  { id: 'drums', label: 'Drum Machine', hint: 'F8' },
   { id: 'automation', label: 'Automation', hint: 'F10' },
   { id: 'mixer', label: 'Mixer', hint: 'F9' },
 ];
@@ -54,7 +54,7 @@ function EngineStatus() {
       last.current.t = now;
     }
     const clock = engine.clockReady ? 'worklet' : 'timer';
-    ref.current.textContent = `${last.current.rate} noter/s · ${clock}`;
+    ref.current.textContent = `${last.current.rate} notes/s · ${clock}`;
   });
   return <span className={s.dim} ref={ref} />;
 }
@@ -176,7 +176,7 @@ function Workspace({ installPrompt, onInstalled }) {
       {aiOpen && <AiPanel onClose={() => setAiOpen(false)} />}
       {dropping && (
         <div className={s.dropHint}>
-          <div className={s.dropCard}>Slapp ljudfiler for att skapa sampler-kanaler</div>
+          <div className={s.dropCard}>Drop audio files to create sampler channels</div>
         </div>
       )}
       <Transport onOpenRecord={() => setRecOpen(true)} onOpenAi={() => setAiOpen(true)} />
@@ -203,10 +203,10 @@ function Workspace({ installPrompt, onInstalled }) {
           FLOW Brain<span className={s.tabHint}>AI</span>
         </button>
         <button type="button" className={s.tab} onClick={() => setRecOpen(true)}>
-          Spela in<span className={s.tabHint}>mic</span>
+          Record<span className={s.tabHint}>mic</span>
         </button>
         <button type="button" className={s.tab} onClick={() => setHelp(true)}>
-          Hjalp<span className={s.tabHint}>?</span>
+          Help<span className={s.tabHint}>?</span>
         </button>
       </div>
 
@@ -237,7 +237,7 @@ function Workspace({ installPrompt, onInstalled }) {
             className={ui.browserOpen ? `${s.navBtn} ${s.on}` : s.navBtn}
             onClick={() => setUi({ browserOpen: !ui.browserOpen })}
           >
-            <span className={s.navIcon}>♪</span>Ljud
+            <span className={s.navIcon}>♪</span>Sounds
           </button>
           {TABS.map((t) => (
             <button
@@ -247,7 +247,7 @@ function Workspace({ installPrompt, onInstalled }) {
               onClick={() => setUi({ view: t.id, browserOpen: false })}
             >
               <span className={s.navIcon}>{NAV_ICONS[t.id]}</span>
-              {({ playlist: 'Playlist', rack: 'Rack', piano: 'Piano', drums: 'Trummor', mixer: 'Mixer', automation: 'Auto' })[t.id]}
+              {({ playlist: 'Playlist', rack: 'Rack', piano: 'Piano', drums: 'Drums', mixer: 'Mixer', automation: 'Auto' })[t.id]}
             </button>
           ))}
         </nav>
@@ -265,13 +265,13 @@ function Workspace({ installPrompt, onInstalled }) {
               await installPrompt.userChoice;
               if (onInstalled) onInstalled();
             }}
-            title="Installera FLOW Studio pa den har enheten"
-          >Installera appen</button>
+            title="Install FLOW Studio on this device"
+          >Install app</button>
         )}
         <EngineStatus />
         {!ui.touch && (
           <>
-            <span className={s.dim}>Oktav {ui.octave}</span>
+            <span className={s.dim}>Octave {ui.octave}</span>
             <span className={s.dim}>{project.bpm.toFixed(1)} BPM</span>
             <span className={s.dim}>{ui.mode === 'song' ? 'SONG' : 'PATTERN'}</span>
           </>

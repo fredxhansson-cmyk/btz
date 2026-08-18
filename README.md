@@ -1,43 +1,44 @@
 # FLOW Studio
 
-Musikstudio som kors direkt i webblasaren — trummaskin, piano roll, playlist,
-mixer, automation, mastering, inspelning och ett eget ljudbibliotek. Fungerar
-pa dator, mobil och surfplatta, och gar att installera som app.
+A music studio that runs straight in your browser — drum machine, piano roll,
+playlist, mixer, automation, mastering, recording and its own sound library.
+It works on desktop, mobile and tablet, and can be installed as an app.
 
-Det har ar en **fristaende Next.js-app** och kan peka mot en egen domän
-(t.ex. `flowstudio.se`).
+This is a **standalone Next.js app** and can point to its own domain
+(e.g. `flowstudio.se`).
 
-## Kora lokalt
+## Running locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-Oppna sedan **http://localhost:3000** — studion ligger pa startsidan, ingen
-sokvag efter.
+Then open **http://localhost:3000** — the studio lives on the home page, no
+path required.
 
-Om porten ar upptagen: `npm run dev -- -p 3001` och oppna
+If the port is taken: `npm run dev -- -p 3001` and open
 `http://localhost:3001`.
 
-## Bygga och kora skarpt
+## Building and running in production
 
 ```bash
 npm run build
 npm start
 ```
 
-## Publicera pa egen adress
+## Publishing on your own address
 
-Appen ar en vanlig Next.js-app utan backend, sa den kan ligga hos vilken
-statisk/Node-host som helst.
+The app is a plain Next.js app with no backend, so it can be hosted on any
+static/Node host.
 
-* **Vercel**: skapa ett nytt projekt fran repot (Root Directory = repo-roten).
-  Peka sedan din domän dit.
+* **Vercel**: create a new project from the repo (Root Directory = repo root).
+  Then point your domain there.
 * **Netlify**: build `npm run build`.
-* **Egen server**: `npm run build && npm start` bakom en reverse proxy.
+* **Your own server**: `npm run build && npm start` behind a reverse proxy.
 
-Kor den over https i skarp drift — mikrofoninspelning, installation som app och
-offline-lage kraver saker kontext (localhost raknas som sakert vid utveckling).
+Run it over https in production — microphone recording, installing as an app and
+offline mode require a secure context (localhost counts as secure during
+development).
 
-Full funktionsbeskrivning finns i [DOCS.md](DOCS.md).
+A full feature description is available in [DOCS.md](DOCS.md).

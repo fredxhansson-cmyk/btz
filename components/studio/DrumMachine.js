@@ -62,7 +62,7 @@ function Pad({ channel, role, selected, onSelect }) {
         e.preventDefault();
         dispatch({ type: 'channel.update', id: channel.id, patch: { mute: !channel.mute } });
       }}
-      title={`${channel.name} — klicka for att spela, hogerklicka for mute (${info ? info.key.toUpperCase() : ''})`}
+      title={`${channel.name} — click to play, right-click to mute (${info ? info.key.toUpperCase() : ''})`}
     >
       <span className={s.padGlow} />
       <span className={s.padName}>{channel.name}</span>
@@ -118,7 +118,7 @@ export default function DrumMachine() {
     if (!channel) return;
     e.preventDefault();
     const cur = stepInfo(i);
-    if (e.button === 2) {                       // right click cycles the roll
+    if (e.button === 2) {                       // right-click cycles the roll
       const next = cur ? (cur.count % 4) + 1 : 2;
       writeStep(i, rollNotes(i, next, cur ? cur.vel : 0.9));
       engine.preview(channel.id, 60, cur ? cur.vel : 0.9);
@@ -177,14 +177,14 @@ export default function DrumMachine() {
     const patLen = patternTicks(pattern);
     if (name === 'clearPad') {
       dispatch({ type: 'notes.setMany', patternId: pattern.id, byChannel: { [channel.id]: [] } });
-      setHint(`Rensade ${channel.name}.`);
+      setHint(`Cleared ${channel.name}.`);
       return;
     }
     if (name === 'clearAll') {
       const byChannel = {};
       drumChannels().forEach((ch) => { byChannel[ch.id] = []; });
       dispatch({ type: 'notes.setMany', patternId: pattern.id, byChannel });
-      setHint('Rensade alla pads i monstret.');
+      setHint('Cleared all pads in the pattern.');
       return;
     }
     if (name === 'random') {
@@ -193,7 +193,7 @@ export default function DrumMachine() {
         byChannel[ch.id] = stepsToNotes(randomSteps(ch.role, steps));
       });
       dispatch({ type: 'notes.setMany', patternId: pattern.id, byChannel });
-      setHint('Slumpade ett nytt beat.');
+      setHint('Randomized a new beat.');
       return;
     }
     if (name === 'euclid') {
@@ -201,7 +201,7 @@ export default function DrumMachine() {
       const list = [];
       grid.forEach((on, i) => { if (on) list.push({ step: i, vel: i % 4 === 0 ? 1 : 0.8 }); });
       dispatch({ type: 'notes.setMany', patternId: pattern.id, byChannel: { [channel.id]: stepsToNotes(list) } });
-      setHint(`Euclid ${euclidHits}/${steps} pa ${channel.name}.`);
+      setHint(`Euclid ${euclidHits}/${steps} on ${channel.name}.`);
       return;
     }
     if (name === 'humanize') {
@@ -211,7 +211,7 @@ export default function DrumMachine() {
         if (list.length) byChannel[ch.id] = humanizeNotes(list);
       });
       dispatch({ type: 'notes.setMany', patternId: pattern.id, byChannel });
-      setHint('Humaniserade timing och velocity.');
+      setHint('Humanized timing and velocity.');
       return;
     }
     if (name === 'double') {
@@ -223,7 +223,7 @@ export default function DrumMachine() {
       });
       dispatch({ type: 'pattern.update', id: pattern.id, patch: { bars } });
       dispatch({ type: 'notes.setMany', patternId: pattern.id, byChannel });
-      setHint(`Dubblade monstret till ${bars} takter.`);
+      setHint(`Doubled the pattern to ${bars} bars.`);
     }
   };
 
@@ -233,14 +233,14 @@ export default function DrumMachine() {
   return (
     <div className={s.panel}>
       <div className={s.panelHead}>
-        <span className={s.panelTitle}>Trummaskin</span>
+        <span className={s.panelTitle}>Drum Machine</span>
         <select
           className={s.select}
           value={project.kit || 'tr808'}
           onChange={(e) => {
             dispatch({ type: 'kit.apply', kitId: e.target.value });
             const k = KITS.find((x) => x.id === e.target.value);
-            setHint(`Kit "${k.name}" laddat — ${k.desc}`);
+            setHint(`Kit "${k.name}" loaded — ${k.desc}`);
           }}
         >
           {KITS.map((k) => <option key={k.id} value={k.id}>{k.name}</option>)}
@@ -253,7 +253,7 @@ export default function DrumMachine() {
           {project.patterns.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
         <div className={s.group}>
-          <span className={s.dim}>Takter</span>
+          <span className={s.dim}>Bars</span>
           <button
             type="button" className={s.btn}
             onClick={() => dispatch({ type: 'pattern.update', id: pattern.id, patch: { bars: clamp((pattern.bars || 1) - 1, 1, 16) } })}
@@ -275,10 +275,10 @@ export default function DrumMachine() {
       </div>
 
       <div className={s.dmTools}>
-        <span className={s.toolLabel}>Verktyg</span>
-        <button type="button" className={s.btn} onClick={() => tool('random')} title="Slumpa fram ett helt nytt beat">Slumpa beat</button>
+        <span className={s.toolLabel}>Tools</span>
+        <button type="button" className={s.btn} onClick={() => tool('random')} title="Randomize a whole new beat">Randomize beat</button>
         <div className={s.group}>
-          <button type="button" className={s.btn} onClick={() => tool('euclid')} title="Fordela traffarna jamnt over stegen">Euclid</button>
+          <button type="button" className={s.btn} onClick={() => tool('euclid')} title="Spread the hits evenly across the steps">Euclid</button>
           <input
             className={s.numInput}
             type="number" min={1} max={steps}
@@ -287,11 +287,11 @@ export default function DrumMachine() {
           />
           <span className={s.dim}>/ {steps}</span>
         </div>
-        <button type="button" className={s.btn} onClick={() => tool('humanize')} title="Slumpa timing och velocity nagot">Humanisera</button>
-        <button type="button" className={s.btn} onClick={() => tool('double')} title="Dubbla monsterlangden och kopiera beatet">Dubbla</button>
+        <button type="button" className={s.btn} onClick={() => tool('humanize')} title="Slightly randomize timing and velocity">Humanize</button>
+        <button type="button" className={s.btn} onClick={() => tool('double')} title="Double the pattern length and copy the beat">Double</button>
         <div className={s.spacer} />
-        <button type="button" className={s.btn} onClick={() => tool('clearPad')}>Rensa pad</button>
-        <button type="button" className={s.btn} onClick={() => tool('clearAll')}>Rensa alla</button>
+        <button type="button" className={s.btn} onClick={() => tool('clearPad')}>Clear pad</button>
+        <button type="button" className={s.btn} onClick={() => tool('clearAll')}>Clear all</button>
       </div>
 
       <div className={s.dmBody}>
@@ -309,15 +309,15 @@ export default function DrumMachine() {
           </div>
           <div className={s.padHint}>
             {ui.touch
-              ? 'Tryck pa en pad for att spela och valja. Hall inne for att mute:a.'
-              : 'Pads spelas med Z X C V / A S D F / Q W E R nar trummaskinen ar oppen. Hogerklick pa en pad = mute.'}
+              ? 'Tap a pad to play and select it. Hold to mute it.'
+              : 'Pads play with Z X C V / A S D F / Q W E R while the drum machine is open. Right-click a pad = mute.'}
           </div>
         </div>
 
         <div className={s.dmMain}>
           <div className={s.dmLaneHead}>
             <span className={s.dmPadName} style={{ color: channel ? channel.color : undefined }}>
-              {channel ? channel.name : 'Ingen pad'}
+              {channel ? channel.name : 'No pad'}
             </span>
             <span className={s.dim}>{inst ? inst.name : ''}</span>
             {channel && (
@@ -339,16 +339,16 @@ export default function DrumMachine() {
                     value={channel.choke || 0}
                     onChange={(e) => dispatch({ type: 'channel.update', id: channel.id, patch: { choke: Number(e.target.value) } })}
                   >
-                    <option value={0}>Av</option>
-                    <option value={1}>Grupp 1</option>
-                    <option value={2}>Grupp 2</option>
-                    <option value={3}>Grupp 3</option>
+                    <option value={0}>Off</option>
+                    <option value={1}>Group 1</option>
+                    <option value={2}>Group 2</option>
+                    <option value={3}>Group 3</option>
                   </select>
                 </div>
               </>
             )}
             <div className={s.spacer} />
-            <span className={s.dim}>{notes.length} traffar</span>
+            <span className={s.dim}>{notes.length} hits</span>
           </div>
 
           <div className={s.dmSteps} style={{ '--stepw': '38px' }}>
@@ -369,7 +369,7 @@ export default function DrumMachine() {
                   onPointerUp={endDrag}
                   onPointerCancel={endDrag}
                   onContextMenu={(e) => e.preventDefault()}
-                  title={info ? `Steg ${i + 1} · velocity ${(info.vel * 100).toFixed(0)}% · ${info.count} traff(ar)` : `Steg ${i + 1}`}
+                  title={info ? `Step ${i + 1} · velocity ${(info.vel * 100).toFixed(0)}% · ${info.count} hit(s)` : `Step ${i + 1}`}
                 >
                   <span className={s.bigStepFill} />
                   <span className={s.bigStepNum}>{i + 1}</span>
@@ -413,7 +413,7 @@ export default function DrumMachine() {
                   />
                 );
               })}
-              <button type="button" className={s.btn} onClick={() => setUi({ pluginOpen: true })}>Alla parametrar…</button>
+              <button type="button" className={s.btn} onClick={() => setUi({ pluginOpen: true })}>All parameters…</button>
             </div>
           )}
 
@@ -448,11 +448,11 @@ export default function DrumMachine() {
       <div className={s.rackFoot}>
         <span className={s.dim}>
           {ui.touch
-            ? 'Tryck = traff · dra upp/ner = velocity · tryck och hall = roll · hall pa en pad = mute'
-            : 'Klick = traff · Shift+klick = accent · Dra upp/ner = velocity · Hogerklick = roll (2-4 traffar)'}
+            ? 'Tap = hit · drag up/down = velocity · press and hold = roll · hold a pad = mute'
+            : 'Click = hit · Shift+click = accent · Drag up/down = velocity · Right-click = roll (2-4 hits)'}
         </span>
         <div className={s.spacer} />
-        <span className={s.dim}>{steps} steg · {(pattern.bars || 1) * BAR_TICKS} ticks</span>
+        <span className={s.dim}>{steps} steps · {(pattern.bars || 1) * BAR_TICKS} ticks</span>
       </div>
     </div>
   );

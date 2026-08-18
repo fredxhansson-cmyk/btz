@@ -35,7 +35,7 @@ function ChannelRow({ channel, pattern, steps, selected }) {
         <button
           type="button"
           className={s.led}
-          title="Valj kanal / forhandslyssna"
+          title="Select channel / preview"
           onClick={() => { dispatch({ type: 'select.channel', id: channel.id }); engine.preview(channel.id); }}
         >
           <span className={selected ? `${s.ledDot} ${s.ledOn}` : s.ledDot} />
@@ -45,10 +45,10 @@ function ChannelRow({ channel, pattern, steps, selected }) {
           className={s.chanName}
           onClick={() => { dispatch({ type: 'select.channel', id: channel.id }); setUi({ pluginOpen: true }); }}
           onDoubleClick={() => {
-            const name = window.prompt('Kanalnamn', channel.name);
+            const name = window.prompt('Channel name', channel.name);
             if (name) dispatch({ type: 'channel.update', id: channel.id, patch: { name } });
           }}
-          title={`${INSTRUMENTS[channel.inst] ? INSTRUMENTS[channel.inst].name : channel.inst} - klicka for instrumentpanelen`}
+          title={`${INSTRUMENTS[channel.inst] ? INSTRUMENTS[channel.inst].name : channel.inst} - click for the instrument panel`}
         >
           {channel.name}
         </button>
@@ -73,7 +73,7 @@ function ChannelRow({ channel, pattern, steps, selected }) {
           />
           <Knob
             size={22} label={null} color="#7ee787"
-            spec={{ min: 0, max: 1.2, def: 0.8, label: 'Volym' }}
+            spec={{ min: 0, max: 1.2, def: 0.8, label: 'Volume' }}
             value={channel.vol}
             onChange={(v, live) => dispatch({ type: 'channel.update', id: channel.id, patch: { vol: v }, live, key: 'vol' })}
           />
@@ -81,7 +81,7 @@ function ChannelRow({ channel, pattern, steps, selected }) {
         <button
           type="button"
           className={s.insBadge}
-          title="Mixer-kanal"
+          title="Mixer channel"
           onClick={() => { if (insert) { dispatch({ type: 'select.insert', id: insert.id }); setUi({ view: 'mixer' }); } }}
         >
           {insert ? insert.name.replace('Insert ', 'INS ') : 'MASTER'}
@@ -89,7 +89,7 @@ function ChannelRow({ channel, pattern, steps, selected }) {
         <button
           type="button"
           className={s.xBtn}
-          title="Ta bort kanal"
+          title="Remove channel"
           onClick={() => dispatch({ type: 'channel.remove', id: channel.id })}
         >×</button>
       </div>
@@ -168,7 +168,7 @@ export default function ChannelRack() {
           </select>
         </span>
         <div className={s.group}>
-          <span className={s.dim}>Takter</span>
+          <span className={s.dim}>Bars</span>
           <button type="button" className={s.btn} onClick={() => setBars(-1)}>−</button>
           <span className={s.numBox}>{pattern.bars}</span>
           <button type="button" className={s.btn} onClick={() => setBars(1)}>+</button>
@@ -191,7 +191,7 @@ export default function ChannelRack() {
           type="button"
           className={s.btn}
           onClick={() => dispatch({ type: 'pattern.clone', id: pattern.id })}
-        >Duplicera</button>
+        >Duplicate</button>
       </div>
 
       <div className={s.rackBody}>
@@ -221,12 +221,12 @@ export default function ChannelRack() {
       </div>
 
       <div className={s.rackFoot}>
-        <span className={s.dim}>{project.channels.length} kanaler · {steps} steg · {(pattern.bars || 1) * BAR_TICKS} ticks</span>
+        <span className={s.dim}>{project.channels.length} channels · {steps} steps · {(pattern.bars || 1) * BAR_TICKS} ticks</span>
         <div className={s.spacer} />
         <span className={s.dim}>
           {ui.touch
-            ? 'Tryck = steg pa/av · tryck och hall = ta bort · dra for att mala'
-            : 'Vansterklick = lagg till steg · Hogerklick = ta bort · dra for att mala'}
+            ? 'Tap = step on/off · tap and hold = remove · drag to paint'
+            : 'Left-click = add step · Right-click = remove · drag to paint'}
         </span>
       </div>
     </div>

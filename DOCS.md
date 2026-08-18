@@ -1,187 +1,191 @@
 # FLOW Studio
 
-En FL Studio-inspirerad musikstudio (DAW) som kors helt i webblasaren, byggd pa
-Web Audio API och React. Egen fristaende app i mappen **`flow-studio/`** —
-studion ligger pa startsidan (`/`).
+An FL Studio-inspired music studio (DAW) that runs entirely in the browser,
+built on the Web Audio API and React. A standalone app in the **`flow-studio/`**
+folder — the studio lives on the home page (`/`).
 
 ```bash
 cd flow-studio
 npm install
 npm run dev
-# oppna http://localhost:3000
+# open http://localhost:3000
 ```
 
-Studion ar en **PWA**: den kan installeras pa hemskarmen (dator, mobil och
-surfplatta) och fungerar helt utan natverk efter forsta besoket. En knapp
-"Installera appen" dyker upp i statusraden nar webblasaren tillater det.
+The studio is a **PWA**: it can be installed on your home screen (desktop,
+mobile and tablet) and works completely offline after the first visit. An
+"Install app" button appears in the status bar when the browser allows it.
 
-Forsta gangen laddas ett demo-projekt (trummor, bas, ackord och lead) sa att det
-finns nagot att trycka play pa direkt.
+On first launch a demo project loads (drums, bass, chords and lead) so there's
+something to press play on right away.
 
 ---
 
-## Ljudbiblioteket
+## The sound library
 
-Allt i biblioteket ar **syntesparametrar, inte ljudfiler**. Ett helt trumkit ar
-nagra hundra byte, vilket betyder att biblioteket laddar direkt, fungerar
-offline, inte kostar nagot i licenser eller bandbredd — och att varje ljud gar
-att skruva vidare pa efter att du lagt in det.
+Everything in the library is **synthesis parameters, not audio files**. A whole
+drum kit is a few hundred bytes, which means the library loads instantly, works
+offline, costs nothing in licenses or bandwidth — and every sound can be tweaked
+further after you've added it.
 
-* **39 trumljud** (kick, snare, clap, hihat, perc, tom, cymbal)
-* **32 instrumentljud** (bas, lead, pad, keys, FX)
-* **10 trumkit** som byter alla pads samtidigt utan att rora dina traffar
-* Sok pa namn, kategori eller tagg (`808`, `acid`, `lofi`, `trap`…)
-* Forhandslyssna med ▸ utan att lagga till nagot
-* **Mina ljud**: spara vilken skruvad kanal som helst i biblioteket
+* **39 drum sounds** (kick, snare, clap, hihat, perc, tom, cymbal)
+* **32 instrument sounds** (bass, lead, pad, keys, FX)
+* **10 drum kits** that swap all pads at once without touching your hits
+* Search by name, category or tag (`808`, `acid`, `lofi`, `trap`…)
+* Preview with ▸ without adding anything
+* **My sounds**: save any tweaked channel to the library
 
-## FLOW Brain — den inbyggda generatorn
+## FLOW Brain — the built-in generator
 
-Studion har en inbyggd generator som skapar nya ljud och beats, och som lar sig
-av det du behaller. Den ar **en lokal statistisk modell**, inte ett moln:
-allt raknas fram i din webblasare, ingenting skickas nagonstans.
+The studio has a built-in generator that creates new sounds and beats, and
+learns from what you keep. It's **a local statistical model**, not a cloud:
+everything is computed in your browser, nothing is sent anywhere.
 
-**Sa fungerar den**
+**How it works**
 
-* Den startar med statistiken fran det inbyggda biblioteket — for varje
-  kategori (Kick, Snare, Pad, Bas …) medelvarde och spridning per parameter.
-* Varje ljud du sparar med ♥ eller lagger till som kanal vags in i modellen med
-  en online-uppdatering av medelvarde och varians. Ju fler du behaller, desto
-  mer dominerar din smak over grundinstallningen.
-* Den lar sig ocksa **var du lagger dina traffar**: ett histogram per
-  trumroll over de sexton stegen. Det anvands nar den genererar beats, sa
-  groovet borjar lata som ditt.
-* Modellen lar sig automatiskt av projektet du jobbar i (som mest en gang per
-  minut), och du kan trycka "Lar av det har projektet nu" nar som helst.
-* Genererade ljud du sparar hamnar under **AI-ljud** i Browser — biblioteket
-  vaxer alltsa for varje pass du gor.
+* It starts with the statistics of the built-in library — for each category
+  (Kick, Snare, Pad, Bass …), the mean and spread per parameter.
+* Every sound you save with ♥ or add as a channel is folded into the model with
+  an online update of the mean and variance. The more you keep, the more your
+  taste dominates over the default settings.
+* It also learns **where you place your hits**: a histogram per drum role over
+  the sixteen steps. This is used when it generates beats, so the groove starts
+  to sound like yours.
+* The model learns automatically from the project you're working in (at most
+  once a minute), and you can press "Learn from this project now" at any time.
+* Generated sounds you save land under **AI sounds** in the Browser — so the
+  library grows with every session you do.
 
-**Vad du kan gora**
+**What you can do**
 
-| Knapp | Vad den gor |
+| Button | What it does |
 | --- | --- |
-| Generera 8 ljud | Nya varianter i vald kategori, med "vagat" som spridningsreglage |
-| ♥ | Sparar ljudet i biblioteket och lar modellen |
-| + | Lagger till som kanal i projektet (och lar modellen) |
-| Generera nytt beat | Skriver ett helt nytt trummonster utifran din inlarda feel |
-| Variera det jag har | Behaller delar av monstret och lagger till nytt |
-| Nollstall inlarning | Tommer modellen (dina sparade ljud finns kvar) |
+| Generate 8 sounds | New variants in the selected category, with "boldness" as a spread control |
+| ♥ | Saves the sound to the library and teaches the model |
+| + | Adds it as a channel in the project (and teaches the model) |
+| Generate new beat | Writes a whole new drum pattern from your learned feel |
+| Vary what I have | Keeps parts of the pattern and adds new material |
+| Reset learning | Empties the model (your saved sounds remain) |
 
-## Ljudinspelning
+## Audio recording
 
-Panelen **Spela in** (mikrofonknappen i transporten) tar in mikrofon, gitarr,
-keyboard eller vad som helst som gar in i ljudkortet.
+The **Record** panel (the microphone button in the transport) captures
+microphone, guitar, keyboard or anything else that comes into the audio
+interface.
 
-* Val av ingang, insignalsgain och nivamatare.
-* **Medhorning** genom mixern sa du hor dig sjalv (anvand horlurar).
-* Spela in medan latten rullar, med inrakning om du har stallt in det.
-* Automatisk trimning av tystnad och normalisering.
-* Resultatet blir en WAV i projektet: skapa en ny sampler-kanal eller lagg den
-  i den kanal du star pa, och spela den sedan med tonhojd fran piano rollen.
+* Input selection, input gain and level meter.
+* **Monitoring** through the mixer so you can hear yourself (use headphones).
+* Record while the song plays, with a count-in if you've set one up.
+* Automatic silence trimming and normalization.
+* The result becomes a WAV in the project: create a new sampler channel or drop
+  it into the channel you're on, and then play it back with pitch from the piano
+  roll.
 
 ## Mastering
 
-Masterbussen har en egen effektkedja och en **loudness-matare** (ungefarlig
-LUFS enligt K-viktning: integrerad, kortsiktig, momentan och topp). Valj
-masterkanalen i mixern for att komma at den.
+The master bus has its own effect chain and a **loudness meter** (approximate
+LUFS by K-weighting: integrated, short-term, momentary and peak). Select the
+master channel in the mixer to access it.
 
-* Presets: Rent, Streaming −14, Klubb −9, Tape/varm, Bred & luftig,
-  Podcast/rost — var och en med malniva och en fardig kedja.
-* **Matcha malniva** justerar mastervolymen sa att den uppmatta integrerade
-  nivan hamnar pa malet.
-* Kedjan renderas ocksa i WAV-exporten, sa det du hor ar det du far.
+* Presets: Clean, Streaming −14, Club −9, Tape/warm, Wide & airy,
+  Podcast/voice — each with a target level and a ready-made chain.
+* **Match target level** adjusts the master volume so the measured integrated
+  level hits the target.
+* The chain is also rendered into the WAV export, so what you hear is what you
+  get.
 
-## Pa mobil och surfplatta
+## On mobile and tablet
 
-Studion byter automatiskt till ett touch-lage nar den kors pa en pekskarm:
+The studio automatically switches to a touch mode when it runs on a touchscreen:
 
-* Bottennavigering i stallet for flikar, och Browser som en utfallbar panel
-* Storre traffytor (steg 40 px, pads 84 px) och storre kontroller
-* **Tryck och hall** ersatter hogerklick overallt: ta bort noter och klipp,
-  roll i trummaskinen, mute pa en pad
-* **Nyp for att zooma** och tva fingrar for att panorera i piano roll,
-  playlist och automation
-* Kompakt topprad med en ⋯-meny for filhantering, taktart och metronom
+* Bottom navigation instead of tabs, and the Browser as a slide-out panel
+* Larger hit targets (steps 40 px, pads 84 px) and larger controls
+* **Press and hold** replaces right-click everywhere: delete notes and clips,
+  roll in the drum machine, mute on a pad
+* **Pinch to zoom** and two fingers to pan in the piano roll, playlist and
+  automation
+* A compact top bar with a ⋯ menu for file handling, time signature and
+  metronome
 
-## Funktioner
+## Features
 
 ### Transport
-Play/stop/record, PAT- och SONG-lage (monster kontra hela laten), tempo som
-dras med musen eller skrivs in, positionsvisning i `takt:slag:tick`,
-metronom och mastervolym med niva-meter.
+Play/stop/record, PAT and SONG mode (pattern versus full song), tempo dragged
+with the mouse or typed in, position display in `bar:beat:tick`, metronome and
+master volume with a level meter.
 
 ### Channel Rack (F6)
-Step sequencer i FL-stil. Varje kanal har LED-val, namn (oppnar instrumentet),
-mute/solo, pan- och volymratt samt routing till en mixerkanal. Klicka i rutnatet
-for att lagga till steg, hogerklicka for att ta bort, dra for att "mala" flera
-steg. Monstrets langd stalls i takter (1–16) och swing-ratten fordrojer var
-annan sextondel.
+FL-style step sequencer. Each channel has an LED selector, a name (opens the
+instrument), mute/solo, pan and volume knobs, plus routing to a mixer channel.
+Click in the grid to add steps, right-click to remove, drag to "paint" multiple
+steps. The pattern length is set in bars (1–16) and the swing knob delays every
+other sixteenth note.
 
 ### Piano Roll (F7)
-Canvas-baserad noteditor for vald kanal och vald monster.
+Canvas-based note editor for the selected channel and selected pattern.
 
-* Verktygslagen **Rita / Markera / Radera**. `Ctrl`+dra ger marquee-markering
-  aven i ritlaget.
-* Klicka pa tomt rutnat = ny not, dra at hoger direkt efter for att satta langd.
-  Dra en not for att flytta, dra i hogerkanten for att andra langd.
-* `Ctrl+C/X/V/D` kopiera, klipp, klistra och duplicera. `Ctrl+A` markerar allt,
-  `Delete` tar bort, piltangenter transponerar (`Shift` = oktav) och flyttar i tid.
-* **Ackordstamplar**: valj ackordtyp och klicka — hela ackordet placeras.
-  18 typer fran dur/moll till maj9, m7b5 och power.
-* **Skalor**: 13 skalor med rotton. Toner utanfor skalan dimmas, och laset
-  tvingar nya och flyttade noter till skalan.
-* **Verktyg**: kvantisera (med styrka i procent), strum, arpeggiera, humanisera
-  och slumpa velocity, legato, invertera, vand och oktavskift.
-* **Arpeggiator per kanal** (rate, riktning, oktaver) som expanderar hallna
-  ackord vid uppspelning utan att andra noterna.
-* Velocity-fältet langst ner: dra i staplarna.
-* Noter fran ovriga kanaler visas som "ghost notes" (kan slas av).
-* Hjulet skrollar, `Shift`+hjul skrollar i sidled, `Ctrl`+hjul zoomar.
-* Klick i linjalen startar uppspelning fran den takten.
+* **Draw / Select / Erase** tool modes. `Ctrl`+drag gives a marquee selection
+  even in draw mode.
+* Click on empty grid = new note, drag right immediately after to set the
+  length. Drag a note to move it, drag the right edge to change the length.
+* `Ctrl+C/X/V/D` copy, cut, paste and duplicate. `Ctrl+A` selects all,
+  `Delete` removes, arrow keys transpose (`Shift` = octave) and move in time.
+* **Chord stamps**: pick a chord type and click — the whole chord is placed.
+  18 types from major/minor to maj9, m7b5 and power.
+* **Scales**: 13 scales with a root note. Notes outside the scale are dimmed,
+  and the lock forces new and moved notes into the scale.
+* **Tools**: quantize (with strength in percent), strum, arpeggiate, humanize
+  and randomize velocity, legato, invert, flip and octave shift.
+* **Per-channel arpeggiator** (rate, direction, octaves) that expands held
+  chords on playback without changing the notes.
+* The velocity lane at the bottom: drag the bars.
+* Notes from other channels appear as "ghost notes" (can be turned off).
+* The wheel scrolls, `Shift`+wheel scrolls sideways, `Ctrl`+wheel zooms.
+* Clicking in the ruler starts playback from that bar.
 
 ### Automation (F10)
-Automationsbanor per monster mot vilken parameter som helst — kanalvolym och
-pan, mixervolym och pan, master, alla effektparametrar och alla
-instrumentparametrar (over 100 mal i ett vanligt projekt).
+Automation lanes per pattern against any parameter — channel volume and pan,
+mixer volume and pan, master, all effect parameters and all instrument
+parameters (over 100 targets in a typical project).
 
-* Klicka i rutnatet for att lagga punkter, dra for att flytta, hogerklick tar bort.
-* Snabbfyllning: ramp upp/ner, LFO (sinus, sag, fyrkant) och **Pump** for
-  klassisk sidechain-kansla.
-* Banor foljer monstret, sa de spelar bade i PAT-lage och nar monstret ligger i
-  playlisten. Lagg en 16-takters "automationslat" som ett eget monster for
-  latnivavepningar.
-* Mixer- och effektbanor ar kontinuerliga; instrumentparametrar sätts vid varje
-  notstart (for kontinuerliga svep, lagg ett filter pa insertet i stallet).
+* Click in the grid to add points, drag to move, right-click to remove.
+* Quick fill: ramp up/down, LFO (sine, saw, square) and **Pump** for the
+  classic sidechain feel.
+* Lanes follow the pattern, so they play both in PAT mode and when the pattern
+  sits in the playlist. Add a 16-bar "automation song" as its own pattern for
+  song-level sweeps.
+* Mixer and effect lanes are continuous; instrument parameters are set at each
+  note start (for continuous sweeps, put a filter on the insert instead).
 
 ### Playlist (F5)
-Arrangemang av monster-klipp pa 10 spar. Klicka for att placera det valda
-monstret, dra for att flytta, dra i hogerkanten for att forlanga (monstret
-upprepas), hogerklicka for att ta bort. Klick i linjalen spelar laten fran den
-takten.
+Arrangement of pattern clips across 10 tracks. Click to place the selected
+pattern, drag to move, drag the right edge to extend (the pattern repeats),
+right-click to remove. Clicking in the ruler plays the song from that bar.
 
-### Trummaskin (F8)
-En egen trummaskin ovanpa samma monsterdata som resten av programmet — allt du
-programmerar har syns ocksa i Channel Rack, Piano Roll och Playlist.
+### Drum machine (F8)
+A dedicated drum machine on top of the same pattern data as the rest of the
+program — everything you program here also shows up in the Channel Rack, Piano
+Roll and Playlist.
 
-* **12 pads** i MPC-layout (kick nere till vanster). Klicka for att spela,
-  hogerklicka for mute. Paden lyser nar den triggas under uppspelning.
-* **Kit-presets**: FLOW-808, FLOW-909, Acoustic, Trap och LoFi. Ett kit byter
-  ljud pa befintliga pads via deras roll (kick forblir kick) och skapar de pads
-  som saknas, utan att rora dina programmerade traffar.
-* **Stegeditor** for vald pad: klick = traff, `Shift`+klick = accent,
-  dra upp/ner pa ett steg = velocity, hogerklick = roll (2–4 traffar inom
-  samma steg, med stigande velocity).
-* **Choke-grupper**: pads i samma grupp klipper varandra, sa en stangd hihat
-  tystar en oppen. Fungerar likadant live som vid WAV-export.
-* **Verktyg**: Slumpa beat (rollmedveten sannolikhet per steg), Euclid
-  (jamnt fordelade traffar), Humanisera (slumpar timing ±3 ticks och velocity
-  ±15 %), Dubbla (dubblar monsterlangden och kopierar beatet), Rensa pad och
-  Rensa alla.
-* **Snabbrattar** for vald pad: level, pan och de viktigaste
-  instrumentparametrarna (tune, decay, punch, snap …).
-* **Oversikt** langst ner visar alla pads samtidigt.
-* Med **REC** aktiverat spelas pad-traffar in kvantiserade till narmaste steg.
+* **12 pads** in MPC layout (kick at the bottom left). Click to play,
+  right-click to mute. The pad lights up when it's triggered during playback.
+* **Kit presets**: FLOW-808, FLOW-909, Acoustic, Trap and LoFi. A kit swaps the
+  sound on existing pads by their role (kick stays kick) and creates the missing
+  pads, without touching your programmed hits.
+* **Step editor** for the selected pad: click = hit, `Shift`+click = accent,
+  drag up/down on a step = velocity, right-click = roll (2–4 hits within the
+  same step, with rising velocity).
+* **Choke groups**: pads in the same group cut each other off, so a closed hihat
+  silences an open one. It works the same live as on WAV export.
+* **Tools**: Randomize beat (role-aware probability per step), Euclid (evenly
+  distributed hits), Humanize (randomizes timing ±3 ticks and velocity ±15 %),
+  Double (doubles the pattern length and copies the beat), Clear pad and
+  Clear all.
+* **Quick knobs** for the selected pad: level, pan and the most important
+  instrument parameters (tune, decay, punch, snap …).
+* An **overview** at the bottom shows all pads at once.
+* With **REC** active, pad hits are recorded quantized to the nearest step.
 
-Pad-tangenter nar trummaskinen ar oppen:
+Pad keys when the drum machine is open:
 
 ```
 Q W E R   ->  Low Tom  Mid Tom  Hi Tom  Cymbal
@@ -190,146 +194,148 @@ Z X C V   ->  Kick     Snare    Clap    Closed Hat
 ```
 
 ### Mixer (F9)
-Master plus atta insert-kanaler (fler kan laggas till) med fader, pan, mute,
-solo, niva-meter och en seriell effektkedja per kanal. Varje effekt kan
-bypassas, tas bort och styras med rattar.
+Master plus eight insert channels (more can be added) with fader, pan, mute,
+solo, level meter and a serial effect chain per channel. Each effect can be
+bypassed, removed and controlled with knobs.
 
-* **Sends** (post-fader) fran vilken insert som helst till vilken annan som
-  helst — kedjor som skulle bli aterkoppling filtreras bort automatiskt.
-* **Spektrumanalys** pa master.
+* **Sends** (post-fader) from any insert to any other — chains that would create
+  feedback are filtered out automatically.
+* **Spectrum analysis** on the master.
 
-### Instrument
-| Instrument | Typ |
+### Instruments
+| Instrument | Type |
 | --- | --- |
-| FlowKick | syntad bastrumma med pitch-envelope, klick och drive |
-| FlowSnare | ton + brus genom bandpass |
-| FlowClap | flera brusburstar med spridning |
-| FlowHat | 808-style sexoscillator-hihat |
-| FlowTom | sinus med pitch-bend |
-| FlowPerc | tva sinustoner + brus (rim/clave) |
-| 3xFLOW | tre oscillatorer, lagpassfilter med envelope, ADSR |
-| FlowFM | tva-operators-FM med index-envelope |
-| FlowPluck | subtraktiv pluck med filter-envelope och sub-oscillator |
-| FlowSampler | spelar en inladdad ljudfil med vagform, start/slut, loop, reverse och tonhojd fran notens tangent |
+| FlowKick | synthesized kick drum with pitch envelope, click and drive |
+| FlowSnare | tone + noise through a bandpass |
+| FlowClap | multiple noise bursts with spread |
+| FlowHat | 808-style six-oscillator hihat |
+| FlowTom | sine with pitch bend |
+| FlowPerc | two sine tones + noise (rim/clave) |
+| 3xFLOW | three oscillators, low-pass filter with envelope, ADSR |
+| FlowFM | two-operator FM with an index envelope |
+| FlowPluck | subtractive pluck with filter envelope and sub-oscillator |
+| FlowSampler | plays a loaded audio file with waveform, start/end, loop, reverse and pitch from the note's key |
 
-### Effekter
-Elva effekter: Filter, Delay (tempo-synkad), Reverb (genererad impulssvarsfil),
-Chorus, Phaser, Distortion, Bitcrusher, 3-bands parametrisk EQ,
-kompressor/limiter, **Sidechain Duck** (tempo-lasst pumpande ducking) och
-**Stereo Shaper** (mid/side-bredd med monobas).
+### Effects
+Eleven effects: Filter, Delay (tempo-synced), Reverb (generated impulse
+response), Chorus, Phaser, Distortion, Bitcrusher, 3-band parametric EQ,
+compressor/limiter, **Sidechain Duck** (tempo-locked pumping ducking) and
+**Stereo Shaper** (mid/side width with mono bass).
 
 ### Samples
-Dra en ljudfil var som helst i studion sa skapas en sampler-kanal; slapp den pa
-vagformen i instrumentpanelen sa laddas den i just den kanalen. Filerna sparas
-base64-kodade i projektet, sa en `.flow.json` ar komplett och gar att flytta
-mellan datorer. Max 4 MB per sample. Om webblasarens lagring inte racker till
-autosparas projektet utan samples (de finns kvar tills du laddar om).
+Drop an audio file anywhere in the studio and a sampler channel is created; drop
+it on the waveform in the instrument panel and it loads into that specific
+channel. The files are stored base64-encoded in the project, so a `.flow.json`
+is complete and can be moved between computers. Max 4 MB per sample. If the
+browser's storage isn't enough, the project autosaves without samples (they
+remain until you reload).
 
 ### MIDI
-* **Exportera MIDI** skriver en Standard MIDI File (format 1) med en spar per
-  kanal. Trumpads gar ut pa GM-trumkanalen med GM-nottummer, sa filen later
-  ratt i andra program.
-* **Importera MIDI** skapar ett nytt monster, mappar GM-trummor tillbaka till
-  pads och skapar syntkanaler for ovriga sparr. Tempo lases fran filen.
-* **Web MIDI**: anslutna keyboards spelar och spelar in vald kanal — eller ratt
-  pad nar trummaskinen ar oppen. Anslutna enheter listas i Browser under MIDI.
+* **Export MIDI** writes a Standard MIDI File (format 1) with one track per
+  channel. Drum pads go out on the GM drum channel with GM note numbers, so the
+  file sounds right in other programs.
+* **Import MIDI** creates a new pattern, maps GM drums back to pads and creates
+  synth channels for the other tracks. Tempo is read from the file.
+* **Web MIDI**: connected keyboards play and record the selected channel — or
+  the right pad when the drum machine is open. Connected devices are listed in
+  the Browser under MIDI.
 
-### Filhantering
-* **Autospar** till `localStorage` (700 ms efter senaste andring).
-* **Spara projekt** laddar ner en `.flow.json`.
-* **Oppna** laser tillbaka samma format.
-* **Exportera WAV** renderar antingen det aktiva monstret (tva varv) eller hela
-  laten offline via `OfflineAudioContext` och laddar ner en 16-bitars WAV.
-* **Exportera stems** renderar en WAV per mixerkanal.
-* **Mallar** i Browser: elva genrer — Techno, Trap, House, Drum & Bass,
-  LoFi Hip Hop, Afrobeats, Reggaeton, Amapiano, Synthwave, Dubstep och Ambient.
-  Varje mall satter tempo, swing, kit, groove, ackord, arrangemang **och**
-  en passande masteringkedja.
+### File handling
+* **Autosave** to `localStorage` (700 ms after the last change).
+* **Save project** downloads a `.flow.json`.
+* **Open** reads the same format back.
+* **Export WAV** renders either the active pattern (two loops) or the whole song
+  offline via `OfflineAudioContext` and downloads a 16-bit WAV.
+* **Export stems** renders one WAV per mixer channel.
+* **Templates** in the Browser: eleven genres — Techno, Trap, House, Drum & Bass,
+  LoFi Hip Hop, Afrobeats, Reggaeton, Amapiano, Synthwave, Dubstep and Ambient.
+  Each template sets tempo, swing, kit, groove, chords, arrangement **and**
+  a matching mastering chain.
 
 ---
 
-## Kortkommandon
+## Keyboard shortcuts
 
-| Tangent | Funktion |
+| Key | Function |
 | --- | --- |
-| `Mellanslag` | play / stop |
-| `F5` / `F6` / `F7` / `F8` / `F9` / `F10` | Playlist / Channel Rack / Piano Roll / Trummaskin / Mixer / Automation |
-| `Ctrl+Z` / `Ctrl+Y` | angra / gor om |
-| `Ctrl+S` | spara projektfil |
-| `Z S X D C V G B H N J M` | nedre oktaven pa datortangentbordet |
-| `Q 2 W 3 E R 5 T 6 Y 7 U` | ovre oktaven |
-| `Z X C V / A S D F / Q W E R` | pads (nar trummaskinen ar oppen) |
-| `Pil upp` / `Pil ner` | byt oktav |
-| `Delete` | ta bort markerade noter (piano roll) |
-| `Ctrl+C / X / V / D` | kopiera / klipp / klistra / duplicera noter |
-| `Ctrl+A` | markera alla noter |
-| `Ctrl+Q` | kvantisera markering |
-| `?` | kortkommandopanel |
-| `Shift`+dra i playlistens linjal | satt loopregion |
+| `Space` | play / stop |
+| `F5` / `F6` / `F7` / `F8` / `F9` / `F10` | Playlist / Channel Rack / Piano Roll / Drum machine / Mixer / Automation |
+| `Ctrl+Z` / `Ctrl+Y` | undo / redo |
+| `Ctrl+S` | save project file |
+| `Z S X D C V G B H N J M` | lower octave on the computer keyboard |
+| `Q 2 W 3 E R 5 T 6 Y 7 U` | upper octave |
+| `Z X C V / A S D F / Q W E R` | pads (when the drum machine is open) |
+| `Arrow up` / `Arrow down` | change octave |
+| `Delete` | delete selected notes (piano roll) |
+| `Ctrl+C / X / V / D` | copy / cut / paste / duplicate notes |
+| `Ctrl+A` | select all notes |
+| `Ctrl+Q` | quantize selection |
+| `?` | shortcut panel |
+| `Shift`+drag in the playlist ruler | set loop region |
 
-Med REC aktiverat spelas tangentbordsnoter in i det aktiva monstret medan
-uppspelningen gar.
+With REC active, keyboard notes are recorded into the active pattern while
+playback runs.
 
 ---
 
-## Arkitektur
+## Architecture
 
 ```
 lib/studio/
-  constants.js          tick-upplosning (PPQ 96), fargpalett, hjalpfunktioner
-  project.js            datamodellen + demo-latten
-  reducer.js            all projektredigering + undo/redo-historik
-  drums.js              pad-roller, kit-presets och rytmverktyg
-  theory.js             skalor, ackord och notverktyg
-  automation.js         automationsmal, kurvor och LFO-former
-  samples.js            base64-lagring och vagformsdata
-  midi.js               SMF-export och -import
-  ai.js                 den lokala generatorn och inlarningsmodellen
-  mastering.js          masterpresets och nivamatchning
-  recording.js          ingangar, trimning och sample-konvertering
-  sequencer.js          monster/playlist -> tick-indexerade eventkartor
-  StudioContext.js      React-context, autospar, fil-I/O, export
+  constants.js          tick resolution (PPQ 96), color palette, helper functions
+  project.js            the data model + the demo song
+  reducer.js            all project editing + undo/redo history
+  drums.js              pad roles, kit presets and rhythm tools
+  theory.js             scales, chords and note tools
+  automation.js         automation targets, curves and LFO shapes
+  samples.js            base64 storage and waveform data
+  midi.js               SMF export and import
+  ai.js                 the local generator and learning model
+  mastering.js          master presets and level matching
+  recording.js          inputs, trimming and sample conversion
+  sequencer.js          pattern/playlist -> tick-indexed event maps
+  StudioContext.js      React context, autosave, file I/O, export
   audio/
-    dsp.js              brus, envelopes, distortionskurvor, impulssvar
-    instruments.js      instrumentdefinitioner (rena rost-fabriker)
-    effects.js          effektdefinitioner
-    graph.js            mixer-grafen (kanaler -> inserts -> master)
-    trigger.js          gemensam nottrigger med choke-grupper
-    engine.js           realtidsmotor med lookahead-schemalaggare
-    render.js           offline-rendering + WAV-encoder
+    dsp.js              noise, envelopes, distortion curves, impulse responses
+    instruments.js      instrument definitions (pure voice factories)
+    effects.js          effect definitions
+    graph.js            the mixer graph (channels -> inserts -> master)
+    trigger.js          shared note trigger with choke groups
+    engine.js           real-time engine with lookahead scheduler
+    render.js           offline rendering + WAV encoder
 components/studio/      UI (Transport, Browser, ChannelRack, PianoRoll,
                         DrumMachine, Playlist, Mixer, PluginPanel, Knob)
-pages/index.js          klientrenderad sida (studion pa /)
-public/flow-clock.worklet.js  klocka pa ljudtraden
-public/sw.js            service worker for offline-lage
+pages/index.js          client-rendered page (the studio at /)
+public/flow-clock.worklet.js  clock on the audio thread
+public/sw.js            service worker for offline mode
 styles/studio.module.css
 ```
 
-**Tid.** Allt raknas i ticks med `PPQ = 96` (ett steg = 24 ticks, en takt i 4/4
-= 384 ticks). Taktarten stalls i transporten och paverkar taktlangd, rutnat och
-metronom. Schemalaggaren tittar 160 ms framat och lagger ut noter pa
-AudioContext-klockan, sa timingen paverkas inte av React-renderingar. Klockan
-drivs av en **AudioWorklet** pa ljudtraden, vilket gor att uppspelningen haller
-takten aven nar fliken ligger i bakgrunden (statusraden visar vilken klocka som
-anvands).
+**Time.** Everything is counted in ticks with `PPQ = 96` (one step = 24 ticks,
+one bar in 4/4 = 384 ticks). The time signature is set in the transport and
+affects bar length, grid and metronome. The scheduler looks 160 ms ahead and
+lays out notes on the AudioContext clock, so timing isn't affected by React
+renders. The clock is driven by an **AudioWorklet** on the audio thread, which
+keeps playback in time even when the tab is in the background (the status bar
+shows which clock is in use).
 
-**En datamodell.** Trummaskinens pads ar vanliga kanaler med en `role`, sa
-samma traffar syns i stegsequencern, piano rollen och arrangemanget. Rolls ar
-helt enkelt flera noter inom ett steg, vilket gor att de fungerar overallt utan
-specialfall i motorn.
+**One data model.** The drum machine's pads are ordinary channels with a `role`,
+so the same hits show up in the step sequencer, the piano roll and the
+arrangement. Rolls are simply multiple notes within one step, which makes them
+work everywhere without special cases in the engine.
 
-**Samma kod live och vid export.** Instrument och effekter ar rena funktioner
-som tar emot en `AudioContext`, sa `renderProject()` bygger om exakt samma graf
-i en `OfflineAudioContext` och renderar snabbare an realtid.
+**Same code live and on export.** Instruments and effects are pure functions
+that take an `AudioContext`, so `renderProject()` rebuilds the exact same graph
+in an `OfflineAudioContext` and renders faster than real time.
 
-**Sakerhet pa mastern.** Master gar genom en limiter och en mjuk tanh-mattning,
-sa utsignalen hamnar aldrig i hard klippning.
+**Safety on the master.** The master goes through a limiter and a soft tanh
+saturation, so the output never ends up in hard clipping.
 
 ---
 
-## Kanda begransningar
+## Known limitations
 
-* Endast 4/4-taktart.
-* Inladdade samples sparas inte i projektfilen (ljuddatan ligger bara i minnet).
-* Ingen automation-kurva an; parametrar ar statiska under uppspelning.
-
+* 4/4 time signature only.
+* Loaded samples aren't saved in the project file (the audio data lives in
+  memory only).
+* No automation curves yet; parameters are static during playback.

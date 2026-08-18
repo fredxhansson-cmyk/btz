@@ -64,7 +64,7 @@ function Strip({ insert, master }) {
         className={s.stripName}
         onDoubleClick={() => {
           if (master) return;
-          const name = window.prompt('Namn pa mixerkanal', insert.name);
+          const name = window.prompt('Mixer channel name', insert.name);
           if (name) dispatch({ type: 'insert.update', id: insert.id, patch: { name } });
         }}
       >
@@ -171,7 +171,7 @@ function Sends({ insert }) {
             })}
           />
         ))}
-        {!others.length && <span className={s.dim}>Inga andra mixerkanaler.</span>}
+        {!others.length && <span className={s.dim}>No other mixer channels.</span>}
       </div>
     </div>
   );
@@ -188,7 +188,7 @@ function Mastering() {
     vals.current = { i: l.integrated, s: l.short, m: l.momentary, p: l.peak };
     if (!ref.current) return;
     const fmt = (v) => (v == null || v < -60 ? '—' : v.toFixed(1));
-    ref.current.textContent = `Integrerad ${fmt(l.integrated)} LUFS · kort ${fmt(l.short)} · momentan ${fmt(l.momentary)} · topp ${(20 * Math.log10(Math.max(1e-4, l.peak))).toFixed(1)} dB`;
+    ref.current.textContent = `Integrated ${fmt(l.integrated)} LUFS · short ${fmt(l.short)} · momentary ${fmt(l.momentary)} · peak ${(20 * Math.log10(Math.max(1e-4, l.peak))).toFixed(1)} dB`;
   });
 
   return (
@@ -196,7 +196,7 @@ function Mastering() {
       <div className={s.fxHead}>
         <span>Mastering</span>
         <div className={s.group}>
-          <span className={s.dim}>Mal</span>
+          <span className={s.dim}>Target</span>
           <select
             className={s.select}
             value={target}
@@ -226,23 +226,23 @@ function Mastering() {
       <div className={s.loudRow}>
         <span className={s.loudRead} ref={ref}>—</span>
         <div className={s.spacer} />
-        <button type="button" className={s.btn} onClick={() => engine.resetLoudness()}>Nollstall matning</button>
+        <button type="button" className={s.btn} onClick={() => engine.resetLoudness()}>Reset measurement</button>
         <button
           type="button"
           className={s.btn}
-          title="Justerar mastervolymen sa att den uppmatta nivan hamnar pa malet"
+          title="Adjusts the master volume so the measured level lands on the target"
           onClick={() => {
             const measured = vals.current.i;
-            if (measured == null) { setHint('Spela upp laten en stund forst sa mataren hinner mata.'); return; }
+            if (measured == null) { setHint('Play the track for a bit first so the meter has time to measure.'); return; }
             const next = matchGain(project.master.vol, measured, target);
             dispatch({ type: 'master', patch: { vol: next } });
-            setHint(`Mastervolym justerad till ${next.toFixed(2)} for att traffa ${target} LUFS.`);
+            setHint(`Master volume adjusted to ${next.toFixed(2)} to hit ${target} LUFS.`);
           }}
-        >Matcha malniva</button>
+        >Match target level</button>
       </div>
       <div className={s.helpBox}>
-        Spela hela laten en gang med mataren igang — den integrerade nivan ar den som
-        streamingtjansterna normaliserar mot.
+        Play the whole track once with the meter running — the integrated level is the one
+        streaming services normalize against.
       </div>
     </div>
   );
@@ -264,7 +264,7 @@ export default function Mixer() {
     <div className={s.panel}>
       <div className={s.panelHead}>
         <span className={s.panelTitle}>Mixer</span>
-        <span className={s.dim}>Vald: {insert ? insert.name : '—'}</span>
+        <span className={s.dim}>Selected: {insert ? insert.name : '—'}</span>
         <div className={s.spacer} />
         <button type="button" className={s.btn} onClick={() => dispatch({ type: 'insert.add' })}>+ Insert</button>
       </div>
@@ -280,9 +280,9 @@ export default function Mixer() {
 
         <div className={s.fxRack}>
           <div className={s.fxHead}>
-            <span>Effektkedja — {insert ? insert.name : ''}{isMaster ? ' (masterbuss)' : ''}</span>
+            <span>Effect chain — {insert ? insert.name : ''}{isMaster ? ' (master bus)' : ''}</span>
             <select className={s.select} value="" onChange={(e) => { addFx(e.target.value); e.target.value = ''; }}>
-              <option value="">+ Lagg till effekt</option>
+              <option value="">+ Add effect</option>
               {EFFECT_LIST.map((fx) => <option key={fx.id} value={fx.id}>{fx.name}</option>)}
             </select>
           </div>
@@ -290,7 +290,7 @@ export default function Mixer() {
             {isMaster && <Mastering />}
             {!isMaster && insert && <Sends insert={insert} />}
             {(insert.fx || []).length === 0 && (
-              <div className={s.emptyFx}>Inga effekter. Lagg till reverb, delay, EQ eller distortion ovan.</div>
+              <div className={s.emptyFx}>No effects. Add reverb, delay, EQ or distortion above.</div>
             )}
             {(insert.fx || []).map((slot) => {
               const def = EFFECTS[slot.type];
