@@ -3,6 +3,8 @@ import s from '../../styles/studio.module.css';
 import { useStudio } from '../../lib/studio/StudioContext';
 import { clamp } from '../../lib/studio/constants';
 import { INSTRUMENTS, INSTRUMENT_LIST, defaultParams, mergedParams } from '../../lib/studio/audio/instruments';
+import { saveUserSound } from '../../lib/studio/library';
+import { uid } from '../../lib/studio/constants';
 import Knob, { ParamGrid } from './Knob';
 
 function Waveform({ channel }) {
@@ -122,7 +124,7 @@ function Waveform({ channel }) {
 }
 
 export default function PluginPanel() {
-  const { project, dispatch, engine, setUi } = useStudio();
+  const { project, dispatch, engine, ui, setUi, setHint } = useStudio();
   const channel = project.channels.find((c) => c.id === project.selectedChannel);
   if (!channel) return null;
   const inst = INSTRUMENTS[channel.inst];
@@ -159,6 +161,26 @@ export default function PluginPanel() {
         </select>
         <button type="button" className={s.btn} onClick={() => engine.preview(channel.id)}>Testa</button>
         <button type="button" className={s.btn} onClick={() => dispatch({ type: 'channel.clone', id: channel.id })}>Klona</button>
+        <button
+          type="button"
+          className={s.btn}
+          title="Spara instrumentets installningar i biblioteket under Mina ljud"
+          onClick={() => {
+            const name = window.prompt('Namn pa ljudet', channel.name);
+            if (!name) return;
+            saveUserSound({
+              id: uid('us'),
+              name,
+              cat: inst ? inst.cat : 'Mina',
+              inst: channel.inst,
+              params: { ...mergedParams(channel) },
+              kind: inst && inst.cat === 'Drums' ? 'drum' : 'inst',
+              tags: ['eget'],
+            });
+            setUi({ soundsVersion: (ui.soundsVersion || 0) + 1 });
+            setHint(`"${name}" sparat i biblioteket under Mina ljud.`);
+          }}
+        >Spara ljud</button>
 
       </div>
 
