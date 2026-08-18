@@ -1,7 +1,7 @@
-// FLOW Studio service worker.
+// BTZ service worker.
 //
 // Keeps the studio installable and usable offline.
-const CACHE = 'flow-studio-v2';
+const CACHE = 'flow-studio-v3';
 const CORE = [
   '/',
   '/flow-clock.worklet.js',

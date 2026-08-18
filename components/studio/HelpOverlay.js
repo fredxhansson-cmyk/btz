@@ -14,8 +14,8 @@ const GROUPS = [
   {
     title: 'Views',
     rows: [
-      ['F5', 'Playlist'],
-      ['F6', 'Channel Rack'],
+      ['F5', 'Arrangement'],
+      ['F6', 'Instruments'],
       ['F7', 'Piano Roll'],
       ['F8', 'Drum Machine'],
       ['F9', 'Mixer'],

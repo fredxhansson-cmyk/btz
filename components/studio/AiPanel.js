@@ -100,7 +100,7 @@ export default function AiPanel({ onClose }) {
     <div className={s.modalBack} onPointerDown={onClose}>
       <div className={s.modal} onPointerDown={(e) => e.stopPropagation()}>
         <div className={s.modalHead}>
-          <span className={s.pluginTitle}>FLOW Brain</span>
+          <span className={s.pluginTitle}>BTZ Brain</span>
           <span className={s.dim}>generates sounds and beats — and learns from what you keep. Everything is saved locally.</span>
           <div className={s.spacer} />
           <button type="button" className={s.xBtn} onClick={onClose}>×</button>

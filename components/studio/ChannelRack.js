@@ -157,7 +157,7 @@ export default function ChannelRack() {
   return (
     <div className={s.panel}>
       <div className={s.panelHead}>
-        <span className={s.panelTitle}>Channel Rack</span>
+        <span className={s.panelTitle}>Instruments</span>
         <span className={s.patName} style={{ borderColor: pattern.color }}>
           <select
             className={s.patSelect}

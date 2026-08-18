@@ -301,7 +301,7 @@ export default function Playlist() {
   return (
     <div className={s.panel}>
       <div className={s.panelHead}>
-        <span className={s.panelTitle}>Playlist</span>
+        <span className={s.panelTitle}>Arrangement</span>
         <span className={s.dim}>Placing:</span>
         <select
           className={s.select}

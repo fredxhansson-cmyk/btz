@@ -111,7 +111,7 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
     <header className={s.header} onPointerDown={(e) => e.stopPropagation()}>
       <div className={s.brand}>
         <span className={s.brandMark}>▶</span>
-        <span className={s.brandName}>FLOW<b>STUDIO</b></span>
+        <span className={s.brandName}>B<b>TZ</b></span>
       </div>
 
       <div className={s.menu}>
@@ -244,7 +244,7 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
                   Record audio…
                 </button>
                 <button type="button" className={s.sheetItem} onClick={() => { setSheet(false); if (onOpenAi) onOpenAi(); }}>
-                  FLOW Brain (AI)…
+                  BTZ Brain (AI)…
                 </button>
                 <div className={s.sheetRow}>
                   <button

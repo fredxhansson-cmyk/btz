@@ -28,8 +28,8 @@ const NAV_ICONS = {
 };
 
 const TABS = [
-  { id: 'playlist', label: 'Playlist', hint: 'F5' },
-  { id: 'rack', label: 'Channel Rack', hint: 'F6' },
+  { id: 'playlist', label: 'Arrangement', hint: 'F5' },
+  { id: 'rack', label: 'Instruments', hint: 'F6' },
   { id: 'piano', label: 'Piano Roll', hint: 'F7' },
   { id: 'drums', label: 'Drum Machine', hint: 'F8' },
   { id: 'automation', label: 'Automation', hint: 'F10' },
@@ -200,7 +200,7 @@ function Workspace({ installPrompt, onInstalled }) {
           Instrument
         </button>
         <button type="button" className={`${s.tab} ${s.aiTab}`} onClick={() => setAiOpen(true)}>
-          FLOW Brain<span className={s.tabHint}>AI</span>
+          BTZ Brain<span className={s.tabHint}>AI</span>
         </button>
         <button type="button" className={s.tab} onClick={() => setRecOpen(true)}>
           Record<span className={s.tabHint}>mic</span>
@@ -247,7 +247,7 @@ function Workspace({ installPrompt, onInstalled }) {
               onClick={() => setUi({ view: t.id, browserOpen: false })}
             >
               <span className={s.navIcon}>{NAV_ICONS[t.id]}</span>
-              {({ playlist: 'Playlist', rack: 'Rack', piano: 'Piano', drums: 'Drums', mixer: 'Mixer', automation: 'Auto' })[t.id]}
+              {({ playlist: 'Arrange', rack: 'Instr', piano: 'Piano', drums: 'Drums', mixer: 'Mixer', automation: 'Auto' })[t.id]}
             </button>
           ))}
         </nav>
@@ -265,7 +265,7 @@ function Workspace({ installPrompt, onInstalled }) {
               await installPrompt.userChoice;
               if (onInstalled) onInstalled();
             }}
-            title="Install FLOW Studio on this device"
+            title="Install BTZ on this device"
           >Install app</button>
         )}
         <EngineStatus />

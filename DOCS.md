@@ -1,8 +1,8 @@
 # FLOW Studio
 
-An FL Studio-inspired music studio (DAW) that runs entirely in the browser,
-built on the Web Audio API and React. A standalone app in the **`flow-studio/`**
-folder — the studio lives on the home page (`/`).
+A browser-based music studio (DAW) that runs entirely in the browser,
+built on the Web Audio API and React. A standalone app — the studio lives on
+the home page (`/`).
 
 ```bash
 cd flow-studio

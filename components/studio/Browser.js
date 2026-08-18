@@ -117,7 +117,7 @@ export default function Browser() {
             {aiSounds.map((sd) => <SoundRow key={sd.id} sound={sd} onRemove={dropUser} />)}
             {!aiSounds.length && (
               <div className={s.helpBox}>
-                Open <b>FLOW Brain</b> and generate sounds — the ones you save land here and
+                Open <b>BTZ Brain</b> and generate sounds — the ones you save land here and
                 the library grows the more you use the app.
               </div>
             )}
@@ -240,7 +240,7 @@ export default function Browser() {
 
           <Section title="Help">
             <div className={s.helpBox}>
-              <p><b>F5</b> Playlist · <b>F6</b> Rack · <b>F7</b> Piano</p>
+              <p><b>F5</b> Arrange · <b>F6</b> Instr · <b>F7</b> Piano</p>
               <p><b>F8</b> Drums · <b>F9</b> Mixer · <b>F10</b> Automation</p>
               <p><b>?</b> all keyboard shortcuts</p>
               <p>Octave: {ui.octave}</p>
