@@ -2,15 +2,22 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import s from '../../styles/studio.module.css';
 import { useStudio, useRaf } from '../../lib/studio/StudioContext';
 import {
-  PPQ, BAR_TICKS, STEP_TICKS, MIN_KEY, MAX_KEY, IS_BLACK,
+  PPQ, BAR_TICKS, STEP_TICKS, MIN_KEY, MAX_KEY, IS_BLACK, NOTE_NAMES,
   keyName, snapTicks, SNAPS, clamp, uid,
 } from '../../lib/studio/constants';
 import { patternTicks } from '../../lib/studio/sequencer';
+import {
+  SCALES, CHORDS, chordKeys, inScale, snapKeyToScale, quantizeNotes, transposeNotes,
+  nudgeNotes, strumNotes, arpeggiateNotes, humanizeVelocity, randomizeVelocity,
+  legatoNotes, invertNotes, reverseNotes, cloneNotes,
+} from '../../lib/studio/theory';
 
 const KEY_W = 62;
 const HEAD_H = 22;
 const VEL_H = 64;
 const KEYS = MAX_KEY - MIN_KEY + 1;
+
+let clipboard = [];   // survives view switches
 
 export default function PianoRoll() {
   const { project, dispatch, engine, ui, setUi, setHint, play } = useStudio();
@@ -18,16 +25,19 @@ export default function PianoRoll() {
   const canvasRef = useRef(null);
   const view = useRef({ scrollX: 0, scrollY: 0, pxPerTick: 0.5, rowH: 13, inited: false });
   const drag = useRef(null);
+  const marquee = useRef(null);
   const sel = useRef(new Set());
   const lastLen = useRef(STEP_TICKS);
   const [, bump] = useState(0);
+  const [qStrength, setQStrength] = useState(1);
 
   const pattern = project.patterns.find((p) => p.id === project.activePattern) || project.patterns[0];
   const channel = project.channels.find((c) => c.id === project.selectedChannel) || project.channels[0];
   const notes = (pattern.notes && pattern.notes[channel.id]) || [];
+  const scale = { root: ui.scaleRoot || 0, id: ui.scale || 'chromatic', snap: !!ui.scaleSnap };
 
   const dataRef = useRef({});
-  dataRef.current = { project, pattern, channel, notes, ui };
+  dataRef.current = { project, pattern, channel, notes, ui, scale };
 
   useEffect(() => {
     if (view.current.inited) return;
@@ -57,11 +67,12 @@ export default function PianoRoll() {
     const gridH = h - HEAD_H - VEL_H;
     const patLen = patternTicks(d.pattern);
     const snap = snapTicks(d.ui.snap);
+    const scaleOn = d.scale.id !== 'chromatic';
 
     ctx.fillStyle = '#1b1d22';
     ctx.fillRect(0, 0, w, h);
 
-    // rows
+    // key rows, dimmed when the note is outside the chosen scale
     ctx.save();
     ctx.beginPath();
     ctx.rect(0, HEAD_H, w, gridH);
@@ -74,17 +85,21 @@ export default function PianoRoll() {
       if (key < MIN_KEY) break;
       const y = HEAD_H + idx * v.rowH - v.scrollY;
       const black = IS_BLACK[((key % 12) + 12) % 12];
-      ctx.fillStyle = black ? '#202329' : '#262a31';
+      const out = scaleOn && !inScale(key, d.scale.root, d.scale.id);
+      ctx.fillStyle = out ? (black ? '#191b1f' : '#1d2025') : (black ? '#202329' : '#262a31');
       ctx.fillRect(KEY_W, y, w - KEY_W, v.rowH);
+      if (key % 12 === d.scale.root && scaleOn) {
+        ctx.fillStyle = 'rgba(255,138,31,0.10)';
+        ctx.fillRect(KEY_W, y, w - KEY_W, v.rowH);
+      }
       if (key % 12 === 0) {
         ctx.fillStyle = '#15171b';
         ctx.fillRect(KEY_W, y + v.rowH - 1, w - KEY_W, 1);
       }
     }
-
     ctx.restore();
 
-    // vertical grid
+    // time grid
     const startTick = v.scrollX / v.pxPerTick;
     const endTick = startTick + (w - KEY_W) / v.pxPerTick;
     const minStep = Math.max(snap, STEP_TICKS);
@@ -97,23 +112,24 @@ export default function PianoRoll() {
       ctx.fillRect(Math.round(x), HEAD_H, isBar ? 2 : 1, gridH);
     }
 
-    // out-of-pattern shading
     const endX = KEY_W + patLen * v.pxPerTick - v.scrollX;
     if (endX < w) {
       ctx.fillStyle = 'rgba(0,0,0,0.45)';
       ctx.fillRect(Math.max(KEY_W, endX), HEAD_H, w - Math.max(KEY_W, endX), gridH);
     }
 
-    // ghost notes from the other channels
-    for (const ch of d.project.channels) {
-      if (ch.id === d.channel.id) continue;
-      const list = (d.pattern.notes && d.pattern.notes[ch.id]) || [];
-      ctx.fillStyle = 'rgba(255,255,255,0.07)';
-      for (const n of list) {
-        const x = KEY_W + n.t * v.pxPerTick - v.scrollX;
-        const y = HEAD_H + (MAX_KEY - n.k) * v.rowH - v.scrollY;
-        if (x > w || y < HEAD_H - v.rowH || y > HEAD_H + gridH) continue;
-        ctx.fillRect(Math.max(KEY_W, x), y + 1, Math.max(2, n.d * v.pxPerTick), v.rowH - 2);
+    // ghost notes from other channels
+    if (d.ui.ghosts !== false) {
+      for (const ch of d.project.channels) {
+        if (ch.id === d.channel.id) continue;
+        const list = (d.pattern.notes && d.pattern.notes[ch.id]) || [];
+        ctx.fillStyle = 'rgba(255,255,255,0.07)';
+        for (const n of list) {
+          const x = KEY_W + n.t * v.pxPerTick - v.scrollX;
+          const y = HEAD_H + (MAX_KEY - n.k) * v.rowH - v.scrollY;
+          if (x > w || y < HEAD_H - v.rowH || y > HEAD_H + gridH) continue;
+          ctx.fillRect(Math.max(KEY_W, x), y + 1, Math.max(2, n.d * v.pxPerTick), v.rowH - 2);
+        }
       }
     }
 
@@ -125,7 +141,7 @@ export default function PianoRoll() {
       if (x + nw < KEY_W || x > w || y + v.rowH < HEAD_H || y > HEAD_H + gridH) continue;
       const selected = sel.current.has(n.id);
       ctx.fillStyle = d.channel.color;
-      ctx.globalAlpha = 0.35 + n.v * 0.65;
+      ctx.globalAlpha = 0.35 + (n.v == null ? 0.85 : n.v) * 0.65;
       ctx.fillRect(x, y + 1, nw, v.rowH - 2);
       ctx.globalAlpha = 1;
       ctx.strokeStyle = selected ? '#ffffff' : 'rgba(0,0,0,0.55)';
@@ -133,7 +149,18 @@ export default function PianoRoll() {
       ctx.strokeRect(x + 0.5, y + 1.5, nw - 1, v.rowH - 3);
     }
 
-    // header ruler
+    // marquee
+    if (marquee.current) {
+      const m = marquee.current;
+      ctx.strokeStyle = 'rgba(255,138,31,0.9)';
+      ctx.fillStyle = 'rgba(255,138,31,0.12)';
+      const x = Math.min(m.x0, m.x1);
+      const y = Math.min(m.y0, m.y1);
+      ctx.fillRect(x, y, Math.abs(m.x1 - m.x0), Math.abs(m.y1 - m.y0));
+      ctx.strokeRect(x + 0.5, y + 0.5, Math.abs(m.x1 - m.x0), Math.abs(m.y1 - m.y0));
+    }
+
+    // ruler
     ctx.fillStyle = '#15171b';
     ctx.fillRect(0, 0, w, HEAD_H);
     ctx.font = '10px ui-monospace, monospace';
@@ -155,7 +182,7 @@ export default function PianoRoll() {
     for (const n of d.notes) {
       const x = KEY_W + n.t * v.pxPerTick - v.scrollX;
       if (x < KEY_W || x > w) continue;
-      const bh = (VEL_H - 12) * n.v;
+      const bh = (VEL_H - 12) * (n.v == null ? 0.85 : n.v);
       ctx.fillStyle = sel.current.has(n.id) ? '#ffffff' : d.channel.color;
       ctx.fillRect(x, velY + VEL_H - 6 - bh, 3, bh);
       ctx.fillStyle = 'rgba(255,255,255,0.6)';
@@ -165,7 +192,7 @@ export default function PianoRoll() {
     ctx.font = '9px ui-monospace, monospace';
     ctx.fillText('VELOCITY', 6, velY + 12);
 
-    // piano keyboard
+    // keyboard
     ctx.save();
     ctx.beginPath();
     ctx.rect(0, HEAD_H, KEY_W, gridH);
@@ -187,6 +214,10 @@ export default function PianoRoll() {
         ctx.fillStyle = '#a8aeb6';
         ctx.fillRect(0, y + v.rowH - 1, KEY_W - 6, 1);
       }
+      if (scaleOn && pc === d.scale.root) {
+        ctx.fillStyle = 'rgba(255,138,31,0.35)';
+        ctx.fillRect(KEY_W - 10, y + 1, 4, v.rowH - 2);
+      }
       if (pc === 0) {
         ctx.fillStyle = '#5a616b';
         ctx.font = '9px ui-monospace, monospace';
@@ -199,7 +230,7 @@ export default function PianoRoll() {
 
     // playhead
     if (engine.playing) {
-      const pos = d.ui.mode === 'pattern' ? engine.currentPosition() : engine.currentPosition() % Math.max(1, patLen);
+      const pos = engine.currentPosition() % Math.max(1, patLen);
       const x = KEY_W + pos * v.pxPerTick - v.scrollX;
       if (x >= KEY_W && x < w) {
         ctx.fillStyle = '#ff8a1f';
@@ -209,9 +240,9 @@ export default function PianoRoll() {
   }, [engine]);
 
   useRaf(draw);
-  useEffect(() => { draw(); }, [draw, project, ui.snap]);
+  useEffect(() => { draw(); }, [draw, project, ui]);
 
-  /* -------------------------------------------------------- hit testing */
+  /* -------------------------------------------------------- interactions */
 
   const posFromEvent = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();
@@ -237,8 +268,28 @@ export default function PianoRoll() {
     return null;
   };
 
-  const commitNotes = (next) => {
-    dispatch({ type: 'notes.set', patternId: pattern.id, channelId: channel.id, notes: next, live: true, id: 'roll' });
+  const setNotes = (next, gesture) => dispatch({
+    type: 'notes.set',
+    patternId: pattern.id,
+    channelId: channel.id,
+    notes: next,
+    live: !!gesture,
+    gesture,
+  });
+
+  const selected = () => notes.filter((n) => sel.current.has(n.id));
+
+  const applyToSelection = (fn, label) => {
+    const chosen = selected();
+    const list = chosen.length ? chosen : notes;
+    if (!list.length) return;
+    const changed = fn(list);
+    const ids = new Set(list.map((n) => n.id));
+    const rest = notes.filter((n) => !ids.has(n.id));
+    setNotes([...rest, ...changed]);
+    sel.current = new Set(changed.map((n) => n.id));
+    if (label) setHint(label);
+    bump((n) => n + 1);
   };
 
   const onPointerDown = useCallback((e) => {
@@ -272,7 +323,9 @@ export default function PianoRoll() {
 
     const snap = snapTicks(d.ui.snap);
     const hit = noteAt(p.tick, p.key);
-    if (e.button === 2) {
+    const tool = d.ui.tool || 'draw';
+
+    if (e.button === 2 || tool === 'erase') {
       if (hit) {
         dispatch({ type: 'note.remove', patternId: pattern.id, channelId: channel.id, ids: [hit.id] });
         sel.current.delete(hit.id);
@@ -280,12 +333,21 @@ export default function PianoRoll() {
       drag.current = { mode: 'erase' };
       return;
     }
+
+    if (tool === 'select' || (e.ctrlKey || e.metaKey)) {
+      if (!e.shiftKey) sel.current.clear();
+      marquee.current = { x0: p.x, y0: p.y, x1: p.x, y1: p.y };
+      drag.current = { mode: 'marquee' };
+      bump((n) => n + 1);
+      return;
+    }
+
     if (hit) {
       const rightEdge = KEY_W + (hit.t + hit.d) * v.pxPerTick - v.scrollX;
       if (!e.shiftKey && !sel.current.has(hit.id)) { sel.current.clear(); sel.current.add(hit.id); }
       else sel.current.add(hit.id);
       if (Math.abs(p.x - rightEdge) < 6) {
-        drag.current = { mode: 'resize', id: hit.id, snap };
+        drag.current = { mode: 'resize', id: hit.id, snap, ids: [...sel.current] };
       } else {
         drag.current = {
           mode: 'move',
@@ -298,15 +360,18 @@ export default function PianoRoll() {
       bump((n) => n + 1);
       return;
     }
-    // create
+
+    // draw a note or a whole chord
     const t = Math.max(0, Math.floor(p.tick / snap) * snap);
-    const key = clamp(p.key, MIN_KEY, MAX_KEY);
-    const note = { id: uid('n'), t, k: key, d: lastLen.current, v: 0.85 };
-    dispatch({ type: 'note.add', patternId: pattern.id, channelId: channel.id, note, live: true, gesture: 'draw' });
-    sel.current.clear();
-    sel.current.add(note.id);
-    engine.preview(channel.id, key, 0.85, 0.3);
-    drag.current = { mode: 'resize', id: note.id, snap, fresh: true };
+    let key = clamp(p.key, MIN_KEY, MAX_KEY);
+    if (d.scale.snap && d.scale.id !== 'chromatic') key = snapKeyToScale(key, d.scale.root, d.scale.id);
+    const chordId = d.ui.chord || 'none';
+    const keys = chordId === 'none' ? [key] : chordKeys(key, chordId, d.scale);
+    const fresh = keys.map((k) => ({ id: uid('n'), t, k, d: lastLen.current, v: 0.85 }));
+    setNotes([...d.notes, ...fresh], 'draw');
+    sel.current = new Set(fresh.map((n) => n.id));
+    fresh.forEach((n, i) => engine.preview(channel.id, n.k, 0.85 - i * 0.05, 0.3));
+    drag.current = { mode: 'resize', id: fresh[0].id, ids: fresh.map((n) => n.id), snap, fresh: true };
   }, [channel, dispatch, engine, pattern.id, play]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const applyVel = (id, p) => {
@@ -321,6 +386,7 @@ export default function PianoRoll() {
     if (!dr) return;
     const p = posFromEvent(e);
     const d = dataRef.current;
+
     if (dr.mode === 'audition') {
       const key = clamp(p.key, MIN_KEY, MAX_KEY);
       if (key !== dr.key) {
@@ -336,42 +402,58 @@ export default function PianoRoll() {
       if (hit) dispatch({ type: 'note.remove', patternId: pattern.id, channelId: channel.id, ids: [hit.id] });
       return;
     }
+    if (dr.mode === 'marquee') {
+      marquee.current.x1 = p.x;
+      marquee.current.y1 = p.y;
+      const v = view.current;
+      const m = marquee.current;
+      const t0 = (Math.min(m.x0, m.x1) - KEY_W + v.scrollX) / v.pxPerTick;
+      const t1 = (Math.max(m.x0, m.x1) - KEY_W + v.scrollX) / v.pxPerTick;
+      const k1 = MAX_KEY - Math.floor((Math.min(m.y0, m.y1) - HEAD_H + v.scrollY) / v.rowH);
+      const k0 = MAX_KEY - Math.floor((Math.max(m.y0, m.y1) - HEAD_H + v.scrollY) / v.rowH);
+      for (const n of d.notes) {
+        if (n.t + n.d >= t0 && n.t <= t1 && n.k >= k0 && n.k <= k1) sel.current.add(n.id);
+      }
+      draw();
+      return;
+    }
     if (dr.mode === 'resize') {
-      const note = d.notes.find((n) => n.id === dr.id);
-      if (!note) return;
-      const len = Math.max(dr.snap, Math.round((p.tick - note.t) / dr.snap) * dr.snap);
+      const anchor = d.notes.find((n) => n.id === dr.id);
+      if (!anchor) return;
+      const len = Math.max(dr.snap, Math.round((p.tick - anchor.t) / dr.snap) * dr.snap);
       lastLen.current = len;
-      dispatch({
-        type: 'note.update',
-        patternId: pattern.id,
-        channelId: channel.id,
-        id: dr.id,
-        patch: { d: len },
-        live: true,
-        gesture: dr.fresh ? 'draw' : `len:${dr.id}`,
-      });
+      const ids = new Set(dr.ids && dr.ids.length ? dr.ids : [dr.id]);
+      setNotes(d.notes.map((n) => (ids.has(n.id) ? { ...n, d: len } : n)),
+        dr.fresh ? 'draw' : `len:${dr.id}`);
       return;
     }
     if (dr.mode === 'move') {
       const dt = Math.round((p.tick - dr.origin.tick) / dr.snap) * dr.snap;
-      const dk = p.key - dr.origin.key;
+      let dk = p.key - dr.origin.key;
       if (!dt && !dk) return;
       const byId = new Map(dr.items.map((it) => [it.id, it]));
       const next = d.notes.map((n) => {
         const it = byId.get(n.id);
         if (!it) return n;
-        return { ...n, t: Math.max(0, it.t + dt), k: clamp(it.k + dk, MIN_KEY, MAX_KEY) };
+        let k = clamp(it.k + dk, MIN_KEY, MAX_KEY);
+        if (d.scale.snap && d.scale.id !== 'chromatic') k = snapKeyToScale(k, d.scale.root, d.scale.id);
+        return { ...n, t: Math.max(0, it.t + dt), k };
       });
-      commitNotes(next);
+      setNotes(next, 'move');
     }
-  }, [channel, dispatch, engine, pattern.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [channel, dispatch, draw, engine, pattern.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onPointerUp = useCallback(() => {
     const dr = drag.current;
     if (dr && dr.mode === 'audition') engine.noteOff(channel.id, dr.key);
+    if (dr && dr.mode === 'marquee') {
+      marquee.current = null;
+      setHint(`${sel.current.size} noter markerade.`);
+    }
     drag.current = null;
     bump((n) => n + 1);
-  }, [channel, engine]);
+    draw();
+  }, [channel, draw, engine, setHint]);
 
   const onWheel = useCallback((e) => {
     const v = view.current;
@@ -393,70 +475,186 @@ export default function PianoRoll() {
     return () => el.removeEventListener('wheel', handler);
   }, [onWheel]);
 
+  /* ------------------------------------------------------------ shortcuts */
+
   useEffect(() => {
     const onKey = (e) => {
       if (ui.view !== 'piano') return;
+      const tag = e.target && e.target.tagName;
+      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+      const mod = e.ctrlKey || e.metaKey;
+      const chosen = selected();
+      const list = chosen.length ? chosen : [];
+
       if (e.key === 'Delete' || e.key === 'Backspace') {
         if (!sel.current.size) return;
         e.preventDefault();
         dispatch({ type: 'note.remove', patternId: pattern.id, channelId: channel.id, ids: [...sel.current] });
         sel.current.clear();
+        return;
       }
-      if (e.key === 'a' && (e.ctrlKey || e.metaKey)) {
+      if (mod && e.key.toLowerCase() === 'a') {
         e.preventDefault();
         sel.current = new Set(notes.map((n) => n.id));
         bump((n) => n + 1);
+        return;
+      }
+      if (mod && e.key.toLowerCase() === 'c') {
+        if (!list.length) return;
+        e.preventDefault();
+        clipboard = list.map((n) => ({ ...n }));
+        setHint(`${clipboard.length} noter kopierade.`);
+        return;
+      }
+      if (mod && e.key.toLowerCase() === 'x') {
+        if (!list.length) return;
+        e.preventDefault();
+        clipboard = list.map((n) => ({ ...n }));
+        dispatch({ type: 'note.remove', patternId: pattern.id, channelId: channel.id, ids: list.map((n) => n.id) });
+        sel.current.clear();
+        return;
+      }
+      if (mod && e.key.toLowerCase() === 'v') {
+        if (!clipboard.length) return;
+        e.preventDefault();
+        const base = Math.min(...clipboard.map((n) => n.t));
+        const at = engine.playing ? Math.round(engine.currentPosition()) : base + snapTicks(ui.snap);
+        const pasted = cloneNotes(clipboard, at - base);
+        setNotes([...notes, ...pasted]);
+        sel.current = new Set(pasted.map((n) => n.id));
+        setHint(`${pasted.length} noter inklistrade.`);
+        return;
+      }
+      if (mod && e.key.toLowerCase() === 'd') {
+        if (!list.length) return;
+        e.preventDefault();
+        const span = Math.max(...list.map((n) => n.t + n.d)) - Math.min(...list.map((n) => n.t));
+        const copy = cloneNotes(list, Math.max(snapTicks(ui.snap), span));
+        setNotes([...notes, ...copy]);
+        sel.current = new Set(copy.map((n) => n.id));
+        return;
+      }
+      if (mod && e.key.toLowerCase() === 'q') {
+        e.preventDefault();
+        applyToSelection((l) => quantizeNotes(l, snapTicks(ui.snap), qStrength), 'Kvantiserat.');
+        return;
+      }
+      if (!mod && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && sel.current.size) {
+        e.preventDefault();
+        const step = e.shiftKey ? 12 : 1;
+        applyToSelection((l) => transposeNotes(l, e.key === 'ArrowUp' ? step : -step));
+        return;
+      }
+      if (!mod && (e.key === 'ArrowLeft' || e.key === 'ArrowRight') && sel.current.size) {
+        e.preventDefault();
+        const g = snapTicks(ui.snap);
+        applyToSelection((l) => nudgeNotes(l, e.key === 'ArrowRight' ? g : -g));
       }
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [dispatch, pattern.id, channel.id, notes, ui.view]);
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
+  }, [dispatch, pattern.id, channel.id, notes, ui.view, ui.snap, qStrength, engine, setHint]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const arp = channel.arp || { on: false, rate: '1/16', mode: 'up', octaves: 1, gate: 0.9 };
+  const setArp = (patch) => dispatch({ type: 'channel.update', id: channel.id, patch: { arp: { ...arp, ...patch } } });
 
   return (
     <div className={s.panel}>
       <div className={s.panelHead}>
         <span className={s.panelTitle}>Piano Roll</span>
-        <select
-          className={s.select}
-          value={channel.id}
-          onChange={(e) => dispatch({ type: 'select.channel', id: e.target.value })}
-        >
+        <select className={s.select} value={channel.id} onChange={(e) => dispatch({ type: 'select.channel', id: e.target.value })}>
           {project.channels.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
-        <select
-          className={s.select}
-          value={pattern.id}
-          onChange={(e) => dispatch({ type: 'pattern.select', id: e.target.value })}
-        >
+        <select className={s.select} value={pattern.id} onChange={(e) => dispatch({ type: 'pattern.select', id: e.target.value })}>
           {project.patterns.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
+        <div className={s.modeSw}>
+          {[['draw', 'Rita'], ['select', 'Markera'], ['erase', 'Radera']].map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              className={(ui.tool || 'draw') === id ? `${s.seg} ${s.on}` : s.seg}
+              onClick={() => setUi({ tool: id })}
+            >{label}</button>
+          ))}
+        </div>
         <div className={s.group}>
           <span className={s.dim}>Snap</span>
           <select className={s.select} value={ui.snap} onChange={(e) => setUi({ snap: e.target.value })}>
             {SNAPS.map((sn) => <option key={sn.id} value={sn.id}>{sn.label}</option>)}
           </select>
         </div>
-        <button
-          type="button"
-          className={s.btn}
-          onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 1.25, 0.08, 4); draw(); }}
-        >+</button>
-        <button
-          type="button"
-          className={s.btn}
-          onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 0.8, 0.08, 4); draw(); }}
-        >−</button>
-        <button
-          type="button"
-          className={s.btn}
-          onClick={() => {
-            dispatch({ type: 'pattern.clearChannel', patternId: pattern.id, channelId: channel.id });
-            setHint(`Rensade ${channel.name} i ${pattern.name}.`);
-          }}
-        >Rensa kanal</button>
+        <div className={s.group}>
+          <span className={s.dim}>Ackord</span>
+          <select className={s.select} value={ui.chord || 'none'} onChange={(e) => setUi({ chord: e.target.value })}>
+            {CHORDS.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        </div>
+        <div className={s.group}>
+          <span className={s.dim}>Skala</span>
+          <select className={s.select} value={ui.scaleRoot || 0} onChange={(e) => setUi({ scaleRoot: Number(e.target.value) })}>
+            {NOTE_NAMES.map((n, i) => <option key={n} value={i}>{n}</option>)}
+          </select>
+          <select className={s.select} value={ui.scale || 'chromatic'} onChange={(e) => setUi({ scale: e.target.value })}>
+            {SCALES.map((sc) => <option key={sc.id} value={sc.id}>{sc.name}</option>)}
+          </select>
+          <button
+            type="button"
+            className={ui.scaleSnap ? `${s.btn} ${s.on}` : s.btn}
+            onClick={() => setUi({ scaleSnap: !ui.scaleSnap })}
+            title="Tvinga nya noter till skalan"
+          >Lås</button>
+        </div>
         <div className={s.spacer} />
+        <button type="button" className={ui.ghosts === false ? s.btn : `${s.btn} ${s.on}`} onClick={() => setUi({ ghosts: ui.ghosts === false })}>Ghosts</button>
+        <button type="button" className={s.btn} onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 1.25, 0.08, 4); draw(); }}>+</button>
+        <button type="button" className={s.btn} onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 0.8, 0.08, 4); draw(); }}>−</button>
         <span className={s.dim}>{notes.length} noter</span>
       </div>
+
+      <div className={s.dmTools}>
+        <span className={s.toolLabel}>Verktyg</span>
+        <div className={s.group}>
+          <button type="button" className={s.btn} onClick={() => applyToSelection((l) => quantizeNotes(l, snapTicks(ui.snap), qStrength), 'Kvantiserat.')}>Kvantisera</button>
+          <input
+            className={s.numInput} type="number" min={0} max={100} step={5}
+            value={Math.round(qStrength * 100)}
+            onChange={(e) => setQStrength(clamp((parseInt(e.target.value, 10) || 0) / 100, 0, 1))}
+          />
+          <span className={s.dim}>%</span>
+        </div>
+        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => strumNotes(l, Math.round(snapTicks(ui.snap) / 2)), 'Strum.')}>Strum</button>
+        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => arpeggiateNotes(l, snapTicks(ui.snap), 'up', 1), 'Arpeggierat.')}>Arpeggiera</button>
+        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => humanizeVelocity(l), 'Humaniserat.')}>Humanisera</button>
+        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => randomizeVelocity(l), 'Slumpad velocity.')}>Slumpa vel</button>
+        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => legatoNotes(l, notes), 'Legato.')}>Legato</button>
+        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => invertNotes(l), 'Inverterat.')}>Invertera</button>
+        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => reverseNotes(l), 'Bakvant.')}>Vänd</button>
+        <div className={s.group}>
+          <button type="button" className={s.btn} onClick={() => applyToSelection((l) => transposeNotes(l, 12))}>Okt +</button>
+          <button type="button" className={s.btn} onClick={() => applyToSelection((l) => transposeNotes(l, -12))}>Okt −</button>
+        </div>
+        <div className={s.spacer} />
+        <div className={s.group}>
+          <span className={s.toolLabel}>Arp</span>
+          <button type="button" className={arp.on ? `${s.btn} ${s.on}` : s.btn} onClick={() => setArp({ on: !arp.on })}>
+            {arp.on ? 'PÅ' : 'AV'}
+          </button>
+          <select className={s.select} value={arp.rate} onChange={(e) => setArp({ rate: e.target.value })}>
+            {['1/4', '1/8', '1/8T', '1/16', '1/16T', '1/32'].map((r) => <option key={r} value={r}>{r}</option>)}
+          </select>
+          <select className={s.select} value={arp.mode} onChange={(e) => setArp({ mode: e.target.value })}>
+            {[['up', 'Upp'], ['down', 'Ner'], ['updown', 'Upp/ner'], ['random', 'Slump'], ['chord', 'Ackord']].map(([id, l]) => (
+              <option key={id} value={id}>{l}</option>
+            ))}
+          </select>
+          <select className={s.select} value={arp.octaves} onChange={(e) => setArp({ octaves: Number(e.target.value) })}>
+            {[1, 2, 3, 4].map((o) => <option key={o} value={o}>{o} okt</option>)}
+          </select>
+        </div>
+        <button type="button" className={s.btn} onClick={() => { dispatch({ type: 'pattern.clearChannel', patternId: pattern.id, channelId: channel.id }); sel.current.clear(); }}>Rensa kanal</button>
+      </div>
+
       <div className={s.canvasWrap} ref={wrapRef}>
         <canvas
           ref={canvasRef}

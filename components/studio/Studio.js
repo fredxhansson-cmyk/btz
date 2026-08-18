@@ -50,7 +50,7 @@ function Workspace() {
 
   useEffect(() => {
     const down = (e) => {
-      if (isTyping(e.target)) return;
+      if (isTyping(e.target) || e.defaultPrevented) return;
       const k = e.key.toLowerCase();
 
       if (e.key === ' ') { e.preventDefault(); togglePlay(); return; }
