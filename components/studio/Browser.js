@@ -42,7 +42,7 @@ function SoundRow({ sound, onRemove }) {
           dispatch({ type: 'sound.add', sound });
           engine.previewSound(sound);
           setHint(`${sound.name} tillagd som kanal.`);
-          setUi({ view: 'rack' });
+          setUi({ view: 'rack', browserOpen: false });
         }}
         title={`Lagg till ${sound.name}${sound.tags && sound.tags.length ? ` · ${sound.tags.join(', ')}` : ''}`}
       >
@@ -120,7 +120,7 @@ export default function Browser() {
                 onClick={() => {
                   dispatch({ type: 'kit.apply', kitId: k.id });
                   setHint(`Kit "${k.name}" laddat — ${k.desc}`);
-                  setUi({ view: 'drums' });
+                  setUi({ view: 'drums', browserOpen: false });
                 }}
               >
                 <span className={s.swatch} style={{ background: '#ff8a1f' }} />
@@ -138,7 +138,7 @@ export default function Browser() {
                 onClick={() => {
                   dispatch({ type: 'sound.add', sound: { inst: inst.id, name: inst.name, params: defaultParams(inst.id), cat: inst.cat } });
                   setHint(`${inst.name} tillagd med grundinstallning.`);
-                  setUi({ view: 'rack' });
+                  setUi({ view: 'rack', browserOpen: false });
                 }}
               >
                 <span className={s.swatch} style={{ background: inst.color }} />
@@ -182,7 +182,10 @@ export default function Browser() {
                 type="button"
                 className={s.sideItem}
                 onClick={() => {
-                  if (window.confirm(`Ladda mallen "${t.name}"? Nuvarande projekt ersatts.`)) loadTemplate(t.id);
+                  if (window.confirm(`Ladda mallen "${t.name}"? Nuvarande projekt ersatts.`)) {
+                    loadTemplate(t.id);
+                    setUi({ browserOpen: false });
+                  }
                 }}
               >
                 <span className={s.swatch} style={{ background: '#ff8a1f' }} />

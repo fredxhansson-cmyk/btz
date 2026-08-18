@@ -6,6 +6,7 @@ import {
   keyName, snapTicks, SNAPS, clamp, uid,
 } from '../../lib/studio/constants';
 import { patternTicks } from '../../lib/studio/sequencer';
+import { longPress, pinchZoom } from '../../lib/studio/touch';
 import {
   SCALES, CHORDS, chordKeys, inScale, snapKeyToScale, quantizeNotes, transposeNotes,
   nudgeNotes, strumNotes, arpeggiateNotes, humanizeVelocity, randomizeVelocity,
@@ -30,6 +31,9 @@ export default function PianoRoll() {
   const lastLen = useRef(STEP_TICKS);
   const [, bump] = useState(0);
   const [qStrength, setQStrength] = useState(1);
+  const gesture = useRef(null);
+  const press = useRef(null);
+  if (!press.current) press.current = longPress();
 
   const pattern = project.patterns.find((p) => p.id === project.activePattern) || project.patterns[0];
   const channel = project.channels.find((c) => c.id === project.selectedChannel) || project.channels[0];
@@ -294,6 +298,8 @@ export default function PianoRoll() {
   };
 
   const onPointerDown = useCallback((e) => {
+    if (!gesture.current) gesture.current = pinchZoom(view, draw, { min: 0.08, max: 4, maxScrollY: KEYS * view.current.rowH - 120 });
+    if (gesture.current.down(e)) { drag.current = null; press.current.cancel(); return; }
     const p = posFromEvent(e);
     const v = view.current;
     const d = dataRef.current;
@@ -344,6 +350,12 @@ export default function PianoRoll() {
     }
 
     if (hit) {
+      // long press on touch removes the note, like a right click does
+      press.current.start(e, () => {
+        dispatch({ type: 'note.remove', patternId: pattern.id, channelId: channel.id, ids: [hit.id] });
+        sel.current.delete(hit.id);
+        drag.current = null;
+      });
       const rightEdge = KEY_W + (hit.t + hit.d) * v.pxPerTick - v.scrollX;
       if (!e.shiftKey && !sel.current.has(hit.id)) { sel.current.clear(); sel.current.add(hit.id); }
       else sel.current.add(hit.id);
@@ -383,6 +395,8 @@ export default function PianoRoll() {
   };
 
   const onPointerMove = useCallback((e) => {
+    if (gesture.current && gesture.current.move(e)) return;
+    press.current.move(e);
     const dr = drag.current;
     if (!dr) return;
     const p = posFromEvent(e);
@@ -444,7 +458,9 @@ export default function PianoRoll() {
     }
   }, [channel, dispatch, draw, engine, pattern.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const onPointerUp = useCallback(() => {
+  const onPointerUp = useCallback((e) => {
+    if (gesture.current) gesture.current.up(e);
+    press.current.cancel();
     const dr = drag.current;
     if (dr && dr.mode === 'audition') engine.noteOff(channel.id, dr.key);
     if (dr && dr.mode === 'marquee') {

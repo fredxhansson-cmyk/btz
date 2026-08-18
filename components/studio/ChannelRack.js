@@ -223,7 +223,11 @@ export default function ChannelRack() {
       <div className={s.rackFoot}>
         <span className={s.dim}>{project.channels.length} kanaler · {steps} steg · {(pattern.bars || 1) * BAR_TICKS} ticks</span>
         <div className={s.spacer} />
-        <span className={s.dim}>Vansterklick = lagg till steg · Hogerklick = ta bort · dra for att mala</span>
+        <span className={s.dim}>
+          {ui.touch
+            ? 'Tryck = steg pa/av · tryck och hall = ta bort · dra for att mala'
+            : 'Vansterklick = lagg till steg · Hogerklick = ta bort · dra for att mala'}
+        </span>
       </div>
     </div>
   );

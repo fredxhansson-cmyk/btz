@@ -43,6 +43,7 @@ export default function Transport() {
     canUndo, canRedo, playing, busy,
   } = useStudio();
   const [openId, setOpenId] = useState(null);
+  const [sheet, setSheet] = useState(false);
   const [editTempo, setEditTempo] = useState(null);
   const timeRef = useRef(null);
   const meterL = useRef(null);
@@ -101,7 +102,7 @@ export default function Transport() {
   ];
 
   useEffect(() => {
-    const close = () => setOpenId(null);
+    const close = () => { setOpenId(null); setSheet(false); };
     window.addEventListener('pointerdown', close);
     return () => window.removeEventListener('pointerdown', close);
   }, []);
@@ -175,12 +176,12 @@ export default function Transport() {
 
       <button
         type="button"
-        className={ui.metronome ? `${s.btn} ${s.on}` : s.btn}
+        className={`${ui.metronome ? `${s.btn} ${s.on}` : s.btn} ${s.deskOnly}`}
         onClick={() => setUi({ metronome: !ui.metronome })}
         title="Metronom"
       >MET</button>
 
-      <div className={s.group}>
+      <div className={`${s.group} ${s.deskOnly}`}>
         <select
           className={s.select}
           value={`${project.sig ? project.sig.num : 4}/${project.sig ? project.sig.den : 4}`}
@@ -203,6 +204,72 @@ export default function Transport() {
       <div className={s.spacer} />
 
       {busy && <span className={s.busy}>{busy}</span>}
+
+      {ui.touch && (
+        <>
+          <button
+            type="button"
+            className={sheet ? `${s.moreBtn} ${s.on}` : s.moreBtn}
+            onClick={() => setSheet((v) => !v)}
+            title="Mer"
+          >⋯</button>
+          {sheet && (
+            <div className={s.sheet} onPointerDown={(e) => e.stopPropagation()}>
+              <div className={s.sheetGroup}>
+                <div className={s.sheetLabel}>FIL</div>
+                {fileItems.filter((i) => !i.sep).map((it) => (
+                  <button key={it.label} type="button" className={s.sheetItem} onClick={() => { setSheet(false); it.onClick(); }}>
+                    {it.label}
+                  </button>
+                ))}
+              </div>
+              <div className={s.sheetGroup}>
+                <div className={s.sheetLabel}>REDIGERA</div>
+                {editItems.filter((i) => !i.sep).map((it) => (
+                  <button
+                    key={it.label} type="button" className={s.sheetItem} disabled={it.disabled}
+                    onClick={() => { setSheet(false); it.onClick(); }}
+                  >{it.label}</button>
+                ))}
+              </div>
+              <div className={s.sheetGroup}>
+                <div className={s.sheetLabel}>TRANSPORT</div>
+                <div className={s.sheetRow}>
+                  <button
+                    type="button"
+                    className={ui.metronome ? `${s.btn} ${s.on}` : s.btn}
+                    onClick={() => setUi({ metronome: !ui.metronome })}
+                  >Metronom</button>
+                  <select
+                    className={s.select}
+                    value={`${project.sig ? project.sig.num : 4}/${project.sig ? project.sig.den : 4}`}
+                    onChange={(e) => {
+                      const [num, den] = e.target.value.split('/').map(Number);
+                      dispatch({ type: 'patch', patch: { sig: { num, den } } });
+                    }}
+                  >
+                    {['4/4', '3/4', '5/4', '6/8', '7/8', '12/8', '6/4', '2/4'].map((v) => <option key={v} value={v}>{v}</option>)}
+                  </select>
+                  <button
+                    type="button"
+                    className={project.countIn ? `${s.btn} ${s.on}` : s.btn}
+                    onClick={() => dispatch({ type: 'patch', patch: { countIn: ((project.countIn || 0) + 1) % 3 } })}
+                  >{project.countIn ? `${project.countIn} takt in` : 'Ingen inrakning'}</button>
+                </div>
+                <div className={s.sheetRow}>
+                  <Knob
+                    size={34}
+                    label="MASTER"
+                    spec={{ min: 0, max: 1.4, def: 0.75 }}
+                    value={project.master.vol}
+                    onChange={(v, live) => dispatch({ type: 'master', patch: { vol: v }, live, id: 'mastervol' })}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
 
       <div className={s.masterBox}>
         <div className={s.meter}><div className={s.meterFill} ref={meterL} /></div>

@@ -13,11 +13,16 @@ import HelpOverlay from './HelpOverlay';
 import PluginPanel from './PluginPanel';
 import { clamp } from '../../lib/studio/constants';
 import { ROLES, padChannels } from '../../lib/studio/drums';
+import { isCoarsePointer } from '../../lib/studio/touch';
 import { useRaf } from '../../lib/studio/StudioContext';
 
 const KEYMAP = {
   z: 0, s: 1, x: 2, d: 3, c: 4, v: 5, g: 6, b: 7, h: 8, n: 9, j: 10, m: 11, ',': 12, l: 13, '.': 14,
   q: 12, 2: 13, w: 14, 3: 15, e: 16, r: 17, 5: 18, t: 19, 6: 20, y: 21, 7: 22, u: 23, i: 24,
+};
+
+const NAV_ICONS = {
+  playlist: '▤', rack: '▦', piano: '🎹', drums: '⬢', mixer: '⧉', automation: '⤢',
 };
 
 const TABS = [
@@ -58,13 +63,21 @@ function isTyping(el) {
   return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
 }
 
-function Workspace() {
+function Workspace({ installPrompt, onInstalled }) {
   const {
     project, dispatch, engine, ui, setUi, togglePlay, saveFile,
     recordNote, finishRecordedNote, loadSampleFile,
   } = useStudio();
   const [dropping, setDropping] = useState(false);
   const [help, setHelp] = useState(false);
+
+  // Touch layout: bottom navigation, slide-over browser and bigger targets.
+  useEffect(() => {
+    const apply = () => setUi({ touch: isCoarsePointer() || window.innerWidth < 900 });
+    apply();
+    window.addEventListener('resize', apply);
+    return () => window.removeEventListener('resize', apply);
+  }, [setUi]);
   const held = useRef(new Map());
   const projectRef = useRef(project);
   projectRef.current = project;
@@ -149,7 +162,7 @@ function Workspace() {
 
   return (
     <div
-      className={s.app}
+      className={ui.touch ? `${s.app} ${s.touch}` : s.app}
       onDragOver={(e) => { e.preventDefault(); setDropping(true); }}
       onDragLeave={(e) => { if (e.currentTarget === e.target) setDropping(false); }}
       onDrop={onDrop}
@@ -186,7 +199,12 @@ function Workspace() {
       </div>
 
       <div className={s.body}>
-        <Browser />
+        {ui.touch && ui.browserOpen && (
+          <div className={s.sideBackdrop} onPointerDown={() => setUi({ browserOpen: false })} />
+        )}
+        <div className={ui.touch && ui.browserOpen ? `${s.sideWrap} ${s.sideOpen}` : s.sideWrap}>
+          <Browser />
+        </div>
         <main className={s.main}>
           <div className={s.viewArea}>
             {ui.view === 'playlist' && <Playlist />}
@@ -200,22 +218,61 @@ function Workspace() {
         </main>
       </div>
 
+      {ui.touch && (
+        <nav className={s.bottomNav}>
+          <button
+            type="button"
+            className={ui.browserOpen ? `${s.navBtn} ${s.on}` : s.navBtn}
+            onClick={() => setUi({ browserOpen: !ui.browserOpen })}
+          >
+            <span className={s.navIcon}>♪</span>Ljud
+          </button>
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              className={ui.view === t.id ? `${s.navBtn} ${s.on}` : s.navBtn}
+              onClick={() => setUi({ view: t.id, browserOpen: false })}
+            >
+              <span className={s.navIcon}>{NAV_ICONS[t.id]}</span>
+              {({ playlist: 'Playlist', rack: 'Rack', piano: 'Piano', drums: 'Trummor', mixer: 'Mixer', automation: 'Auto' })[t.id]}
+            </button>
+          ))}
+        </nav>
+      )}
+
       <footer className={s.status}>
         <span className={s.hint}>{ui.hint}</span>
         <div className={s.spacer} />
+        {installPrompt && (
+          <button
+            type="button"
+            className={`${s.btn} ${s.on}`}
+            onClick={async () => {
+              installPrompt.prompt();
+              await installPrompt.userChoice;
+              if (onInstalled) onInstalled();
+            }}
+            title="Installera FLOW Studio pa den har enheten"
+          >Installera appen</button>
+        )}
         <EngineStatus />
-        <span className={s.dim}>Oktav {ui.octave}</span>
-        <span className={s.dim}>{project.bpm.toFixed(1)} BPM</span>
-        <span className={s.dim}>{ui.mode === 'song' ? 'SONG' : 'PATTERN'}</span>
+        {!ui.touch && (
+          <>
+            <span className={s.dim}>Oktav {ui.octave}</span>
+            <span className={s.dim}>{project.bpm.toFixed(1)} BPM</span>
+            <span className={s.dim}>{ui.mode === 'song' ? 'SONG' : 'PATTERN'}</span>
+          </>
+        )}
       </footer>
     </div>
   );
 }
 
-export default function Studio() {
+export default function Studio({ installPrompt, onInstalled }) {
   return (
     <StudioProvider>
-      <Workspace />
+      <Workspace installPrompt={installPrompt} onInstalled={onInstalled} />
     </StudioProvider>
   );
 }

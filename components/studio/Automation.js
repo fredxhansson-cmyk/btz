@@ -4,6 +4,7 @@ import { useStudio, useRaf } from '../../lib/studio/StudioContext';
 import { BAR_TICKS, PPQ, STEP_TICKS, snapTicks, SNAPS, clamp, COLORS } from '../../lib/studio/constants';
 import { patternTicks } from '../../lib/studio/sequencer';
 import { listTargets, valueAt, denorm, shapePoints, sortPoints } from '../../lib/studio/automation';
+import { longPress } from '../../lib/studio/touch';
 
 const HEAD_H = 22;
 const PAD = 14;
@@ -15,6 +16,8 @@ export default function Automation() {
   const drag = useRef(null);
   const [, bump] = useState(0);
   const [pick, setPick] = useState('');
+  const press = useRef(null);
+  if (!press.current) press.current = longPress();
 
   const pattern = project.patterns.find((p) => p.id === project.activePattern) || project.patterns[0];
   const lanes = pattern.automation || [];
@@ -186,6 +189,10 @@ export default function Automation() {
       return;
     }
     if (hit >= 0) {
+      press.current.start(e, () => {
+        if (pts.length > 1) commit(pts.filter((_, i) => i !== hit));
+        drag.current = null;
+      });
       drag.current = { mode: 'point', index: hit, snap };
       return;
     }
@@ -196,6 +203,7 @@ export default function Automation() {
   };
 
   const onPointerMove = (e) => {
+    press.current.move(e);
     const d = drag.current;
     if (!d || !lane) return;
     const p = posFromEvent(e);
@@ -206,7 +214,7 @@ export default function Automation() {
     commit(next, `autopt:${lane.id}:${d.index}`);
   };
 
-  const onPointerUp = () => { drag.current = null; bump((n) => n + 1); };
+  const onPointerUp = () => { press.current.cancel(); drag.current = null; bump((n) => n + 1); };
 
   const addLane = (targetId) => {
     if (!targetId) return;

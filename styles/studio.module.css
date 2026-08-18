@@ -16,6 +16,7 @@
   inset: 0;
   display: grid;
   grid-template-rows: auto auto 1fr auto;
+  grid-template-columns: minmax(0, 1fr);
   background: var(--bg);
   color: var(--text);
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -124,7 +125,7 @@
 .tabHint { font-size: 9px; color: #5c636d; border: 1px solid #3a3f47; border-radius: 3px; padding: 0 3px; }
 
 /* ------------------------------------------------------------------ body */
-.body { display: flex; min-height: 0; }
+.body { display: flex; min-height: 0; overflow: hidden; }
 .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .viewArea { flex: 1; min-height: 0; display: flex; }
 
@@ -607,3 +608,85 @@
   padding: 5px 4px; cursor: pointer; font-size: 11.5px;
 }
 .soundName:hover { color: #fff; }
+
+/* --------------------------------------------------------- touch layout */
+.sideWrap { display: contents; }
+
+.touch { grid-template-rows: auto 1fr auto auto; }
+.touch .tabs { display: none; }
+.touch .body { position: relative; }
+.touch .sideWrap {
+  display: block; position: absolute; left: 0; top: 0; bottom: 0; z-index: 70;
+  width: min(86vw, 340px); transform: translateX(-101%);
+  transition: transform 0.18s ease-out; box-shadow: 6px 0 24px rgba(0,0,0,0.45);
+}
+.touch .sideOpen { transform: none; }
+.touch .side { display: block; width: 100%; height: 100%; }
+.sideBackdrop { position: absolute; inset: 0; z-index: 65; background: rgba(8,10,13,0.5); }
+
+.bottomNav {
+  display: flex; min-width: 0; align-items: stretch; background: #1a1c21;
+  border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.navBtn {
+  flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 2px; padding: 8px 1px 7px; background: transparent;
+  border: 0; border-top: 2px solid transparent; color: #7d848e; cursor: pointer;
+  font-size: 8.5px; letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.navBtn span + * { min-width: 0; }
+.navBtn.on { color: #fff; border-top-color: var(--accent); background: rgba(255,138,31,0.09); }
+.navIcon { font-size: 14px; line-height: 1; }
+
+/* bigger targets when a finger is the pointer */
+.touch .step { width: 40px; height: 32px; margin: 0 2px; border-radius: 5px; }
+.touch .bigStep { width: 54px; height: 72px; }
+.touch .pad { height: 84px; }
+.touch .btn { padding: 8px 12px; font-size: 12px; }
+.touch .tinyBtn { width: 26px; height: 26px; font-size: 11px; }
+.touch .select, .touch .patSelect { padding: 7px 8px; font-size: 12px; }
+.touch .miniKnobs { display: none; }
+.touch .chanRow { height: 40px; }
+.touch .chanName { padding: 8px 8px; }
+.touch .soundName { padding: 10px 4px; font-size: 12.5px; }
+.touch .previewBtn { width: 30px; height: 30px; font-size: 12px; }
+.touch .sideItem { padding: 9px 8px; }
+.touch .xBtn { width: 26px; height: 26px; font-size: 16px; }
+.touch .fader { width: 34px; }
+.touch .strip { width: 88px; }
+.touch .canvas { cursor: default; }
+.touch .hint { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 62vw; }
+.touch .status { font-size: 10px; gap: 8px; }
+.touch .dmBody { overflow-y: auto; }
+.touch .padWrap { width: min(46vw, 420px); }
+@media (max-width: 700px) {
+  .touch .padWrap { width: 100%; }
+}
+.touch .panel { min-height: 0; }
+.touch .mixerBody { overflow-y: auto; }
+
+/* compact touch header + overflow sheet */
+.touch .menu, .touch .timeBox, .touch .masterBox, .touch .sep, .touch .deskOnly { display: none; }
+.touch .header { min-height: 52px; gap: 8px; flex-wrap: nowrap; overflow: visible; }
+.touch .tempoVal, .touch .tempoInput { font-size: 15px; min-width: 62px; }
+.deskOnly { display: inherit; }
+.moreBtn {
+  width: 40px; height: 38px; flex: none; border-radius: 6px; cursor: pointer;
+  background: #33383f; border: 1px solid var(--line); color: #d6dae0; font-size: 17px; line-height: 1;
+}
+.moreBtn.on { background: var(--accent); color: #241500; }
+.sheet {
+  position: absolute; top: 100%; right: 6px; z-index: 90; width: min(94vw, 340px);
+  max-height: 70vh; overflow: auto; background: #2a2e35; border: 1px solid var(--line);
+  border-radius: 10px; box-shadow: 0 16px 40px rgba(0,0,0,0.6); padding: 6px;
+}
+.sheetGroup { padding: 4px 6px 8px; border-bottom: 1px solid #33383f; margin-bottom: 6px; }
+.sheetGroup:last-child { border-bottom: 0; margin-bottom: 0; }
+.sheetLabel { font-size: 9.5px; letter-spacing: 1.2px; color: #626973; padding: 4px 2px; }
+.sheetItem {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;
+  background: transparent; border: 0; color: var(--text); text-align: left;
+  padding: 11px 8px; border-radius: 6px; cursor: pointer; font-size: 13px;
+}
+.sheetItem:active { background: rgba(255,255,255,0.08); }
+.sheetRow { display: flex; align-items: center; gap: 8px; padding: 6px 8px; flex-wrap: wrap; }

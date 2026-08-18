@@ -9,10 +9,40 @@ npm run dev
 # oppna http://localhost:3000/studio
 ```
 
+Studion ar en **PWA**: den kan installeras pa hemskarmen (dator, mobil och
+surfplatta) och fungerar helt utan natverk efter forsta besoket. En knapp
+"Installera appen" dyker upp i statusraden nar webblasaren tillater det.
+
 Forsta gangen laddas ett demo-projekt (trummor, bas, ackord och lead) sa att det
 finns nagot att trycka play pa direkt.
 
 ---
+
+## Ljudbiblioteket
+
+Allt i biblioteket ar **syntesparametrar, inte ljudfiler**. Ett helt trumkit ar
+nagra hundra byte, vilket betyder att biblioteket laddar direkt, fungerar
+offline, inte kostar nagot i licenser eller bandbredd — och att varje ljud gar
+att skruva vidare pa efter att du lagt in det.
+
+* **39 trumljud** (kick, snare, clap, hihat, perc, tom, cymbal)
+* **32 instrumentljud** (bas, lead, pad, keys, FX)
+* **10 trumkit** som byter alla pads samtidigt utan att rora dina traffar
+* Sok pa namn, kategori eller tagg (`808`, `acid`, `lofi`, `trap`…)
+* Forhandslyssna med ▸ utan att lagga till nagot
+* **Mina ljud**: spara vilken skruvad kanal som helst i biblioteket
+
+## Pa mobil och surfplatta
+
+Studion byter automatiskt till ett touch-lage nar den kors pa en pekskarm:
+
+* Bottennavigering i stallet for flikar, och Browser som en utfallbar panel
+* Storre traffytor (steg 40 px, pads 84 px) och storre kontroller
+* **Tryck och hall** ersatter hogerklick overallt: ta bort noter och klipp,
+  roll i trummaskinen, mute pa en pad
+* **Nyp for att zooma** och tva fingrar for att panorera i piano roll,
+  playlist och automation
+* Kompakt topprad med en ⋯-meny for filhantering, taktart och metronom
 
 ## Funktioner
 

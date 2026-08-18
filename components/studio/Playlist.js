@@ -3,6 +3,7 @@ import s from '../../styles/studio.module.css';
 import { useStudio, useRaf } from '../../lib/studio/StudioContext';
 import { BAR_TICKS, PPQ, snapTicks, SNAPS, clamp } from '../../lib/studio/constants';
 import { patternTicks, songLength } from '../../lib/studio/sequencer';
+import { longPress, pinchZoom } from '../../lib/studio/touch';
 
 const LABEL_W = 96;
 const HEAD_H = 22;
@@ -16,6 +17,9 @@ export default function Playlist() {
   const view = useRef({ scrollX: 0, pxPerTick: 0.11 });
   const drag = useRef(null);
   const [, bump] = useState(0);
+  const gesture = useRef(null);
+  const press = useRef(null);
+  if (!press.current) press.current = longPress();
 
   const dataRef = useRef({});
   const barLen = project.barTicks || BAR_TICKS;
@@ -186,6 +190,8 @@ export default function Playlist() {
   ) || null;
 
   const onPointerDown = useCallback((e) => {
+    if (!gesture.current) gesture.current = pinchZoom(view, draw, { min: 0.02, max: 1.2 });
+    if (gesture.current.down(e)) { drag.current = null; press.current.cancel(); return; }
     const p = posFromEvent(e);
     const v = view.current;
     canvasRef.current.setPointerCapture(e.pointerId);
@@ -210,6 +216,10 @@ export default function Playlist() {
       return;
     }
     if (hit) {
+      press.current.start(e, () => {
+        dispatch({ type: 'clip.remove', id: hit.id });
+        drag.current = null;
+      });
       const rightEdge = LABEL_W + (hit.start + hit.length) * v.pxPerTick - v.scrollX;
       if (Math.abs(p.x - rightEdge) < 8) {
         drag.current = { mode: 'resize', id: hit.id, snap };
@@ -227,6 +237,8 @@ export default function Playlist() {
   }, [dispatch, play, project.activePattern, ui.snap]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onPointerMove = useCallback((e) => {
+    if (gesture.current && gesture.current.move(e)) return;
+    press.current.move(e);
     const dr = drag.current;
     if (!dr || dr.mode === 'none') return;
     const p = posFromEvent(e);
@@ -262,7 +274,12 @@ export default function Playlist() {
     }
   }, [dispatch]);
 
-  const onPointerUp = useCallback(() => { drag.current = null; bump((n) => n + 1); }, []);
+  const onPointerUp = useCallback((e) => {
+    if (gesture.current) gesture.current.up(e);
+    press.current.cancel();
+    drag.current = null;
+    bump((n) => n + 1);
+  }, []);
 
   const onWheel = useCallback((e) => {
     const v = view.current;

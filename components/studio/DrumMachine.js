@@ -9,6 +9,7 @@ import {
   stepsToNotes, humanizeNotes, doubleNotes, rollNotes, notesInStep,
 } from '../../lib/studio/drums';
 import Knob from './Knob';
+import { longPress } from '../../lib/studio/touch';
 
 /** Instrument-specific knobs shown for the selected pad. */
 const QUICK = {
@@ -23,6 +24,8 @@ const QUICK = {
 function Pad({ channel, role, selected, onSelect }) {
   const { engine, dispatch } = useStudio();
   const ref = useRef(null);
+  const press = useRef(null);
+  if (!press.current) press.current = longPress();
   const info = roleInfo(role);
 
   useRaf(() => {
@@ -48,9 +51,13 @@ function Pad({ channel, role, selected, onSelect }) {
       style={{ '--pad': channel.color }}
       onPointerDown={(e) => {
         if (e.button === 2) return;
+        press.current.start(e, () => dispatch({ type: 'channel.update', id: channel.id, patch: { mute: !channel.mute } }));
         onSelect(channel.id);
         engine.preview(channel.id, 60, 1);
       }}
+      onPointerMove={(e) => press.current.move(e)}
+      onPointerUp={() => press.current.cancel()}
+      onPointerCancel={() => press.current.cancel()}
       onContextMenu={(e) => {
         e.preventDefault();
         dispatch({ type: 'channel.update', id: channel.id, patch: { mute: !channel.mute } });
@@ -75,6 +82,8 @@ export default function DrumMachine() {
   const [euclidHits, setEuclidHits] = useState(4);
   const cursorRef = useRef(null);
   const drag = useRef(null);
+  const stepPress = useRef(null);
+  if (!stepPress.current) stepPress.current = longPress();
 
   const selectedId = ui.padChannel && project.channels.find((c) => c.id === ui.padChannel)
     ? ui.padChannel
@@ -115,6 +124,11 @@ export default function DrumMachine() {
       engine.preview(channel.id, 60, cur ? cur.vel : 0.9);
       return;
     }
+    stepPress.current.start(e, () => {
+      const now = stepInfo(i);
+      writeStep(i, rollNotes(i, now ? (now.count % 4) + 1 : 2, now ? now.vel : 0.9));
+      drag.current = null;
+    });
     if (cur) {
       if (e.shiftKey) {                          // shift = accent
         writeStep(i, rollNotes(i, cur.count, 1));
@@ -134,6 +148,7 @@ export default function DrumMachine() {
   };
 
   const onStepMove = (e) => {
+    stepPress.current.move(e);
     const d = drag.current;
     if (!d || d.mode !== 'vel') return;
     const dy = d.y - e.clientY;
@@ -151,7 +166,7 @@ export default function DrumMachine() {
     });
   };
 
-  const endDrag = () => { drag.current = null; };
+  const endDrag = () => { stepPress.current.cancel(); drag.current = null; };
 
   /* ---------------------------------------------------------------- tools */
 
@@ -293,8 +308,9 @@ export default function DrumMachine() {
             )))}
           </div>
           <div className={s.padHint}>
-            Pads spelas med <b>Z X C V / A S D F / Q W E R</b> nar trummaskinen ar oppen.
-            Hogerklick pa en pad = mute.
+            {ui.touch
+              ? 'Tryck pa en pad for att spela och valja. Hall inne for att mute:a.'
+              : 'Pads spelas med Z X C V / A S D F / Q W E R nar trummaskinen ar oppen. Hogerklick pa en pad = mute.'}
           </div>
         </div>
 
@@ -431,7 +447,9 @@ export default function DrumMachine() {
 
       <div className={s.rackFoot}>
         <span className={s.dim}>
-          Klick = traff · Shift+klick = accent · Dra upp/ner = velocity · Hogerklick = roll (2-4 traffar)
+          {ui.touch
+            ? 'Tryck = traff · dra upp/ner = velocity · tryck och hall = roll · hall pa en pad = mute'
+            : 'Klick = traff · Shift+klick = accent · Dra upp/ner = velocity · Hogerklick = roll (2-4 traffar)'}
         </span>
         <div className={s.spacer} />
         <span className={s.dim}>{steps} steg · {(pattern.bars || 1) * BAR_TICKS} ticks</span>
