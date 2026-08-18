@@ -37,7 +37,8 @@ export default function PianoRoll() {
   const scale = { root: ui.scaleRoot || 0, id: ui.scale || 'chromatic', snap: !!ui.scaleSnap };
 
   const dataRef = useRef({});
-  dataRef.current = { project, pattern, channel, notes, ui, scale };
+  const barLen = project.barTicks || BAR_TICKS;
+  dataRef.current = { project, pattern, channel, notes, ui, scale, barLen };
 
   useEffect(() => {
     if (view.current.inited) return;
@@ -106,7 +107,7 @@ export default function PianoRoll() {
     for (let t = Math.floor(startTick / minStep) * minStep; t <= endTick; t += minStep) {
       const x = KEY_W + t * v.pxPerTick - v.scrollX;
       if (x < KEY_W) continue;
-      const isBar = t % BAR_TICKS === 0;
+      const isBar = t % d.barLen === 0;
       const isBeat = t % PPQ === 0;
       ctx.fillStyle = isBar ? '#0e1013' : isBeat ? '#191b20' : '#212429';
       ctx.fillRect(Math.round(x), HEAD_H, isBar ? 2 : 1, gridH);
@@ -164,8 +165,8 @@ export default function PianoRoll() {
     ctx.fillStyle = '#15171b';
     ctx.fillRect(0, 0, w, HEAD_H);
     ctx.font = '10px ui-monospace, monospace';
-    for (let bar = Math.floor(startTick / BAR_TICKS); bar * BAR_TICKS <= endTick; bar++) {
-      const x = KEY_W + bar * BAR_TICKS * v.pxPerTick - v.scrollX;
+    for (let bar = Math.floor(startTick / d.barLen); bar * d.barLen <= endTick; bar++) {
+      const x = KEY_W + bar * d.barLen * v.pxPerTick - v.scrollX;
       if (x < KEY_W - 20) continue;
       ctx.fillStyle = '#4b5058';
       ctx.fillRect(Math.round(x), 0, 1, HEAD_H);
@@ -299,7 +300,7 @@ export default function PianoRoll() {
     canvasRef.current.setPointerCapture(e.pointerId);
 
     if (p.inHead) {
-      play(d.ui.mode === 'song' ? 'song' : 'pattern', Math.max(0, Math.floor(p.tick / BAR_TICKS) * BAR_TICKS));
+      play(d.ui.mode === 'song' ? 'song' : 'pattern', Math.max(0, Math.floor(p.tick / d.barLen) * d.barLen));
       drag.current = null;
       return;
     }

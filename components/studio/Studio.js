@@ -9,9 +9,11 @@ import Playlist from './Playlist';
 import Mixer from './Mixer';
 import DrumMachine from './DrumMachine';
 import Automation from './Automation';
+import HelpOverlay from './HelpOverlay';
 import PluginPanel from './PluginPanel';
 import { clamp } from '../../lib/studio/constants';
 import { ROLES, padChannels } from '../../lib/studio/drums';
+import { useRaf } from '../../lib/studio/StudioContext';
 
 const KEYMAP = {
   z: 0, s: 1, x: 2, d: 3, c: 4, v: 5, g: 6, b: 7, h: 8, n: 9, j: 10, m: 11, ',': 12, l: 13, '.': 14,
@@ -30,6 +32,26 @@ const TABS = [
 /** Letter key -> drum pad role, matching the pad grid layout. */
 const PAD_KEYS = ROLES.reduce((acc, r) => { acc[r.key] = r.id; return acc; }, {});
 
+/** Small live readout: notes triggered per second and which clock drives playback. */
+function EngineStatus() {
+  const { engine } = useStudio();
+  const ref = useRef(null);
+  const last = useRef({ t: 0, count: 0, rate: 0 });
+  useRaf(() => {
+    if (!ref.current) return;
+    const now = performance.now();
+    if (now - last.current.t > 500) {
+      const delta = engine.voiceCount - last.current.count;
+      last.current.rate = Math.round((delta * 1000) / Math.max(1, now - last.current.t));
+      last.current.count = engine.voiceCount;
+      last.current.t = now;
+    }
+    const clock = engine.clockReady ? 'worklet' : 'timer';
+    ref.current.textContent = `${last.current.rate} noter/s · ${clock}`;
+  });
+  return <span className={s.dim} ref={ref} />;
+}
+
 function isTyping(el) {
   if (!el) return false;
   const tag = el.tagName;
@@ -42,6 +64,7 @@ function Workspace() {
     recordNote, finishRecordedNote, loadSampleFile,
   } = useStudio();
   const [dropping, setDropping] = useState(false);
+  const [help, setHelp] = useState(false);
   const held = useRef(new Map());
   const projectRef = useRef(project);
   projectRef.current = project;
@@ -62,6 +85,8 @@ function Workspace() {
       if (e.key === 'F7') { e.preventDefault(); setUi({ view: 'piano' }); return; }
       if (e.key === 'F8') { e.preventDefault(); setUi({ view: 'drums' }); return; }
       if (e.key === 'F10') { e.preventDefault(); setUi({ view: 'automation' }); return; }
+      if (e.key === '?' || (e.key === '/' && e.shiftKey)) { e.preventDefault(); setHelp((v) => !v); return; }
+      if (e.key === 'Escape') { setHelp(false); return; }
       if (e.key === 'F9') { e.preventDefault(); setUi({ view: 'mixer' }); return; }
       if ((e.ctrlKey || e.metaKey) && k === 's') { e.preventDefault(); saveFile(); return; }
       if ((e.ctrlKey || e.metaKey) && k === 'z') {
@@ -129,6 +154,7 @@ function Workspace() {
       onDragLeave={(e) => { if (e.currentTarget === e.target) setDropping(false); }}
       onDrop={onDrop}
     >
+      {help && <HelpOverlay onClose={() => setHelp(false)} />}
       {dropping && (
         <div className={s.dropHint}>
           <div className={s.dropCard}>Slapp ljudfiler for att skapa sampler-kanaler</div>
@@ -154,6 +180,9 @@ function Workspace() {
         >
           Instrument
         </button>
+        <button type="button" className={s.tab} onClick={() => setHelp(true)}>
+          Hjalp<span className={s.tabHint}>?</span>
+        </button>
       </div>
 
       <div className={s.body}>
@@ -174,6 +203,7 @@ function Workspace() {
       <footer className={s.status}>
         <span className={s.hint}>{ui.hint}</span>
         <div className={s.spacer} />
+        <EngineStatus />
         <span className={s.dim}>Oktav {ui.octave}</span>
         <span className={s.dim}>{project.bpm.toFixed(1)} BPM</span>
         <span className={s.dim}>{ui.mode === 'song' ? 'SONG' : 'PATTERN'}</span>

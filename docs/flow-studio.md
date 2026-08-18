@@ -31,13 +31,38 @@ annan sextondel.
 ### Piano Roll (F7)
 Canvas-baserad noteditor for vald kanal och vald monster.
 
+* Verktygslagen **Rita / Markera / Radera**. `Ctrl`+dra ger marquee-markering
+  aven i ritlaget.
 * Klicka pa tomt rutnat = ny not, dra at hoger direkt efter for att satta langd.
-* Dra en not for att flytta, dra i hogerkanten for att andra langd.
-* Shift-klick lagger till i markeringen, `Delete` tar bort, `Ctrl+A` markerar allt.
+  Dra en not for att flytta, dra i hogerkanten for att andra langd.
+* `Ctrl+C/X/V/D` kopiera, klipp, klistra och duplicera. `Ctrl+A` markerar allt,
+  `Delete` tar bort, piltangenter transponerar (`Shift` = oktav) och flyttar i tid.
+* **Ackordstamplar**: valj ackordtyp och klicka — hela ackordet placeras.
+  18 typer fran dur/moll till maj9, m7b5 och power.
+* **Skalor**: 13 skalor med rotton. Toner utanfor skalan dimmas, och laset
+  tvingar nya och flyttade noter till skalan.
+* **Verktyg**: kvantisera (med styrka i procent), strum, arpeggiera, humanisera
+  och slumpa velocity, legato, invertera, vand och oktavskift.
+* **Arpeggiator per kanal** (rate, riktning, oktaver) som expanderar hallna
+  ackord vid uppspelning utan att andra noterna.
 * Velocity-fältet langst ner: dra i staplarna.
-* Noter fran ovriga kanaler visas som "ghost notes".
+* Noter fran ovriga kanaler visas som "ghost notes" (kan slas av).
 * Hjulet skrollar, `Shift`+hjul skrollar i sidled, `Ctrl`+hjul zoomar.
 * Klick i linjalen startar uppspelning fran den takten.
+
+### Automation (F10)
+Automationsbanor per monster mot vilken parameter som helst — kanalvolym och
+pan, mixervolym och pan, master, alla effektparametrar och alla
+instrumentparametrar (over 100 mal i ett vanligt projekt).
+
+* Klicka i rutnatet for att lagga punkter, dra for att flytta, hogerklick tar bort.
+* Snabbfyllning: ramp upp/ner, LFO (sinus, sag, fyrkant) och **Pump** for
+  klassisk sidechain-kansla.
+* Banor foljer monstret, sa de spelar bade i PAT-lage och nar monstret ligger i
+  playlisten. Lagg en 16-takters "automationslat" som ett eget monster for
+  latnivavepningar.
+* Mixer- och effektbanor ar kontinuerliga; instrumentparametrar sätts vid varje
+  notstart (for kontinuerliga svep, lagg ett filter pa insertet i stallet).
 
 ### Playlist (F5)
 Arrangemang av monster-klipp pa 10 spar. Klicka for att placera det valda
@@ -81,6 +106,10 @@ Master plus atta insert-kanaler (fler kan laggas till) med fader, pan, mute,
 solo, niva-meter och en seriell effektkedja per kanal. Varje effekt kan
 bypassas, tas bort och styras med rattar.
 
+* **Sends** (post-fader) fran vilken insert som helst till vilken annan som
+  helst — kedjor som skulle bli aterkoppling filtreras bort automatiskt.
+* **Spektrumanalys** pa master.
+
 ### Instrument
 | Instrument | Typ |
 | --- | --- |
@@ -93,11 +122,29 @@ bypassas, tas bort och styras med rattar.
 | 3xFLOW | tre oscillatorer, lagpassfilter med envelope, ADSR |
 | FlowFM | tva-operators-FM med index-envelope |
 | FlowPluck | subtraktiv pluck med filter-envelope och sub-oscillator |
-| FlowSampler | spelar en inladdad ljudfil, tonhojd fran notens tangent |
+| FlowSampler | spelar en inladdad ljudfil med vagform, start/slut, loop, reverse och tonhojd fran notens tangent |
 
 ### Effekter
-Filter, Delay (tempo-synkad), Reverb (genererad impulssvarsfil), Chorus,
-Distortion, 3-bands parametrisk EQ och kompressor/limiter.
+Elva effekter: Filter, Delay (tempo-synkad), Reverb (genererad impulssvarsfil),
+Chorus, Phaser, Distortion, Bitcrusher, 3-bands parametrisk EQ,
+kompressor/limiter, **Sidechain Duck** (tempo-lasst pumpande ducking) och
+**Stereo Shaper** (mid/side-bredd med monobas).
+
+### Samples
+Dra en ljudfil var som helst i studion sa skapas en sampler-kanal; slapp den pa
+vagformen i instrumentpanelen sa laddas den i just den kanalen. Filerna sparas
+base64-kodade i projektet, sa en `.flow.json` ar komplett och gar att flytta
+mellan datorer. Max 4 MB per sample. Om webblasarens lagring inte racker till
+autosparas projektet utan samples (de finns kvar tills du laddar om).
+
+### MIDI
+* **Exportera MIDI** skriver en Standard MIDI File (format 1) med en spar per
+  kanal. Trumpads gar ut pa GM-trumkanalen med GM-nottummer, sa filen later
+  ratt i andra program.
+* **Importera MIDI** skapar ett nytt monster, mappar GM-trummor tillbaka till
+  pads och skapar syntkanaler for ovriga sparr. Tempo lases fran filen.
+* **Web MIDI**: anslutna keyboards spelar och spelar in vald kanal — eller ratt
+  pad nar trummaskinen ar oppen. Anslutna enheter listas i Browser under MIDI.
 
 ### Filhantering
 * **Autospar** till `localStorage` (700 ms efter senaste andring).
@@ -105,6 +152,9 @@ Distortion, 3-bands parametrisk EQ och kompressor/limiter.
 * **Oppna** laser tillbaka samma format.
 * **Exportera WAV** renderar antingen det aktiva monstret (tva varv) eller hela
   laten offline via `OfflineAudioContext` och laddar ner en 16-bitars WAV.
+* **Exportera stems** renderar en WAV per mixerkanal.
+* **Mallar** i Browser: Techno 130, Trap 140 och House 124 — kompletta
+  startprojekt med kit, monster och arrangemang.
 
 ---
 
@@ -113,7 +163,7 @@ Distortion, 3-bands parametrisk EQ och kompressor/limiter.
 | Tangent | Funktion |
 | --- | --- |
 | `Mellanslag` | play / stop |
-| `F5` / `F6` / `F7` / `F8` / `F9` | Playlist / Channel Rack / Piano Roll / Trummaskin / Mixer |
+| `F5` / `F6` / `F7` / `F8` / `F9` / `F10` | Playlist / Channel Rack / Piano Roll / Trummaskin / Mixer / Automation |
 | `Ctrl+Z` / `Ctrl+Y` | angra / gor om |
 | `Ctrl+S` | spara projektfil |
 | `Z S X D C V G B H N J M` | nedre oktaven pa datortangentbordet |
@@ -121,6 +171,11 @@ Distortion, 3-bands parametrisk EQ och kompressor/limiter.
 | `Z X C V / A S D F / Q W E R` | pads (nar trummaskinen ar oppen) |
 | `Pil upp` / `Pil ner` | byt oktav |
 | `Delete` | ta bort markerade noter (piano roll) |
+| `Ctrl+C / X / V / D` | kopiera / klipp / klistra / duplicera noter |
+| `Ctrl+A` | markera alla noter |
+| `Ctrl+Q` | kvantisera markering |
+| `?` | kortkommandopanel |
+| `Shift`+dra i playlistens linjal | satt loopregion |
 
 Med REC aktiverat spelas tangentbordsnoter in i det aktiva monstret medan
 uppspelningen gar.
@@ -135,6 +190,10 @@ lib/studio/
   project.js            datamodellen + demo-latten
   reducer.js            all projektredigering + undo/redo-historik
   drums.js              pad-roller, kit-presets och rytmverktyg
+  theory.js             skalor, ackord och notverktyg
+  automation.js         automationsmal, kurvor och LFO-former
+  samples.js            base64-lagring och vagformsdata
+  midi.js               SMF-export och -import
   sequencer.js          monster/playlist -> tick-indexerade eventkartor
   StudioContext.js      React-context, autospar, fil-I/O, export
   audio/
@@ -148,12 +207,17 @@ lib/studio/
 components/studio/      UI (Transport, Browser, ChannelRack, PianoRoll,
                         DrumMachine, Playlist, Mixer, PluginPanel, Knob)
 pages/studio.js         klientrenderad sida
+public/flow-clock.worklet.js  klocka pa ljudtraden
 styles/studio.module.css
 ```
 
-**Tid.** Allt raknas i ticks med `PPQ = 96` (ett steg = 24 ticks, en takt =
-384 ticks). Schemalaggaren tittar 160 ms framat var 20:e ms och lagger ut
-noter pa AudioContext-klockan, sa timingen paverkas inte av React-renderingar.
+**Tid.** Allt raknas i ticks med `PPQ = 96` (ett steg = 24 ticks, en takt i 4/4
+= 384 ticks). Taktarten stalls i transporten och paverkar taktlangd, rutnat och
+metronom. Schemalaggaren tittar 160 ms framat och lagger ut noter pa
+AudioContext-klockan, sa timingen paverkas inte av React-renderingar. Klockan
+drivs av en **AudioWorklet** pa ljudtraden, vilket gor att uppspelningen haller
+takten aven nar fliken ligger i bakgrunden (statusraden visar vilken klocka som
+anvands).
 
 **En datamodell.** Trummaskinens pads ar vanliga kanaler med en `role`, sa
 samma traffar syns i stegsequencern, piano rollen och arrangemanget. Rolls ar
@@ -174,5 +238,4 @@ sa utsignalen hamnar aldrig i hard klippning.
 * Endast 4/4-taktart.
 * Inladdade samples sparas inte i projektfilen (ljuddatan ligger bara i minnet).
 * Ingen automation-kurva an; parametrar ar statiska under uppspelning.
-* Om webblasarfliken ligger i bakgrunden strypar webblasaren timers, vilket kan
-  ge glapp i uppspelningen. Exporten paverkas inte.
+

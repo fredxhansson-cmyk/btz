@@ -52,7 +52,11 @@ export default function Transport() {
 
   useRaf(() => {
     if (timeRef.current) {
-      timeRef.current.textContent = ticksToBBT(engine.playing ? engine.currentPosition() : 0);
+      timeRef.current.textContent = ticksToBBT(
+        engine.playing ? engine.currentPosition() : 0,
+        project.barTicks,
+        project.beatTicks,
+      );
     }
     if (meterL.current) {
       const lvl = engine.masterLevel();
@@ -175,6 +179,26 @@ export default function Transport() {
         onClick={() => setUi({ metronome: !ui.metronome })}
         title="Metronom"
       >MET</button>
+
+      <div className={s.group}>
+        <select
+          className={s.select}
+          value={`${project.sig ? project.sig.num : 4}/${project.sig ? project.sig.den : 4}`}
+          onChange={(e) => {
+            const [num, den] = e.target.value.split('/').map(Number);
+            dispatch({ type: 'patch', patch: { sig: { num, den } } });
+          }}
+          title="Taktart"
+        >
+          {['4/4', '3/4', '5/4', '6/8', '7/8', '12/8', '6/4', '2/4'].map((v) => <option key={v} value={v}>{v}</option>)}
+        </select>
+        <button
+          type="button"
+          className={project.countIn ? `${s.btn} ${s.on}` : s.btn}
+          onClick={() => dispatch({ type: 'patch', patch: { countIn: ((project.countIn || 0) + 1) % 3 } })}
+          title="Inraknings-takter fore inspelning"
+        >{project.countIn ? `${project.countIn} takt${project.countIn > 1 ? 'er' : ''} in` : 'Ingen inrakning'}</button>
+      </div>
 
       <div className={s.spacer} />
 

@@ -30,7 +30,8 @@ export default function Automation() {
   const len = patternTicks(pattern);
 
   const dataRef = useRef({});
-  dataRef.current = { lanes, lane, meta, len, ui };
+  const barLen = project.barTicks || BAR_TICKS;
+  dataRef.current = { lanes, lane, meta, len, ui, barLen };
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -62,13 +63,13 @@ export default function Automation() {
       ctx.fillRect(PAD, Math.round(y), w - PAD * 2, 1);
     }
     // bars
-    const bars = Math.max(1, Math.round(d.len / BAR_TICKS));
+    const bars = Math.max(1, Math.round(d.len / d.barLen));
     for (let b = 0; b <= bars; b++) {
-      const x = px(b * BAR_TICKS);
+      const x = px(b * d.barLen);
       ctx.fillStyle = '#0e1013';
       ctx.fillRect(Math.round(x), HEAD_H, 1, h - HEAD_H);
       for (let q = 1; q < 4; q++) {
-        const qx = px(b * BAR_TICKS + q * PPQ);
+        const qx = px(b * d.barLen + q * PPQ);
         if (qx > w - PAD) continue;
         ctx.fillStyle = '#1f2229';
         ctx.fillRect(Math.round(qx), HEAD_H, 1, h - HEAD_H);
@@ -128,7 +129,7 @@ export default function Automation() {
     ctx.fillRect(0, 0, w, HEAD_H);
     ctx.font = '10px ui-monospace, monospace';
     for (let b = 0; b <= bars; b++) {
-      const x = px(b * BAR_TICKS);
+      const x = px(b * d.barLen);
       ctx.fillStyle = '#4b5058';
       ctx.fillRect(Math.round(x), 0, 1, HEAD_H);
       ctx.fillStyle = '#8b929c';
@@ -171,7 +172,7 @@ export default function Automation() {
     const p = posFromEvent(e);
     canvasRef.current.setPointerCapture(e.pointerId);
     if (p.inHead) {
-      play(ui.mode === 'song' ? 'song' : 'pattern', Math.max(0, Math.floor(p.t / BAR_TICKS) * BAR_TICKS));
+      play(ui.mode === 'song' ? 'song' : 'pattern', Math.max(0, Math.floor(p.t / barLen) * barLen));
       return;
     }
     const snap = snapTicks(ui.snap);
@@ -227,7 +228,7 @@ export default function Automation() {
 
   const shape = (kind) => {
     if (!lane) return;
-    const cycles = Math.max(1, Math.round(len / BAR_TICKS));
+    const cycles = Math.max(1, Math.round(len / barLen));
     commit(shapePoints(kind, len, kind === 'up' || kind === 'down' ? 1 : cycles));
     setHint(`Fyllde banan med ${kind}.`);
   };

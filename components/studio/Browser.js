@@ -3,6 +3,7 @@ import s from '../../styles/studio.module.css';
 import { useStudio } from '../../lib/studio/StudioContext';
 import { INSTRUMENT_LIST } from '../../lib/studio/audio/instruments';
 import { patternTicks } from '../../lib/studio/sequencer';
+import { TEMPLATES } from '../../lib/studio/project';
 import { BAR_TICKS } from '../../lib/studio/constants';
 
 function Section({ title, children, defaultOpen = true }) {
@@ -18,7 +19,7 @@ function Section({ title, children, defaultOpen = true }) {
 }
 
 export default function Browser() {
-  const { project, dispatch, setUi, setHint, ui, midiInputs, loadSampleFile } = useStudio();
+  const { project, dispatch, setUi, setHint, ui, midiInputs, loadTemplate } = useStudio();
 
   const cats = INSTRUMENT_LIST.reduce((acc, inst) => {
     (acc[inst.cat] = acc[inst.cat] || []).push(inst);
@@ -77,6 +78,24 @@ export default function Browser() {
         <button type="button" className={s.sideAdd} onClick={() => dispatch({ type: 'pattern.add' })}>
           + Nytt monster
         </button>
+      </Section>
+
+      <Section title="Mallar" defaultOpen={false}>
+        {TEMPLATES.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            className={s.sideItem}
+            onClick={() => {
+              if (window.confirm(`Ladda mallen "${t.name}"? Nuvarande projekt ersatts (spara forst om du vill behalla det).`)) {
+                loadTemplate(t.id);
+              }
+            }}
+          >
+            <span className={s.swatch} style={{ background: '#ff8a1f' }} />
+            {t.name}
+          </button>
+        ))}
       </Section>
 
       <Section title="Samples" defaultOpen={false}>

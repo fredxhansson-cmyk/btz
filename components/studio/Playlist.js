@@ -18,7 +18,8 @@ export default function Playlist() {
   const [, bump] = useState(0);
 
   const dataRef = useRef({});
-  dataRef.current = { project, ui };
+  const barLen = project.barTicks || BAR_TICKS;
+  dataRef.current = { project, ui, barLen };
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -52,14 +53,22 @@ export default function Playlist() {
       ctx.fillRect(LABEL_W, y, w - LABEL_W, TRACK_H - 1);
     }
 
+    // loop region
+    if (d.project.loopEnd > d.project.loopStart) {
+      const lx = LABEL_W + d.project.loopStart * v.pxPerTick - v.scrollX;
+      const lw = (d.project.loopEnd - d.project.loopStart) * v.pxPerTick;
+      ctx.fillStyle = d.project.loop === false ? 'rgba(255,255,255,0.04)' : 'rgba(255,138,31,0.09)';
+      ctx.fillRect(Math.max(LABEL_W, lx), HEAD_H, Math.max(0, lw - Math.max(0, LABEL_W - lx)), TRACKS * TRACK_H);
+    }
+
     // bar grid
-    for (let bar = Math.floor(startTick / BAR_TICKS); bar * BAR_TICKS <= endTick; bar++) {
-      const x = LABEL_W + bar * BAR_TICKS * v.pxPerTick - v.scrollX;
+    for (let bar = Math.floor(startTick / d.barLen); bar * d.barLen <= endTick; bar++) {
+      const x = LABEL_W + bar * d.barLen * v.pxPerTick - v.scrollX;
       if (x < LABEL_W) continue;
       const strong = bar % 4 === 0;
       ctx.fillStyle = strong ? '#0e1013' : '#191b20';
       ctx.fillRect(Math.round(x), HEAD_H, strong ? 2 : 1, TRACKS * TRACK_H);
-      if (v.pxPerTick * BAR_TICKS > 26) {
+      if (v.pxPerTick * d.barLen > 26) {
         for (let b = 1; b < 4; b++) {
           const bx = x + b * PPQ * v.pxPerTick;
           ctx.fillStyle = '#1f2229';
@@ -109,8 +118,8 @@ export default function Playlist() {
     ctx.fillStyle = '#15171b';
     ctx.fillRect(0, 0, w, HEAD_H);
     ctx.font = '10px ui-monospace, monospace';
-    for (let bar = Math.floor(startTick / BAR_TICKS); bar * BAR_TICKS <= endTick; bar++) {
-      const x = LABEL_W + bar * BAR_TICKS * v.pxPerTick - v.scrollX;
+    for (let bar = Math.floor(startTick / d.barLen); bar * d.barLen <= endTick; bar++) {
+      const x = LABEL_W + bar * d.barLen * v.pxPerTick - v.scrollX;
       if (x < LABEL_W - 10) continue;
       const strong = bar % 4 === 0;
       ctx.fillStyle = strong ? '#6b727c' : '#3a3f47';
@@ -131,6 +140,18 @@ export default function Playlist() {
       const y = HEAD_H + t * TRACK_H;
       ctx.fillStyle = '#7d848e';
       ctx.fillText(`Track ${t + 1}`, 10, y + 21);
+    }
+
+    // loop handles in the ruler
+    if (d.project.loopEnd > d.project.loopStart) {
+      const lx = LABEL_W + d.project.loopStart * v.pxPerTick - v.scrollX;
+      const rx = LABEL_W + d.project.loopEnd * v.pxPerTick - v.scrollX;
+      ctx.fillStyle = d.project.loop === false ? '#5a616b' : '#ff8a1f';
+      if (lx >= LABEL_W) ctx.fillRect(Math.round(lx), 0, 2, HEAD_H);
+      if (rx >= LABEL_W && rx < w) ctx.fillRect(Math.round(rx) - 2, 0, 2, HEAD_H);
+      if (lx < w && rx > LABEL_W) {
+        ctx.fillRect(Math.max(LABEL_W, lx), HEAD_H - 3, Math.min(w, rx) - Math.max(LABEL_W, lx), 3);
+      }
     }
 
     // playhead
@@ -171,7 +192,12 @@ export default function Playlist() {
     const snap = Math.max(snapTicks(ui.snap), PPQ);
 
     if (p.inHead) {
-      const tick = Math.max(0, Math.floor(p.tick / BAR_TICKS) * BAR_TICKS);
+      const tick = Math.max(0, Math.floor(p.tick / barLen) * barLen);
+      if (e.shiftKey) {
+        dispatch({ type: 'patch', patch: { loopStart: tick, loopEnd: tick + barLen, loop: true } });
+        drag.current = { mode: 'loop', from: tick };
+        return;
+      }
       play('song', tick);
       return;
     }
@@ -194,7 +220,7 @@ export default function Playlist() {
       bump((n) => n + 1);
       return;
     }
-    const start = Math.max(0, Math.round(p.tick / BAR_TICKS) * BAR_TICKS);
+    const start = Math.max(0, Math.round(p.tick / barLen) * barLen);
     dispatch({ type: 'clip.add', patternId: project.activePattern, track: p.track, start });
     drag.current = { mode: 'none' };
     bump((n) => n + 1);
@@ -204,6 +230,13 @@ export default function Playlist() {
     const dr = drag.current;
     if (!dr || dr.mode === 'none') return;
     const p = posFromEvent(e);
+    if (dr.mode === 'loop') {
+      const tick = Math.max(0, Math.round(p.tick / barLen) * barLen);
+      const a = Math.min(dr.from, tick);
+      const b = Math.max(dr.from + barLen, tick);
+      dispatch({ type: 'patch', patch: { loopStart: a, loopEnd: b }, live: true, id: 'loopregion' });
+      return;
+    }
     if (dr.mode === 'erase') {
       const hit = clipAt(p.tick, p.track);
       if (hit) dispatch({ type: 'clip.remove', id: hit.id });
@@ -246,7 +279,7 @@ export default function Playlist() {
     return () => el.removeEventListener('wheel', handler);
   }, [onWheel]);
 
-  const bars = Math.ceil(songLength(project) / BAR_TICKS);
+  const bars = Math.ceil(songLength(project) / barLen);
 
   return (
     <div className={s.panel}>
@@ -269,6 +302,19 @@ export default function Playlist() {
         <button type="button" className={s.btn} onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 1.25, 0.02, 1.2); draw(); }}>+</button>
         <button type="button" className={s.btn} onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 0.8, 0.02, 1.2); draw(); }}>−</button>
         <button type="button" className={s.btn} onClick={() => play('song')}>Spela laten</button>
+        <button
+          type="button"
+          className={project.loop !== false && project.loopEnd > project.loopStart ? `${s.btn} ${s.on}` : s.btn}
+          onClick={() => dispatch({ type: 'patch', patch: { loop: project.loop === false } })}
+          title="Shift+dra i linjalen for att satta loopregion"
+        >Loop</button>
+        {project.loopEnd > project.loopStart && (
+          <button
+            type="button"
+            className={s.btn}
+            onClick={() => dispatch({ type: 'patch', patch: { loopStart: 0, loopEnd: 0 } })}
+          >Rensa loop</button>
+        )}
         <div className={s.spacer} />
         <span className={s.dim}>{project.playlist.length} klipp · {bars} takter</span>
       </div>
