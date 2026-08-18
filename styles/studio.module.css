@@ -690,3 +690,69 @@
 }
 .sheetItem:active { background: rgba(255,255,255,0.08); }
 .sheetRow { display: flex; align-items: center; gap: 8px; padding: 6px 8px; flex-wrap: wrap; }
+
+/* ------------------------------------------------------------- recording */
+.recBody { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.recRow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.recMeter {
+  height: 14px; background: #101216; border: 1px solid var(--line);
+  border-radius: 4px; overflow: hidden;
+}
+.recMeterFill { height: 100%; width: 0; background: var(--green); }
+.recBtn {
+  padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 14px;
+  background: #33383f; border: 1px solid var(--line); color: #ffd6d6;
+}
+.recBtnOn { background: #a12b2b; color: #fff; box-shadow: 0 0 14px rgba(255,80,80,0.4); }
+.recWave {
+  display: block; width: 100%; height: 120px; border-radius: 6px;
+  border: 1px solid var(--line); background: #15171b;
+}
+.checkRow { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: #aeb5be; cursor: pointer; }
+.checkRow input { accent-color: var(--accent); width: 16px; height: 16px; }
+.micBtn {
+  width: 34px; height: 30px; border-radius: 5px; cursor: pointer;
+  background: #33383f; border: 1px solid var(--line); color: #d6dae0; font-size: 13px;
+}
+.micBtn:hover { background: #3c424a; }
+
+/* ------------------------------------------------------------- mastering */
+.masterBox2 { background: #23262c; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.presetRow { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; }
+.loudRow { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-top: 1px solid #1a1c21; flex-wrap: wrap; }
+.loudRead {
+  font-family: ui-monospace, monospace; font-size: 11.5px; color: var(--accent);
+  background: #14161a; border: 1px solid var(--line); border-radius: 4px; padding: 5px 8px;
+}
+
+/* -------------------------------------------------------------- AI panel */
+.aiTabs { display: flex; gap: 2px; padding: 8px 14px 0; }
+.aiBody { padding: 12px 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+.chipRow { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip {
+  background: #2a2e35; border: 1px solid var(--line); color: #aeb5be;
+  border-radius: 14px; padding: 5px 11px; font-size: 11px; cursor: pointer;
+}
+.chip.on { background: var(--accent); color: #241500; border-color: #7a4408; }
+.aiGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.aiCard { background: #23262c; border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
+.aiKept { border-color: var(--green); box-shadow: 0 0 0 1px rgba(126,231,135,0.25); }
+.aiCardTop { display: flex; align-items: center; gap: 6px; font-size: 11.5px; margin-bottom: 6px; }
+.aiCardBtns { display: flex; align-items: center; gap: 4px; }
+.grooveGrid { display: flex; flex-wrap: wrap; gap: 8px; }
+.grooveRow {
+  display: flex; align-items: center; gap: 6px; background: #23262c;
+  border: 1px solid var(--line); border-radius: 5px; padding: 5px 9px; font-size: 11px;
+}
+.grooveName { color: #dfe3e9; }
+.statGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+.statBox {
+  background: #23262c; border: 1px solid var(--line); border-radius: 6px;
+  padding: 10px; display: flex; flex-direction: column; gap: 2px; align-items: center;
+}
+.statBox b { font-size: 20px; color: var(--accent); font-family: ui-monospace, monospace; }
+.statBox span { font-size: 10px; color: #7d848e; }
+.aiTab { color: #b197fc; }
+.aiTab .tabHint { border-color: #6b4fb0; color: #b197fc; }
+.genreRow { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px; border-bottom: 1px solid #202329; }
+.genreRow .chip { font-size: 10px; padding: 3px 8px; }

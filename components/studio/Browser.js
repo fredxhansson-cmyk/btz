@@ -62,6 +62,8 @@ export default function Browser() {
   const [userSounds, setUserSounds] = useState(() => loadUserSounds());
   useEffect(() => { setUserSounds(loadUserSounds()); }, [ui.soundsVersion]);
   const results = useMemo(() => (query ? searchLibrary(query, userSounds) : []), [query, userSounds]);
+  const aiSounds = useMemo(() => userSounds.filter((x) => (x.tags || []).includes('ai')), [userSounds]);
+  const mySounds = useMemo(() => userSounds.filter((x) => !(x.tags || []).includes('ai')), [userSounds]);
 
   const dropUser = (id) => { setUserSounds(removeUserSound(id)); };
 
@@ -76,6 +78,14 @@ export default function Browser() {
         />
         {query && <button type="button" className={s.xBtn} onClick={() => setQuery('')}>×</button>}
       </div>
+
+      {!query && (
+        <div className={s.genreRow}>
+          {['808', 'trap', 'house', 'techno', 'lofi', 'edm', 'organic', 'latin', 'ambient', 'acid'].map((g) => (
+            <button key={g} type="button" className={s.chip} onClick={() => setQuery(g)}>{g}</button>
+          ))}
+        </div>
+      )}
 
       {query ? (
         <div className={s.sideList}>
@@ -103,9 +113,19 @@ export default function Browser() {
             ))}
           </Section>
 
-          <Section title="Mina ljud" count={userSounds.length}>
-            {userSounds.map((sd) => <SoundRow key={sd.id} sound={sd} onRemove={dropUser} />)}
-            {!userSounds.length && (
+          <Section title="AI-ljud" count={aiSounds.length}>
+            {aiSounds.map((sd) => <SoundRow key={sd.id} sound={sd} onRemove={dropUser} />)}
+            {!aiSounds.length && (
+              <div className={s.helpBox}>
+                Oppna <b>FLOW Brain</b> och generera ljud — de du sparar hamnar har och
+                biblioteket vaxer ju mer du anvander programmet.
+              </div>
+            )}
+          </Section>
+
+          <Section title="Mina ljud" count={mySounds.length}>
+            {mySounds.map((sd) => <SoundRow key={sd.id} sound={sd} onRemove={dropUser} />)}
+            {!mySounds.length && (
               <div className={s.helpBox}>Skruva pa ett ljud och tryck "Spara ljud" i instrumentpanelen.</div>
             )}
           </Section>

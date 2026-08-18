@@ -36,7 +36,7 @@ function Menu({ label, items, openId, setOpenId }) {
   );
 }
 
-export default function Transport() {
+export default function Transport({ onOpenRecord, onOpenAi }) {
   const {
     project, dispatch, engine, ui, setUi, play, stop, setMode,
     newProject, saveFile, openFile, exportWav, exportStems, exportMidiFile, importMidiFile,
@@ -135,6 +135,12 @@ export default function Transport() {
           onClick={() => setUi({ recording: !ui.recording })}
           title="Spela in fran tangentbordet (R)"
         >●</button>
+        <button
+          type="button"
+          className={s.micBtn}
+          onClick={() => onOpenRecord && onOpenRecord()}
+          title="Spela in fran mikrofon eller instrument"
+        >🎙</button>
       </div>
 
       <div className={s.modeSw}>
@@ -234,6 +240,12 @@ export default function Transport() {
               </div>
               <div className={s.sheetGroup}>
                 <div className={s.sheetLabel}>TRANSPORT</div>
+                <button type="button" className={s.sheetItem} onClick={() => { setSheet(false); if (onOpenRecord) onOpenRecord(); }}>
+                  Spela in ljud…
+                </button>
+                <button type="button" className={s.sheetItem} onClick={() => { setSheet(false); if (onOpenAi) onOpenAi(); }}>
+                  FLOW Brain (AI)…
+                </button>
                 <div className={s.sheetRow}>
                   <button
                     type="button"

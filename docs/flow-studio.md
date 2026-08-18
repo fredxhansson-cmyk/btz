@@ -32,6 +32,62 @@ att skruva vidare pa efter att du lagt in det.
 * Forhandslyssna med ▸ utan att lagga till nagot
 * **Mina ljud**: spara vilken skruvad kanal som helst i biblioteket
 
+## FLOW Brain — den inbyggda generatorn
+
+Studion har en inbyggd generator som skapar nya ljud och beats, och som lar sig
+av det du behaller. Den ar **en lokal statistisk modell**, inte ett moln:
+allt raknas fram i din webblasare, ingenting skickas nagonstans.
+
+**Sa fungerar den**
+
+* Den startar med statistiken fran det inbyggda biblioteket — for varje
+  kategori (Kick, Snare, Pad, Bas …) medelvarde och spridning per parameter.
+* Varje ljud du sparar med ♥ eller lagger till som kanal vags in i modellen med
+  en online-uppdatering av medelvarde och varians. Ju fler du behaller, desto
+  mer dominerar din smak over grundinstallningen.
+* Den lar sig ocksa **var du lagger dina traffar**: ett histogram per
+  trumroll over de sexton stegen. Det anvands nar den genererar beats, sa
+  groovet borjar lata som ditt.
+* Modellen lar sig automatiskt av projektet du jobbar i (som mest en gang per
+  minut), och du kan trycka "Lar av det har projektet nu" nar som helst.
+* Genererade ljud du sparar hamnar under **AI-ljud** i Browser — biblioteket
+  vaxer alltsa for varje pass du gor.
+
+**Vad du kan gora**
+
+| Knapp | Vad den gor |
+| --- | --- |
+| Generera 8 ljud | Nya varianter i vald kategori, med "vagat" som spridningsreglage |
+| ♥ | Sparar ljudet i biblioteket och lar modellen |
+| + | Lagger till som kanal i projektet (och lar modellen) |
+| Generera nytt beat | Skriver ett helt nytt trummonster utifran din inlarda feel |
+| Variera det jag har | Behaller delar av monstret och lagger till nytt |
+| Nollstall inlarning | Tommer modellen (dina sparade ljud finns kvar) |
+
+## Ljudinspelning
+
+Panelen **Spela in** (mikrofonknappen i transporten) tar in mikrofon, gitarr,
+keyboard eller vad som helst som gar in i ljudkortet.
+
+* Val av ingang, insignalsgain och nivamatare.
+* **Medhorning** genom mixern sa du hor dig sjalv (anvand horlurar).
+* Spela in medan latten rullar, med inrakning om du har stallt in det.
+* Automatisk trimning av tystnad och normalisering.
+* Resultatet blir en WAV i projektet: skapa en ny sampler-kanal eller lagg den
+  i den kanal du star pa, och spela den sedan med tonhojd fran piano rollen.
+
+## Mastering
+
+Masterbussen har en egen effektkedja och en **loudness-matare** (ungefarlig
+LUFS enligt K-viktning: integrerad, kortsiktig, momentan och topp). Valj
+masterkanalen i mixern for att komma at den.
+
+* Presets: Rent, Streaming −14, Klubb −9, Tape/varm, Bred & luftig,
+  Podcast/rost — var och en med malniva och en fardig kedja.
+* **Matcha malniva** justerar mastervolymen sa att den uppmatta integrerade
+  nivan hamnar pa malet.
+* Kedjan renderas ocksa i WAV-exporten, sa det du hor ar det du far.
+
 ## Pa mobil och surfplatta
 
 Studion byter automatiskt till ett touch-lage nar den kors pa en pekskarm:
@@ -183,8 +239,10 @@ autosparas projektet utan samples (de finns kvar tills du laddar om).
 * **Exportera WAV** renderar antingen det aktiva monstret (tva varv) eller hela
   laten offline via `OfflineAudioContext` och laddar ner en 16-bitars WAV.
 * **Exportera stems** renderar en WAV per mixerkanal.
-* **Mallar** i Browser: Techno 130, Trap 140 och House 124 — kompletta
-  startprojekt med kit, monster och arrangemang.
+* **Mallar** i Browser: elva genrer — Techno, Trap, House, Drum & Bass,
+  LoFi Hip Hop, Afrobeats, Reggaeton, Amapiano, Synthwave, Dubstep och Ambient.
+  Varje mall satter tempo, swing, kit, groove, ackord, arrangemang **och**
+  en passande masteringkedja.
 
 ---
 
@@ -224,6 +282,9 @@ lib/studio/
   automation.js         automationsmal, kurvor och LFO-former
   samples.js            base64-lagring och vagformsdata
   midi.js               SMF-export och -import
+  ai.js                 den lokala generatorn och inlarningsmodellen
+  mastering.js          masterpresets och nivamatchning
+  recording.js          ingangar, trimning och sample-konvertering
   sequencer.js          monster/playlist -> tick-indexerade eventkartor
   StudioContext.js      React-context, autospar, fil-I/O, export
   audio/

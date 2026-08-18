@@ -10,6 +10,8 @@ import Mixer from './Mixer';
 import DrumMachine from './DrumMachine';
 import Automation from './Automation';
 import HelpOverlay from './HelpOverlay';
+import RecordPanel from './RecordPanel';
+import AiPanel from './AiPanel';
 import PluginPanel from './PluginPanel';
 import { clamp } from '../../lib/studio/constants';
 import { ROLES, padChannels } from '../../lib/studio/drums';
@@ -70,6 +72,8 @@ function Workspace({ installPrompt, onInstalled }) {
   } = useStudio();
   const [dropping, setDropping] = useState(false);
   const [help, setHelp] = useState(false);
+  const [recOpen, setRecOpen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
 
   // Touch layout: bottom navigation, slide-over browser and bigger targets.
   useEffect(() => {
@@ -168,12 +172,14 @@ function Workspace({ installPrompt, onInstalled }) {
       onDrop={onDrop}
     >
       {help && <HelpOverlay onClose={() => setHelp(false)} />}
+      {recOpen && <RecordPanel onClose={() => setRecOpen(false)} />}
+      {aiOpen && <AiPanel onClose={() => setAiOpen(false)} />}
       {dropping && (
         <div className={s.dropHint}>
           <div className={s.dropCard}>Slapp ljudfiler for att skapa sampler-kanaler</div>
         </div>
       )}
-      <Transport />
+      <Transport onOpenRecord={() => setRecOpen(true)} onOpenAi={() => setAiOpen(true)} />
       <div className={s.tabs}>
         {TABS.map((t) => (
           <button
@@ -192,6 +198,12 @@ function Workspace({ installPrompt, onInstalled }) {
           onClick={() => setUi({ pluginOpen: !ui.pluginOpen })}
         >
           Instrument
+        </button>
+        <button type="button" className={`${s.tab} ${s.aiTab}`} onClick={() => setAiOpen(true)}>
+          FLOW Brain<span className={s.tabHint}>AI</span>
+        </button>
+        <button type="button" className={s.tab} onClick={() => setRecOpen(true)}>
+          Spela in<span className={s.tabHint}>mic</span>
         </button>
         <button type="button" className={s.tab} onClick={() => setHelp(true)}>
           Hjalp<span className={s.tabHint}>?</span>
