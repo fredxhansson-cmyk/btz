@@ -8,6 +8,7 @@ import PianoRoll from './PianoRoll';
 import Playlist from './Playlist';
 import Mixer from './Mixer';
 import DrumMachine from './DrumMachine';
+import Automation from './Automation';
 import PluginPanel from './PluginPanel';
 import { clamp } from '../../lib/studio/constants';
 import { ROLES, padChannels } from '../../lib/studio/drums';
@@ -22,6 +23,7 @@ const TABS = [
   { id: 'rack', label: 'Channel Rack', hint: 'F6' },
   { id: 'piano', label: 'Piano Roll', hint: 'F7' },
   { id: 'drums', label: 'Trummaskin', hint: 'F8' },
+  { id: 'automation', label: 'Automation', hint: 'F10' },
   { id: 'mixer', label: 'Mixer', hint: 'F9' },
 ];
 
@@ -58,6 +60,7 @@ function Workspace() {
       if (e.key === 'F6') { e.preventDefault(); setUi({ view: 'rack' }); return; }
       if (e.key === 'F7') { e.preventDefault(); setUi({ view: 'piano' }); return; }
       if (e.key === 'F8') { e.preventDefault(); setUi({ view: 'drums' }); return; }
+      if (e.key === 'F10') { e.preventDefault(); setUi({ view: 'automation' }); return; }
       if (e.key === 'F9') { e.preventDefault(); setUi({ view: 'mixer' }); return; }
       if ((e.ctrlKey || e.metaKey) && k === 's') { e.preventDefault(); saveFile(); return; }
       if ((e.ctrlKey || e.metaKey) && k === 'z') {
@@ -141,6 +144,7 @@ function Workspace() {
             {ui.view === 'rack' && <ChannelRack />}
             {ui.view === 'piano' && <PianoRoll />}
             {ui.view === 'drums' && <DrumMachine />}
+            {ui.view === 'automation' && <Automation />}
             {ui.view === 'mixer' && <Mixer />}
           </div>
           {ui.pluginOpen && <PluginPanel />}

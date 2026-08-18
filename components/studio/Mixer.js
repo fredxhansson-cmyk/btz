@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import s from '../../styles/studio.module.css';
 import { useStudio, useRaf } from '../../lib/studio/StudioContext';
 import { clamp, gainToDb } from '../../lib/studio/constants';
@@ -105,6 +105,77 @@ function Strip({ insert, master }) {
   );
 }
 
+function Spectrum() {
+  const { engine } = useStudio();
+  const ref = useRef(null);
+  const buf = useRef(new Uint8Array(512));
+  useRaf(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    if (canvas.width !== Math.floor(w * dpr) || canvas.height !== Math.floor(h * dpr)) {
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+    }
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = '#15171b';
+    ctx.fillRect(0, 0, w, h);
+    const ok = engine.spectrum(buf.current);
+    const bins = buf.current.length;
+    const bars = 64;
+    for (let i = 0; i < bars; i++) {
+      // logarithmic bin mapping so the low end is not squashed into one bar
+      const lo = Math.floor(Math.pow(i / bars, 2) * bins);
+      const hi = Math.max(lo + 1, Math.floor(Math.pow((i + 1) / bars, 2) * bins));
+      let peak = 0;
+      if (ok) for (let j = lo; j < hi && j < bins; j++) peak = Math.max(peak, buf.current[j]);
+      const bh = (peak / 255) * (h - 6);
+      const x = (i / bars) * w;
+      const bw = w / bars - 1.5;
+      const grad = peak > 220 ? '#ff5a5a' : peak > 160 ? '#ffd43b' : '#4dabf7';
+      ctx.fillStyle = grad;
+      ctx.fillRect(x, h - bh - 2, bw, bh);
+    }
+    ctx.fillStyle = '#5a616b';
+    ctx.font = '9px ui-monospace, monospace';
+    ctx.fillText('MASTER SPECTRUM', 6, 12);
+  });
+  return <canvas ref={ref} className={s.spectrum} />;
+}
+
+function Sends({ insert }) {
+  const { project, dispatch } = useStudio();
+  const others = project.inserts.filter((i) => i.id !== insert.id);
+  const amountFor = (id) => {
+    const sd = (insert.sends || []).find((x) => x.to === id);
+    return sd ? sd.amount : 0;
+  };
+  return (
+    <div className={s.sendBox}>
+      <div className={s.sendHead}>Sends (post-fader)</div>
+      <div className={s.sendGrid}>
+        {others.map((i) => (
+          <Knob
+            key={i.id}
+            size={28}
+            label={i.name.replace('Insert ', 'INS ')}
+            color="#b197fc"
+            spec={{ min: 0, max: 1, def: 0 }}
+            value={amountFor(i.id)}
+            onChange={(v, live) => dispatch({
+              type: 'send.set', insertId: insert.id, to: i.id, amount: v, live, key: `send${i.id}`,
+            })}
+          />
+        ))}
+        {!others.length && <span className={s.dim}>Inga andra mixerkanaler.</span>}
+      </div>
+    </div>
+  );
+}
+
 export default function Mixer() {
   const { project, dispatch } = useStudio();
   const insert = project.inserts.find((i) => i.id === project.selectedInsert) || project.inserts[0];
@@ -123,6 +194,8 @@ export default function Mixer() {
         <button type="button" className={s.btn} onClick={() => dispatch({ type: 'insert.add' })}>+ Insert</button>
       </div>
 
+      <Spectrum />
+
       <div className={s.mixerBody}>
         <div className={s.strips}>
           <Strip insert={{ id: 'master', name: 'MASTER' }} master />
@@ -139,6 +212,7 @@ export default function Mixer() {
             </select>
           </div>
           <div className={s.fxList}>
+            {insert && <Sends insert={insert} />}
             {(insert.fx || []).length === 0 && (
               <div className={s.emptyFx}>Inga effekter. Lagg till reverb, delay, EQ eller distortion ovan.</div>
             )}
