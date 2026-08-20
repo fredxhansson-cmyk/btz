@@ -818,3 +818,8 @@
 .touch .btn, .touch .tab, .touch .seg, .touch .menuBtn, .touch .select,
 .touch .patSelect, .touch .selectWide, .touch .tbtn { min-height: var(--hit); }
 .touch .tbtn { width: var(--hit); }
+
+/* Bolder, clearly-bigger controls on desktop too (design-system --ctl-sm). */
+.btn, .select, .patSelect, .selectWide, .menuBtn, .seg { min-height: var(--ctl-sm); }
+.tab { min-height: var(--ctl-sm); }
+.tbtn { min-height: var(--hit); }
