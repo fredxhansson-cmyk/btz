@@ -17,6 +17,7 @@ import Onboarding from './Onboarding';
 import { clamp } from '../../lib/studio/constants';
 import { ROLES, padChannels } from '../../lib/studio/drums';
 import { isCoarsePointer } from '../../lib/studio/touch';
+import { refreshTheme } from '../../lib/studio/theme';
 import { useRaf } from '../../lib/studio/StudioContext';
 
 const KEYMAP = {
@@ -93,6 +94,24 @@ function Workspace({ installPrompt, onInstalled }) {
     window.addEventListener('resize', apply);
     return () => window.removeEventListener('resize', apply);
   }, [setUi]);
+
+  // Light/dark theme, driven by the design-system tokens.
+  useEffect(() => {
+    let t = 'dark';
+    try { t = localStorage.getItem('btz.theme') || 'dark'; } catch (e) { /* ignore */ }
+    setUi({ theme: t });
+  }, [setUi]);
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    if (ui.theme === 'light') document.documentElement.dataset.theme = 'light';
+    else document.documentElement.removeAttribute('data-theme');
+    refreshTheme();
+  }, [ui.theme]);
+  const toggleTheme = () => {
+    const next = ui.theme === 'light' ? 'dark' : 'light';
+    try { localStorage.setItem('btz.theme', next); } catch (e) { /* ignore */ }
+    setUi({ theme: next });
+  };
   const held = useRef(new Map());
   const projectRef = useRef(project);
   projectRef.current = project;
@@ -283,6 +302,12 @@ function Workspace({ installPrompt, onInstalled }) {
             title="Install BTZ on this device"
           >Install app</button>
         )}
+        <button
+          type="button"
+          className={s.btn}
+          onClick={toggleTheme}
+          title="Toggle light / dark theme"
+        >{ui.theme === 'light' ? '🌙' : '☀'}</button>
         <EngineStatus />
         {!ui.touch && (
           <>

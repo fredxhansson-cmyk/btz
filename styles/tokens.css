@@ -1,8 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
 /* ============================================================================
    BTZ Design System — tokens (single source of truth)
-   Adopted verbatim from the Claude Design "BTZ" project (styles.css), plus an
-   alias layer so the app's existing CSS keeps working. A redesign = edit here.
+   Adopted from the Claude Design "BTZ" project (styles.css), plus an alias
+   layer so the app's existing CSS keeps working. Dark = :root, light =
+   [data-theme="light"]. A redesign = edit these values.
    ========================================================================== */
 :root {
   --font: 'Instrument Sans', system-ui, sans-serif;
@@ -11,6 +12,7 @@
   --bg:#0C0C0B; --chrome:#0E0E0D; --panel:#0F0F0E; --stage:#111110; --gridsurface:#0D0D0C; --card:#131311;
   --field:#161613; --field-2:#171714; --hover:#181814; --selected:#191915; --hover-strong:#1F1F1A;
   --step-off:#151513; --step-bar:#1C1C18; --meter-track:#1E1E19; --fader-track:#232320;
+  --pad-lit:#1D1D18; --avatar-bg:#2A2A22; --avatar-ink:#C9C6BE; --rec-hover:#241715; --meter-hot:#FFB000;
 
   /* lines */
   --line:#22221C; --line-weak:#202019; --line-strong:#26261F; --line-2:#2A2A23; --line-3:#2C2C24; --line-4:#33332B; --line-5:#35352B;
@@ -22,6 +24,9 @@
   --accent:#4DE1C1; --accent-ink:#0C0C0B;
   --rec:#FF5C36; --rec-bg:#1C1412; --rec-line:#3A2420;
   --fader-knob:#C9C6BE; --meter-grad:linear-gradient(90deg,#D6FF3F,#FFB000);
+
+  /* piano roll */
+  --key-white:#1A1A16; --key-white-ink:#8C8A83; --key-black:#131311; --key-black-ink:#55534E; --key-line:#191916; --grid-line:#1B1B17;
 
   /* track / channel colors */
   --track-1:#D6FF3F; --track-2:#FF5C36; --track-3:#4DE1C1; --track-4:#B490FF; --track-5:#FFB000; --track-6:#7FB2FF;
@@ -58,4 +63,35 @@
   --glow-accent: 0 0 16px -2px var(--accent-glow);
   --font-ui: var(--font);
   --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+[data-theme="light"] {
+  /* surfaces */
+  --bg:#F4F3EE; --chrome:#FBFAF6; --panel:#F7F6F1; --stage:#F1F0EA; --gridsurface:#FCFBF7; --card:#FFFFFF;
+  --field:#F0EFE8; --field-2:#EDECE4; --hover:#E9E8E0; --selected:#E6E5DC; --hover-strong:#E2E1D7;
+  --step-off:#E8E7DE; --step-bar:#DEDDD1; --meter-track:#E2E1D6; --fader-track:#D8D7CB;
+  --pad-lit:#E4E2D7; --avatar-bg:#E2E1D7; --avatar-ink:#3A3934; --rec-hover:#F3D9CE; --meter-hot:#B87A00;
+
+  /* lines */
+  --line:#DAD8CC; --line-weak:#E2E1D6; --line-strong:#CFCDBF; --line-2:#C6C4B5; --line-3:#C0BEAF; --line-4:#B6B4A4; --line-5:#ADAB9A;
+
+  /* text */
+  --text:#1A1A16; --text-2:#3A3934; --text-3:#4B4A43; --text-4:#5E5C54; --muted:#6B6960; --muted-2:#7A786E; --muted-3:#9B998E; --muted-4:#BEBCAF;
+
+  /* accent + semantic */
+  --accent:#0D8C74; --accent-ink:#FFFFFF;
+  --rec:#B8380B; --rec-bg:#FAE7E0; --rec-line:#E7BDAB;
+  --fader-knob:#3A3934; --meter-grad:linear-gradient(90deg,#6F8C00,#B87A00);
+
+  /* piano roll */
+  --key-white:#FFFFFF; --key-white-ink:#5E5C54; --key-black:#2C2C25; --key-black-ink:#CFCDC2; --key-line:#DAD8CC; --grid-line:#E4E2D7;
+
+  /* track / channel colors */
+  --track-1:#6F8C00; --track-2:#C6410F; --track-3:#0D8C74; --track-4:#5E3BB8; --track-5:#A96A00; --track-6:#2560B5;
+
+  /* alias literals that need light-mode variants */
+  --accent-strong: #12B092;
+  --accent-soft: rgba(13,140,116,0.14);
+  --accent-glow: rgba(13,140,116,0.32);
+  --shadow-pop: 0 14px 40px rgba(60,57,52,0.22);
 }

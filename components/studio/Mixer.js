@@ -123,7 +123,7 @@ function Spectrum() {
     }
     const ctx = canvas.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = '#15171b';
+    ctx.fillStyle = token('--meter-track');
     ctx.fillRect(0, 0, w, h);
     const ok = engine.spectrum(buf.current);
     const bins = buf.current.length;
@@ -141,7 +141,7 @@ function Spectrum() {
       ctx.fillStyle = grad;
       ctx.fillRect(x, h - bh - 2, bw, bh);
     }
-    ctx.fillStyle = '#5a616b';
+    ctx.fillStyle = token('--text-4');
     ctx.font = '9px ui-monospace, monospace';
     ctx.fillText('MASTER SPECTRUM', 6, 12);
   });

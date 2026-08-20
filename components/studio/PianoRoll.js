@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import s from '../../styles/studio.module.css';
-import { accent, accentA } from '../../lib/studio/theme';
+import { accent, accentA, token } from '../../lib/studio/theme';
 import { useStudio, useRaf } from '../../lib/studio/StudioContext';
 import {
   PPQ, BAR_TICKS, STEP_TICKS, MIN_KEY, MAX_KEY, IS_BLACK, NOTE_NAMES,
@@ -75,7 +75,7 @@ export default function PianoRoll() {
     const snap = snapTicks(d.ui.snap);
     const scaleOn = d.scale.id !== 'chromatic';
 
-    ctx.fillStyle = '#1b1d22';
+    ctx.fillStyle = token('--gridsurface');
     ctx.fillRect(0, 0, w, h);
 
     // key rows, dimmed when the note is outside the chosen scale
@@ -92,14 +92,14 @@ export default function PianoRoll() {
       const y = HEAD_H + idx * v.rowH - v.scrollY;
       const black = IS_BLACK[((key % 12) + 12) % 12];
       const out = scaleOn && !inScale(key, d.scale.root, d.scale.id);
-      ctx.fillStyle = out ? (black ? '#191b1f' : '#1d2025') : (black ? '#202329' : '#262a31');
+      ctx.fillStyle = out ? (black ? token('--key-black') : token('--step-off')) : (black ? token('--key-black') : token('--key-white'));
       ctx.fillRect(KEY_W, y, w - KEY_W, v.rowH);
       if (key % 12 === d.scale.root && scaleOn) {
         ctx.fillStyle = accentA(0.10);
         ctx.fillRect(KEY_W, y, w - KEY_W, v.rowH);
       }
       if (key % 12 === 0) {
-        ctx.fillStyle = '#15171b';
+        ctx.fillStyle = token('--panel');
         ctx.fillRect(KEY_W, y + v.rowH - 1, w - KEY_W, 1);
       }
     }
@@ -114,7 +114,7 @@ export default function PianoRoll() {
       if (x < KEY_W) continue;
       const isBar = t % d.barLen === 0;
       const isBeat = t % PPQ === 0;
-      ctx.fillStyle = isBar ? '#0e1013' : isBeat ? '#191b20' : '#212429';
+      ctx.fillStyle = isBar ? token('--line') : isBeat ? token('--grid-line') : token('--grid-line');
       ctx.fillRect(Math.round(x), HEAD_H, isBar ? 2 : 1, gridH);
     }
 
@@ -167,23 +167,23 @@ export default function PianoRoll() {
     }
 
     // ruler
-    ctx.fillStyle = '#15171b';
+    ctx.fillStyle = token('--panel');
     ctx.fillRect(0, 0, w, HEAD_H);
     ctx.font = '10px ui-monospace, monospace';
     for (let bar = Math.floor(startTick / d.barLen); bar * d.barLen <= endTick; bar++) {
       const x = KEY_W + bar * d.barLen * v.pxPerTick - v.scrollX;
       if (x < KEY_W - 20) continue;
-      ctx.fillStyle = '#4b5058';
+      ctx.fillStyle = token('--key-black-ink');
       ctx.fillRect(Math.round(x), 0, 1, HEAD_H);
-      ctx.fillStyle = '#8b929c';
+      ctx.fillStyle = token('--key-white-ink');
       ctx.fillText(String(bar + 1), x + 4, 14);
     }
 
     // velocity lane
     const velY = h - VEL_H;
-    ctx.fillStyle = '#17191d';
+    ctx.fillStyle = token('--card');
     ctx.fillRect(0, velY, w, VEL_H);
-    ctx.fillStyle = '#0e1013';
+    ctx.fillStyle = token('--line');
     ctx.fillRect(0, velY, w, 1);
     for (const n of d.notes) {
       const x = KEY_W + n.t * v.pxPerTick - v.scrollX;
@@ -194,7 +194,7 @@ export default function PianoRoll() {
       ctx.fillStyle = 'rgba(255,255,255,0.6)';
       ctx.fillRect(x, velY + VEL_H - 6 - bh - 2, 3, 2);
     }
-    ctx.fillStyle = '#5a616b';
+    ctx.fillStyle = token('--text-4');
     ctx.font = '9px ui-monospace, monospace';
     ctx.fillText('VELOCITY', 6, velY + 12);
 
@@ -203,7 +203,7 @@ export default function PianoRoll() {
     ctx.beginPath();
     ctx.rect(0, HEAD_H, KEY_W, gridH);
     ctx.clip();
-    ctx.fillStyle = '#d8dce2';
+    ctx.fillStyle = token('--text');
     ctx.fillRect(0, HEAD_H, KEY_W - 6, gridH);
     for (let i = 0; i < rows; i++) {
       const idx = firstKeyIdx + i;
@@ -212,12 +212,12 @@ export default function PianoRoll() {
       const y = HEAD_H + idx * v.rowH - v.scrollY;
       const pc = ((key % 12) + 12) % 12;
       if (IS_BLACK[pc]) {
-        ctx.fillStyle = '#15171b';
+        ctx.fillStyle = token('--panel');
         ctx.fillRect(0, y, KEY_W - 24, v.rowH);
         ctx.fillStyle = 'rgba(0,0,0,0.25)';
         ctx.fillRect(KEY_W - 24, y + v.rowH / 2 - 0.5, 18, 1);
       } else if (pc === 0 || pc === 5) {
-        ctx.fillStyle = '#a8aeb6';
+        ctx.fillStyle = token('--text-3');
         ctx.fillRect(0, y + v.rowH - 1, KEY_W - 6, 1);
       }
       if (scaleOn && pc === d.scale.root) {
@@ -225,13 +225,13 @@ export default function PianoRoll() {
         ctx.fillRect(KEY_W - 10, y + 1, 4, v.rowH - 2);
       }
       if (pc === 0) {
-        ctx.fillStyle = '#5a616b';
+        ctx.fillStyle = token('--text-4');
         ctx.font = '9px ui-monospace, monospace';
         ctx.fillText(keyName(key), KEY_W - 26, y + v.rowH - 2);
       }
     }
     ctx.restore();
-    ctx.fillStyle = '#0e1013';
+    ctx.fillStyle = token('--line');
     ctx.fillRect(KEY_W - 6, HEAD_H, 6, gridH);
 
     // playhead
@@ -625,6 +625,9 @@ export default function PianoRoll() {
         </div>
         <div className={s.spacer} />
         <button type="button" className={ui.ghosts === false ? s.btn : `${s.btn} ${s.on}`} onClick={() => setUi({ ghosts: ui.ghosts === false })}>Ghosts</button>
+        <span className={s.dim}>Octave</span>
+        <button type="button" className={s.btn} title="Scroll up an octave (or scroll the wheel over the keys)" onClick={() => { const v = view.current; v.scrollY = clamp(v.scrollY - 12 * v.rowH, 0, Math.max(0, KEYS * v.rowH - 120)); draw(); }}>▲</button>
+        <button type="button" className={s.btn} title="Scroll down an octave" onClick={() => { const v = view.current; v.scrollY = clamp(v.scrollY + 12 * v.rowH, 0, Math.max(0, KEYS * v.rowH - 120)); draw(); }}>▼</button>
         <button type="button" className={s.btn} onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 1.25, 0.08, 4); draw(); }}>+</button>
         <button type="button" className={s.btn} onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 0.8, 0.08, 4); draw(); }}>−</button>
         <span className={s.dim}>{notes.length} notes</span>
