@@ -39,7 +39,7 @@ function Menu({ label, items, openId, setOpenId }) {
 export default function Transport({ onOpenRecord, onOpenAi }) {
   const {
     project, dispatch, engine, ui, setUi, play, stop, setMode,
-    newProject, saveFile, openFile, exportWav, exportStems, exportMidiFile, importMidiFile,
+    newProject, saveFile, openFile, exportAudio, exportMidiFile, importMidiFile,
     canUndo, canRedo, playing, busy,
   } = useStudio();
   const [openId, setOpenId] = useState(null);
@@ -84,9 +84,11 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
     { label: 'Open .flow.json...', onClick: () => fileRef.current && fileRef.current.click() },
     { label: 'Save project', hint: 'Ctrl+S', onClick: saveFile },
     { sep: true },
-    { label: 'Export pattern (WAV)', onClick: () => exportWav('pattern') },
-    { label: 'Export full track (WAV)', onClick: () => exportWav('song') },
-    { label: 'Export stems (WAV per mixer channel)', onClick: () => exportStems() },
+    { label: 'Export pattern — WAV', onClick: () => exportAudio({ scope: 'pattern', format: 'wav' }) },
+    { label: 'Export full track — WAV', onClick: () => exportAudio({ scope: 'song', format: 'wav' }) },
+    { label: 'Export full track — MP3', onClick: () => exportAudio({ scope: 'song', format: 'mp3', bitrate: 320 }) },
+    { label: 'Export full track — AIFF', onClick: () => exportAudio({ scope: 'song', format: 'aiff' }) },
+    { label: 'Export stems — WAV (per mixer channel)', onClick: () => exportAudio({ scope: 'stems', format: 'wav' }) },
     { sep: true },
     { label: 'Export MIDI', onClick: () => exportMidiFile() },
     { label: 'Import MIDI...', onClick: () => midiRef.current && midiRef.current.click() },
