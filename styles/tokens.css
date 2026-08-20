@@ -1,49 +1,61 @@
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
 /* ============================================================================
    BTZ Design System — tokens (single source of truth)
-   Pulled from the Claude Design "BTZ" project (styles.css) and mapped onto the
-   app's token names. A redesign = change these values, nothing else.
+   Adopted verbatim from the Claude Design "BTZ" project (styles.css), plus an
+   alias layer so the app's existing CSS keeps working. A redesign = edit here.
    ========================================================================== */
 :root {
-  /* --- surfaces (warm near-black, layered) --- */
-  --bg:      #0c0c0b;   /* app background */
-  --panel:   #0f0f0e;   /* raised panels: drum grid, mixer, library */
-  --panel2:  #0d0d0c;   /* deep wells / step-grid background */
-  --surface: #161613;   /* buttons, inputs, cells (field) */
-  --line:    #22221c;   /* borders */
-  --line2:   #2a2a23;   /* soft dividers */
+  --font: 'Instrument Sans', system-ui, sans-serif;
 
-  /* --- text (warm off-white) --- */
-  --text:      #edebe6;
-  --dim:       #b9b6ae;
-  --text-mute: #706e67;
+  /* surfaces */
+  --bg:#0C0C0B; --chrome:#0E0E0D; --panel:#0F0F0E; --stage:#111110; --gridsurface:#0D0D0C; --card:#131311;
+  --field:#161613; --field-2:#171714; --hover:#181814; --selected:#191915; --hover-strong:#1F1F1A;
+  --step-off:#151513; --step-bar:#1C1C18; --meter-track:#1E1E19; --fader-track:#232320;
 
-  /* --- accent: teal / mint --- */
-  --accent:        #4de1c1;
-  --accent-strong: #6ef0d4;
-  --accent-ink:    #0c0c0b;                 /* text on accent */
-  --accent-soft:   rgba(77,225,193,0.14);   /* tint fills */
-  --accent-glow:   rgba(77,225,193,0.40);   /* glow */
+  /* lines */
+  --line:#22221C; --line-weak:#202019; --line-strong:#26261F; --line-2:#2A2A23; --line-3:#2C2C24; --line-4:#33332B; --line-5:#35352B;
 
-  /* --- status / semantic --- */
-  --green: #d6ff3f;   /* meter ok (lime) */
-  --blue:  #7fb2ff;
-  --red:   #ff5c36;   /* rec / clip (coral) */
-  --warn:  #ffb000;   /* amber */
-  --meter-grad: linear-gradient(90deg, #d6ff3f, #ffb000);
+  /* text */
+  --text:#EDEBE6; --text-2:#B9B6AE; --text-3:#A8A59E; --text-4:#8C8A83; --muted:#706E67; --muted-2:#6C6A63; --muted-3:#55534E; --muted-4:#3D3C37;
 
-  /* --- radii (rounded) --- */
-  --r-sm:   6px;
-  --r-md:   10px;
-  --r-lg:   14px;
-  --r-pill: 999px;
-  --r-cell: 6px;
+  /* accent + semantic */
+  --accent:#4DE1C1; --accent-ink:#0C0C0B;
+  --rec:#FF5C36; --rec-bg:#1C1412; --rec-line:#3A2420;
+  --fader-knob:#C9C6BE; --meter-grad:linear-gradient(90deg,#D6FF3F,#FFB000);
 
-  /* --- elevation / glow --- */
+  /* track / channel colors */
+  --track-1:#D6FF3F; --track-2:#FF5C36; --track-3:#4DE1C1; --track-4:#B490FF; --track-5:#FFB000; --track-6:#7FB2FF;
+
+  /* radius */
+  --r-2:2px; --r-3:3px; --r-4:4px; --r-7:7px; --r-8:8px; --r-9:9px; --r-10:10px; --r-11:11px; --r-12:12px; --r-13:13px; --r-full:999px;
+
+  /* spacing */
+  --s-2:2px; --s-3:3px; --s-4:4px; --s-5:5px; --s-6:6px; --s-7:7px; --s-8:8px; --s-9:9px; --s-10:10px; --s-11:11px; --s-12:12px; --s-14:14px; --s-16:16px; --s-18:18px; --s-20:20px;
+  --pad-page:clamp(12px,2vw,20px); --gap-header:clamp(10px,2vw,22px);
+
+  /* glow */
+  --glow-step:0 0 18px -6px; --glow-pad:0 0 26px -8px;
+
+  /* ---- alias layer: names the app's existing CSS/canvas already uses ---- */
+  --panel2: var(--gridsurface);
+  --surface: var(--field);
+  --line2: var(--line-2);
+  --dim: var(--text-2);
+  --text-mute: var(--muted);
+  --accent-strong: #6EF0D4;
+  --accent-soft: rgba(77,225,193,0.14);
+  --accent-glow: rgba(77,225,193,0.40);
+  --green: var(--track-1);
+  --blue: var(--track-6);
+  --red: var(--rec);
+  --warn: var(--track-5);
+  --r-sm: var(--r-8);
+  --r-md: var(--r-10);
+  --r-lg: var(--r-12);
+  --r-pill: var(--r-full);
+  --r-cell: var(--r-4);
   --shadow-pop: 0 14px 40px rgba(0,0,0,0.62);
   --glow-accent: 0 0 16px -2px var(--accent-glow);
-
-  /* --- type --- */
-  --font-ui:   'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-ui: var(--font);
   --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
 }
