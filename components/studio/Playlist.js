@@ -198,6 +198,23 @@ export default function Playlist() {
       ctx.restore();
     }
 
+    // tempo changes
+    for (const tm of (d.project.tempoMap || [])) {
+      const tx = LABEL_W + tm.tick * v.pxPerTick - v.scrollX;
+      if (tx < LABEL_W || tx > w) continue;
+      ctx.fillStyle = token('--warn');
+      ctx.fillRect(Math.round(tx), 11, 2, h - 11);
+      ctx.fillRect(Math.round(tx), 11, 48, 11);
+      ctx.fillStyle = '#1a1a16';
+      ctx.font = '9px system-ui, sans-serif';
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(tx, 11, 48, 11);
+      ctx.clip();
+      ctx.fillText(`${tm.bpm} bpm`, tx + 3, 20);
+      ctx.restore();
+    }
+
     // playhead
     if (engine.playing && d.ui.mode === 'song') {
       const x = LABEL_W + engine.currentPosition() * v.pxPerTick - v.scrollX;
@@ -347,7 +364,9 @@ export default function Playlist() {
     if (p.inHead) {
       const v = view.current;
       const mk = (dataRef.current.project.markers || []).find((m) => Math.abs(LABEL_W + m.tick * v.pxPerTick - v.scrollX - p.x) < 12);
-      if (mk) { dispatch({ type: 'marker.remove', id: mk.id }); bump((n) => n + 1); }
+      if (mk) { dispatch({ type: 'marker.remove', id: mk.id }); bump((n) => n + 1); return; }
+      const tm = (dataRef.current.project.tempoMap || []).find((m) => Math.abs(LABEL_W + m.tick * v.pxPerTick - v.scrollX - p.x) < 26);
+      if (tm) { dispatch({ type: 'tempo.remove', id: tm.id }); bump((n) => n + 1); }
       return;
     }
     if (p.inLabels) {
@@ -430,6 +449,17 @@ export default function Playlist() {
           title="Add a marker at the playhead (double-click a marker to remove)"
           onClick={() => { const v = view.current; const at = engine.playing ? engine.currentPosition() : v.scrollX / v.pxPerTick; dispatch({ type: 'marker.add', tick: Math.round(at / barLen) * barLen }); }}
         >+ Marker</button>
+        <button
+          type="button"
+          className={s.btn}
+          title="Add a tempo change from the playhead (double-click to remove)"
+          onClick={() => {
+            const v = view.current;
+            const at = engine.playing ? engine.currentPosition() : v.scrollX / v.pxPerTick;
+            const bpm = parseFloat(window.prompt('Tempo (BPM) from here on', String(Math.round(project.bpm))));
+            if (!Number.isNaN(bpm)) dispatch({ type: 'tempo.add', tick: Math.round(at / barLen) * barLen, bpm });
+          }}
+        >+ Tempo</button>
         <button
           type="button"
           className={project.loop !== false && project.loopEnd > project.loopStart ? `${s.btn} ${s.on}` : s.btn}
