@@ -14,6 +14,7 @@ import RecordPanel from './RecordPanel';
 import AiPanel from './AiPanel';
 import PluginPanel from './PluginPanel';
 import Onboarding from './Onboarding';
+import PopOut from './PopOut';
 import { clamp } from '../../lib/studio/constants';
 import { ROLES, padChannels } from '../../lib/studio/drums';
 import { isCoarsePointer } from '../../lib/studio/touch';
@@ -77,6 +78,7 @@ function Workspace({ installPrompt, onInstalled }) {
   const [recOpen, setRecOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
   const [onboard, setOnboard] = useState(false);
+  const [detached, setDetached] = useState([]);
 
   // Show the welcome guide on the first visit; reopenable via the Guide tab.
   useEffect(() => {
@@ -112,6 +114,22 @@ function Workspace({ installPrompt, onInstalled }) {
     try { localStorage.setItem('btz.theme', next); } catch (e) { /* ignore */ }
     setUi({ theme: next });
   };
+
+  // Detach a view into its own window (second screen).
+  const viewFor = (id) => {
+    switch (id) {
+      case 'playlist': return <Playlist />;
+      case 'rack': return <ChannelRack />;
+      case 'piano': return <PianoRoll />;
+      case 'drums': return <DrumMachine />;
+      case 'automation': return <Automation />;
+      case 'mixer': return <Mixer />;
+      default: return null;
+    }
+  };
+  const labelFor = (id) => (TABS.find((t) => t.id === id) || {}).label || id;
+  const detach = () => setDetached((d) => (d.includes(ui.view) ? d : [...d, ui.view]));
+  const attach = (id) => setDetached((d) => d.filter((x) => x !== id));
   const held = useRef(new Map());
   const projectRef = useRef(project);
   projectRef.current = project;
@@ -205,6 +223,11 @@ function Workspace({ installPrompt, onInstalled }) {
       {recOpen && <RecordPanel onClose={() => setRecOpen(false)} />}
       {aiOpen && <AiPanel onClose={() => setAiOpen(false)} />}
       {onboard && <Onboarding onClose={closeOnboard} />}
+      {detached.map((id) => (
+        <PopOut key={id} title={labelFor(id)} theme={ui.theme} onClose={() => attach(id)}>
+          {viewFor(id)}
+        </PopOut>
+      ))}
       {dropping && (
         <div className={s.dropHint}>
           <div className={s.dropCard}>Drop audio files to create sampler channels</div>
@@ -223,6 +246,14 @@ function Workspace({ installPrompt, onInstalled }) {
           </button>
         ))}
         <div className={s.spacer} />
+        {!ui.touch && (
+          <button
+            type="button"
+            className={detached.includes(ui.view) ? `${s.tab} ${s.on}` : s.tab}
+            onClick={detach}
+            title="Open this panel in its own window — drag it to a second screen"
+          >⧉ Detach</button>
+        )}
         <button
           type="button"
           className={ui.pluginOpen ? `${s.tab} ${s.on}` : s.tab}
@@ -253,12 +284,12 @@ function Workspace({ installPrompt, onInstalled }) {
         </div>
         <main className={s.main}>
           <div className={s.viewArea}>
-            {ui.view === 'playlist' && <Playlist />}
-            {ui.view === 'rack' && <ChannelRack />}
-            {ui.view === 'piano' && <PianoRoll />}
-            {ui.view === 'drums' && <DrumMachine />}
-            {ui.view === 'automation' && <Automation />}
-            {ui.view === 'mixer' && <Mixer />}
+            {detached.includes(ui.view) ? (
+              <div className={s.detachedNote}>
+                <span><b>{labelFor(ui.view)}</b> is open in a separate window.</span>
+                <button type="button" className={`${s.btn} ${s.on}`} onClick={() => attach(ui.view)}>Bring it back</button>
+              </div>
+            ) : viewFor(ui.view)}
           </div>
           {ui.pluginOpen && <PluginPanel />}
         </main>
