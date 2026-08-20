@@ -33,6 +33,11 @@ const NAV_ICONS = {
   playlist: '▤', rack: '▦', piano: '🎹', drums: '⬢', mixer: '⧉', automation: '⤢',
 };
 
+// Short labels shown under each rail / bottom-nav icon.
+const NAV_SHORT = {
+  playlist: 'Arr', rack: 'Inst', piano: 'Roll', drums: 'Beat', automation: 'Auto', mixer: 'Mix',
+};
+
 const TABS = [
   { id: 'playlist', label: 'Arrangement', hint: 'F5' },
   { id: 'rack', label: 'Instruments', hint: 'F6' },
@@ -237,48 +242,53 @@ function Workspace({ installPrompt, onInstalled }) {
         </div>
       )}
       <Transport onOpenRecord={() => setRecOpen(true)} onOpenAi={() => setAiOpen(true)} />
-      <div className={s.tabs}>
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            className={ui.view === t.id ? `${s.tab} ${s.on}` : s.tab}
-            onClick={() => setUi({ view: t.id })}
-          >
-            {t.label}<span className={s.tabHint}>{t.hint}</span>
-          </button>
-        ))}
-        <div className={s.spacer} />
-        {!ui.touch && (
-          <button
-            type="button"
-            className={detached.includes(ui.view) ? `${s.tab} ${s.on}` : s.tab}
-            onClick={detach}
-            title="Open this panel in its own window — drag it to a second screen"
-          >⧉ Detach</button>
-        )}
-        <button
-          type="button"
-          className={ui.pluginOpen ? `${s.tab} ${s.on}` : s.tab}
-          onClick={() => setUi({ pluginOpen: !ui.pluginOpen })}
-        >
-          Instrument
-        </button>
-        <button type="button" className={`${s.tab} ${s.aiTab}`} onClick={() => setAiOpen(true)}>
-          <span className={s.aiSpark}>✨</span>BTZ Brain<span className={s.tabHint}>AI</span>
-        </button>
-        <button type="button" className={s.tab} onClick={() => setRecOpen(true)}>
-          Record<span className={s.tabHint}>mic</span>
-        </button>
-        <button type="button" className={s.tab} onClick={() => setOnboard(true)}>
-          Guide
-        </button>
-        <button type="button" className={s.tab} onClick={() => setHelp(true)}>
-          Help<span className={s.tabHint}>?</span>
-        </button>
-      </div>
 
       <div className={s.body}>
+        {!ui.touch && (
+          <nav className={s.iconRail}>
+            {TABS.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                title={`${t.label} · ${t.hint}`}
+                className={ui.view === t.id ? `${s.railBtn} ${s.on}` : s.railBtn}
+                onClick={() => setUi({ view: t.id })}
+              >
+                <span className={s.railIcon}>{NAV_ICONS[t.id]}</span>
+                <span className={s.railLbl}>{NAV_SHORT[t.id]}</span>
+              </button>
+            ))}
+            <div className={s.railSpacer} />
+            <button type="button" title="BTZ Brain — AI generator" className={`${s.railBtn} ${s.aiRail}`} onClick={() => setAiOpen(true)}>
+              <span className={s.railIcon}>✨</span><span className={s.railLbl}>AI</span>
+            </button>
+            <button type="button" title="Record from mic / input" className={s.railBtn} onClick={() => setRecOpen(true)}>
+              <span className={s.railIcon}>◉</span><span className={s.railLbl}>Rec</span>
+            </button>
+            <button
+              type="button"
+              title="Instrument / plugin panel"
+              className={ui.pluginOpen ? `${s.railBtn} ${s.on}` : s.railBtn}
+              onClick={() => setUi({ pluginOpen: !ui.pluginOpen })}
+            >
+              <span className={s.railIcon}>▣</span><span className={s.railLbl}>Plug</span>
+            </button>
+            <button
+              type="button"
+              title="Open this panel in its own window — drag it to a second screen"
+              className={detached.includes(ui.view) ? `${s.railBtn} ${s.on}` : s.railBtn}
+              onClick={detach}
+            >
+              <span className={s.railIcon}>⧉</span><span className={s.railLbl}>Pop</span>
+            </button>
+            <button type="button" title="Guided tour" className={s.railBtn} onClick={() => setOnboard(true)}>
+              <span className={s.railIcon}>◎</span><span className={s.railLbl}>Guide</span>
+            </button>
+            <button type="button" title="Keyboard shortcuts & help" className={s.railBtn} onClick={() => setHelp(true)}>
+              <span className={s.railIcon}>?</span><span className={s.railLbl}>Help</span>
+            </button>
+          </nav>
+        )}
         {ui.touch && ui.browserOpen && (
           <div className={s.sideBackdrop} onPointerDown={() => setUi({ browserOpen: false })} />
         )}
