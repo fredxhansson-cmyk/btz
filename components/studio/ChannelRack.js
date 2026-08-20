@@ -66,6 +66,12 @@ function ChannelRow({ channel, pattern, steps, selected }) {
           onClick={() => dispatch({ type: 'channel.update', id: channel.id, patch: { solo: !channel.solo } })}
           title="Solo"
         >S</button>
+        <button
+          type="button"
+          className={selected ? `${s.tinyBtn} ${s.armOn}` : s.tinyBtn}
+          onClick={() => dispatch({ type: 'select.channel', id: channel.id })}
+          title="Arm for recording — keyboard, MIDI and mic recording go into this channel"
+        >●</button>
         <div className={s.miniKnobs}>
           <Knob
             size={22} label={null}
