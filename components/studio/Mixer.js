@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import s from '../../styles/studio.module.css';
+import { accent, token } from '../../lib/studio/theme';
 import { useStudio, useRaf } from '../../lib/studio/StudioContext';
 import { clamp, gainToDb } from '../../lib/studio/constants';
 import { EFFECT_LIST, EFFECTS, mergedFxParams } from '../../lib/studio/audio/effects';
 import { MASTER_PRESETS, masterPreset, matchGain } from '../../lib/studio/mastering';
 import Knob, { ParamGrid } from './Knob';
 
-function Fader({ value, onChange, color = '#ff8a1f' }) {
+function Fader({ value, onChange, color = accent() }) {
   const drag = useRef(null);
   const onDown = (e) => {
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -77,7 +78,7 @@ function Strip({ insert, master }) {
         onChange={(v, live) => !master && dispatch({ type: 'insert.update', id: insert.id, patch: { pan: v }, live, key: 'pan' })}
       />
       <div className={s.stripBody}>
-        <Fader value={vol} onChange={setVol} color={master ? '#ff8a1f' : '#4dabf7'} />
+        <Fader value={vol} onChange={setVol} color={master ? accent() : token('--blue')} />
         <div className={s.vMeter}><div className={s.vMeterFill} ref={meterRef} /></div>
       </div>
       <div className={s.stripBtns}>

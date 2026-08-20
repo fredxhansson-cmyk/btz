@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import s from '../../styles/studio.module.css';
+import { accent, accentA } from '../../lib/studio/theme';
 import { useStudio, useRaf } from '../../lib/studio/StudioContext';
 import { BAR_TICKS, PPQ, snapTicks, SNAPS, clamp } from '../../lib/studio/constants';
 import { patternTicks, songLength } from '../../lib/studio/sequencer';
@@ -61,7 +62,7 @@ export default function Playlist() {
     if (d.project.loopEnd > d.project.loopStart) {
       const lx = LABEL_W + d.project.loopStart * v.pxPerTick - v.scrollX;
       const lw = (d.project.loopEnd - d.project.loopStart) * v.pxPerTick;
-      ctx.fillStyle = d.project.loop === false ? 'rgba(255,255,255,0.04)' : 'rgba(255,138,31,0.09)';
+      ctx.fillStyle = d.project.loop === false ? 'rgba(255,255,255,0.04)' : accentA(0.09);
       ctx.fillRect(Math.max(LABEL_W, lx), HEAD_H, Math.max(0, lw - Math.max(0, LABEL_W - lx)), TRACKS * TRACK_H);
     }
 
@@ -150,7 +151,7 @@ export default function Playlist() {
     if (d.project.loopEnd > d.project.loopStart) {
       const lx = LABEL_W + d.project.loopStart * v.pxPerTick - v.scrollX;
       const rx = LABEL_W + d.project.loopEnd * v.pxPerTick - v.scrollX;
-      ctx.fillStyle = d.project.loop === false ? '#5a616b' : '#ff8a1f';
+      ctx.fillStyle = d.project.loop === false ? '#5a616b' : accent();
       if (lx >= LABEL_W) ctx.fillRect(Math.round(lx), 0, 2, HEAD_H);
       if (rx >= LABEL_W && rx < w) ctx.fillRect(Math.round(rx) - 2, 0, 2, HEAD_H);
       if (lx < w && rx > LABEL_W) {
@@ -162,7 +163,7 @@ export default function Playlist() {
     if (engine.playing && d.ui.mode === 'song') {
       const x = LABEL_W + engine.currentPosition() * v.pxPerTick - v.scrollX;
       if (x >= LABEL_W && x < w) {
-        ctx.fillStyle = '#ff8a1f';
+        ctx.fillStyle = accent();
         ctx.fillRect(Math.round(x), 0, 1.5, h);
       }
     }

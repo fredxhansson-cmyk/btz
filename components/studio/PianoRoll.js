@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import s from '../../styles/studio.module.css';
+import { accent, accentA } from '../../lib/studio/theme';
 import { useStudio, useRaf } from '../../lib/studio/StudioContext';
 import {
   PPQ, BAR_TICKS, STEP_TICKS, MIN_KEY, MAX_KEY, IS_BLACK, NOTE_NAMES,
@@ -94,7 +95,7 @@ export default function PianoRoll() {
       ctx.fillStyle = out ? (black ? '#191b1f' : '#1d2025') : (black ? '#202329' : '#262a31');
       ctx.fillRect(KEY_W, y, w - KEY_W, v.rowH);
       if (key % 12 === d.scale.root && scaleOn) {
-        ctx.fillStyle = 'rgba(255,138,31,0.10)';
+        ctx.fillStyle = accentA(0.10);
         ctx.fillRect(KEY_W, y, w - KEY_W, v.rowH);
       }
       if (key % 12 === 0) {
@@ -157,8 +158,8 @@ export default function PianoRoll() {
     // marquee
     if (marquee.current) {
       const m = marquee.current;
-      ctx.strokeStyle = 'rgba(255,138,31,0.9)';
-      ctx.fillStyle = 'rgba(255,138,31,0.12)';
+      ctx.strokeStyle = accentA(0.9);
+      ctx.fillStyle = accentA(0.12);
       const x = Math.min(m.x0, m.x1);
       const y = Math.min(m.y0, m.y1);
       ctx.fillRect(x, y, Math.abs(m.x1 - m.x0), Math.abs(m.y1 - m.y0));
@@ -220,7 +221,7 @@ export default function PianoRoll() {
         ctx.fillRect(0, y + v.rowH - 1, KEY_W - 6, 1);
       }
       if (scaleOn && pc === d.scale.root) {
-        ctx.fillStyle = 'rgba(255,138,31,0.35)';
+        ctx.fillStyle = accentA(0.35);
         ctx.fillRect(KEY_W - 10, y + 1, 4, v.rowH - 2);
       }
       if (pc === 0) {
@@ -238,7 +239,7 @@ export default function PianoRoll() {
       const pos = engine.currentPosition() % Math.max(1, patLen);
       const x = KEY_W + pos * v.pxPerTick - v.scrollX;
       if (x >= KEY_W && x < w) {
-        ctx.fillStyle = '#ff8a1f';
+        ctx.fillStyle = accent();
         ctx.fillRect(Math.round(x), 0, 1.5, h - VEL_H);
       }
     }

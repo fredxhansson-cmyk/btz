@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import s from '../../styles/studio.module.css';
+import { accent } from '../../lib/studio/theme';
 import { useStudio, useRaf } from '../../lib/studio/StudioContext';
 import { BAR_TICKS, PPQ, STEP_TICKS, snapTicks, SNAPS, clamp, COLORS } from '../../lib/studio/constants';
 import { patternTicks } from '../../lib/studio/sequencer';
@@ -143,7 +144,7 @@ export default function Automation() {
     if (engine.playing) {
       const pos = engine.currentPosition() % Math.max(1, d.len);
       const x = px(pos);
-      ctx.fillStyle = '#ff8a1f';
+      ctx.fillStyle = accent();
       ctx.fillRect(Math.round(x), 0, 1.5, h);
     }
   }, [engine]);

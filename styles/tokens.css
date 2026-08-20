@@ -1,0 +1,48 @@
+/* ============================================================================
+   BTZ Design System — tokens (single source of truth)
+   The whole app (CSS modules + canvas via lib/studio/theme.js) reads from here.
+   A redesign = change these values, nothing else.
+   Mirrored to the Claude Design "BTZ" project.
+   ========================================================================== */
+:root {
+  /* --- surfaces (near-black, layered) --- */
+  --bg:      #0a0b0e;   /* app background */
+  --panel:   #14161c;   /* raised panels: drum grid, mixer, library */
+  --panel2:  #0f1116;   /* deep wells / step-grid background */
+  --surface: #1b1e26;   /* buttons, inputs, cells */
+  --line:    #05060a;   /* hard borders */
+  --line2:   #262a33;   /* soft dividers */
+
+  /* --- text --- */
+  --text:      #e7ebf0;
+  --dim:       #8b93a1;
+  --text-mute: #5b626e;
+
+  /* --- accent: lime / chartreuse --- */
+  --accent:        #c8f24c;
+  --accent-strong: #d8ff62;
+  --accent-ink:    #16210a;                 /* text on accent */
+  --accent-soft:   rgba(200,242,76,0.14);   /* tint fills */
+  --accent-glow:   rgba(200,242,76,0.38);   /* glow */
+
+  /* --- status --- */
+  --green: #8ce99a;
+  --blue:  #5b9dff;
+  --red:   #ff5a6a;
+  --warn:  #ffd93d;
+
+  /* --- radii (rounded) --- */
+  --r-sm:   6px;
+  --r-md:   10px;
+  --r-lg:   14px;
+  --r-pill: 999px;
+  --r-cell: 5px;
+
+  /* --- elevation / glow --- */
+  --shadow-pop: 0 14px 40px rgba(0,0,0,0.6);
+  --glow-accent: 0 0 12px var(--accent-glow);
+
+  /* --- type --- */
+  --font-ui:   system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+}

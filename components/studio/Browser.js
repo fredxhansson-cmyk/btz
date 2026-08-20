@@ -143,7 +143,7 @@ export default function Browser() {
                   setUi({ view: 'drums', browserOpen: false });
                 }}
               >
-                <span className={s.swatch} style={{ background: '#ff8a1f' }} />
+                <span className={s.swatch} style={{ background: 'var(--accent)' }} />
                 <span className={s.laneText}>{k.name}</span>
               </button>
             ))}
@@ -208,7 +208,7 @@ export default function Browser() {
                   }
                 }}
               >
-                <span className={s.swatch} style={{ background: '#ff8a1f' }} />
+                <span className={s.swatch} style={{ background: 'var(--accent)' }} />
                 <span className={s.laneText}>{t.name}</span>
               </button>
             ))}

@@ -1,5 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 import s from '../../styles/studio.module.css';
+import { accent } from '../../lib/studio/theme';
 import { clamp } from '../../lib/studio/constants';
 
 const norm = (v, spec) => {
@@ -36,7 +37,7 @@ const fmt = (v, spec) => {
   return v.toFixed(3);
 };
 
-export default function Knob({ value, spec, onChange, onCommit, label, size = 34, color = '#ff8a1f' }) {
+export default function Knob({ value, spec, onChange, onCommit, label, size = 34, color = accent() }) {
   const sp = { min: 0, max: 1, def: 0, ...(spec || {}) };
   const ref = useRef(null);
   const drag = useRef(null);
