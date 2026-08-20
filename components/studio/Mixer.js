@@ -145,6 +145,27 @@ function Spectrum() {
       ctx.fillStyle = grad;
       ctx.fillRect(x, h - bh - 2, bw, bh);
     }
+    // reference spectrum overlay (captured while A/B-ing a reference track)
+    const rs = engine.refSpectrum;
+    if (rs && rs.length) {
+      ctx.strokeStyle = token('--accent');
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let i = 0; i < bars; i++) {
+        const lo = Math.floor(Math.pow(i / bars, 2) * rs.length);
+        const hi = Math.max(lo + 1, Math.floor(Math.pow((i + 1) / bars, 2) * rs.length));
+        let peak = 0;
+        for (let j = lo; j < hi && j < rs.length; j++) peak = Math.max(peak, rs[j]);
+        const y = h - (peak / 255) * (h - 6) - 2;
+        const x = (i / bars) * w + (w / bars) / 2;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.fillStyle = token('--accent');
+      ctx.font = '9px ui-monospace, monospace';
+      ctx.fillText('REFERENCE', w - 68, 12);
+    }
+
     ctx.fillStyle = token('--text-4');
     ctx.font = '9px ui-monospace, monospace';
     ctx.fillText('MASTER SPECTRUM', 6, 12);
@@ -194,25 +215,47 @@ function Mastering() {
   const [refTrack, setRefTrack] = useState(null);
   const refBuf = useRef(null);
   const refSrc = useRef(null);
+  const refRaf = useRef(0);
   const fileRef = useRef(null);
   const loadRef = async (file) => {
     try {
       const ctx = engine.ensureContext();
       const buf = await ctx.decodeAudioData(await file.arrayBuffer());
       refBuf.current = buf;
+      engine.refSpectrum = null;
       const lufs = measureBufferLufs(buf);
       setRefTrack({ name: file.name.replace(/\.[^.]+$/, '').slice(0, 26), lufs, playing: false });
       setHint(`Reference "${file.name}" — ${lufs.toFixed(1)} LUFS.`);
     } catch (e) { setHint(`Could not read the reference: ${e.message}`); }
   };
   const toggleRefPlay = () => {
-    if (refSrc.current) { try { refSrc.current.stop(); } catch (e) { /* noop */ } refSrc.current = null; setRefTrack((r) => (r ? { ...r, playing: false } : r)); return; }
+    if (refSrc.current) {
+      try { refSrc.current.stop(); } catch (e) { /* noop */ }
+      refSrc.current = null;
+      cancelAnimationFrame(refRaf.current);
+      setRefTrack((r) => (r ? { ...r, playing: false } : r));
+      return;
+    }
     if (!refBuf.current) return;
     const ctx = engine.ensureContext();
     const src = ctx.createBufferSource();
     src.buffer = refBuf.current;
+    const an = ctx.createAnalyser();
+    an.fftSize = 1024;
+    src.connect(an);
     src.connect(ctx.destination);
-    src.onended = () => { refSrc.current = null; setRefTrack((r) => (r ? { ...r, playing: false } : r)); };
+    if (!engine.refSpectrum || engine.refSpectrum.length !== an.frequencyBinCount) {
+      engine.refSpectrum = new Uint8Array(an.frequencyBinCount);
+    }
+    const tmp = new Uint8Array(an.frequencyBinCount);
+    const capture = () => {
+      an.getByteFrequencyData(tmp);
+      const spec = engine.refSpectrum;
+      for (let i = 0; i < spec.length; i++) spec[i] = Math.round(spec[i] * 0.85 + tmp[i] * 0.15);
+      refRaf.current = requestAnimationFrame(capture);
+    };
+    refRaf.current = requestAnimationFrame(capture);
+    src.onended = () => { refSrc.current = null; cancelAnimationFrame(refRaf.current); setRefTrack((r) => (r ? { ...r, playing: false } : r)); };
     src.start();
     refSrc.current = src;
     setRefTrack((r) => (r ? { ...r, playing: true } : r));
