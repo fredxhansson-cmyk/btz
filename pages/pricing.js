@@ -4,24 +4,34 @@ import Link from 'next/link';
 
 const PLANS = [
   {
-    id: 'free', name: 'Free', price: '$0', per: 'forever', accent: false,
+    id: 'free', name: 'Free', price: '$0', per: 'forever', accent: false, plan: null,
     tagline: 'The whole studio, on your device.',
     features: ['Full studio (arrange, mix, master)', 'WAV export', 'Light & dark', 'Install as an app', 'A few AI generations / day'],
     cta: 'Start free', href: '/',
   },
   {
-    id: 'pro', name: 'Pro', price: '$4', per: '/ month · $29 / yr', accent: true,
+    id: 'pro', name: 'Pro', price: '$4', per: '/ month · $29 / yr', accent: true, plan: 'pro_monthly',
     tagline: 'Unlimited AI + every export.',
     features: ['Unlimited BTZ Brain generations', 'MP3 / AIFF / stems export', 'Cloud project save', 'Extra sound packs', 'Priority updates'],
-    cta: 'Go Pro', href: '/',
+    cta: 'Go Pro',
   },
   {
-    id: 'lifetime', name: 'Lifetime', price: '$79', per: 'one-time', accent: false,
+    id: 'lifetime', name: 'Lifetime', price: '$79', per: 'one-time', accent: false, plan: 'lifetime',
     tagline: 'Everything, forever. No subscription.',
     features: ['All Pro features', 'One payment, keep it for good', 'A fraction of a desktop DAW'],
-    cta: 'Get Lifetime', href: '/',
+    cta: 'Get Lifetime',
   },
 ];
+
+async function startCheckout(plan) {
+  try {
+    const r = await fetch(`/api/stripe/checkout?plan=${plan}`, { method: 'POST' });
+    if (r.status === 401) { window.location.href = '/?signin=1'; return; }
+    const d = await r.json();
+    if (d.url) window.location.href = d.url;
+    else window.alert(d.error || 'Billing is not available yet.');
+  } catch (e) { window.alert('Billing is not available yet.'); }
+}
 
 export default function Pricing() {
   return (
@@ -54,11 +64,18 @@ export default function Pricing() {
                     </li>
                   ))}
                 </ul>
-                <Link href={p.href} style={{
-                  textAlign: 'center', textDecoration: 'none', borderRadius: 10, padding: '13px 18px', fontSize: 15, fontWeight: 600,
-                  background: p.accent ? 'var(--accent)' : 'transparent', color: p.accent ? 'var(--accent-ink)' : 'var(--text)',
-                  border: p.accent ? 'none' : '1px solid var(--line-3)',
-                }}>{p.cta}</Link>
+                {p.plan ? (
+                  <button type="button" onClick={() => startCheckout(p.plan)} style={{
+                    textAlign: 'center', borderRadius: 10, padding: '13px 18px', fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                    background: p.accent ? 'var(--accent)' : 'transparent', color: p.accent ? 'var(--accent-ink)' : 'var(--text)',
+                    border: p.accent ? 'none' : '1px solid var(--line-3)',
+                  }}>{p.cta}</button>
+                ) : (
+                  <Link href={p.href} style={{
+                    textAlign: 'center', textDecoration: 'none', borderRadius: 10, padding: '13px 18px', fontSize: 15, fontWeight: 600,
+                    background: 'transparent', color: 'var(--text)', border: '1px solid var(--line-3)',
+                  }}>{p.cta}</Link>
+                )}
               </div>
             ))}
           </div>
