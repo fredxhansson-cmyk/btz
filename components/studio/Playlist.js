@@ -21,6 +21,8 @@ export default function Playlist() {
   const canvasRef = useRef(null);
   const view = useRef({ scrollX: 0, pxPerTick: 0.11 });
   const drag = useRef(null);
+  const clipboard = useRef(null);
+  const selClip = useRef(null);
   const [, bump] = useState(0);
   const gesture = useRef(null);
   const press = useRef(null);
@@ -179,6 +181,23 @@ export default function Playlist() {
       }
     }
 
+    // markers
+    for (const mk of (d.project.markers || [])) {
+      const mx = LABEL_W + mk.tick * v.pxPerTick - v.scrollX;
+      if (mx < LABEL_W || mx > w) continue;
+      ctx.fillStyle = accent();
+      ctx.fillRect(Math.round(mx), 0, 2, h);
+      ctx.fillRect(Math.round(mx), 0, 40, 11);
+      ctx.fillStyle = token('--accent-ink');
+      ctx.font = '9px system-ui, sans-serif';
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(mx, 0, 40, 11);
+      ctx.clip();
+      ctx.fillText(mk.name, mx + 3, 9);
+      ctx.restore();
+    }
+
     // playhead
     if (engine.playing && d.ui.mode === 'song') {
       const x = LABEL_W + engine.currentPosition() * v.pxPerTick - v.scrollX;
@@ -268,6 +287,7 @@ export default function Playlist() {
         drag.current = { mode: 'move', id: hit.id, snap, offset: p.tick - hit.start, track: p.track };
       }
       dispatch({ type: 'pattern.select', id: hit.patternId });
+      selClip.current = hit.id;
       bump((n) => n + 1);
       return;
     }
@@ -324,7 +344,13 @@ export default function Playlist() {
 
   const onDoubleClick = useCallback((e) => {
     const p = posFromEvent(e);
-    if (p.inHead || p.inLabels) return;
+    if (p.inHead) {
+      const v = view.current;
+      const mk = (dataRef.current.project.markers || []).find((m) => Math.abs(LABEL_W + m.tick * v.pxPerTick - v.scrollX - p.x) < 12);
+      if (mk) { dispatch({ type: 'marker.remove', id: mk.id }); bump((n) => n + 1); }
+      return;
+    }
+    if (p.inLabels) return;
     const hit = clipAt(p.tick, p.track);
     if (hit) { dispatch({ type: 'pattern.select', id: hit.patternId }); setUi({ view: 'piano' }); }
   }, [dispatch, setUi]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -343,6 +369,29 @@ export default function Playlist() {
     el.addEventListener('wheel', handler, { passive: false });
     return () => el.removeEventListener('wheel', handler);
   }, [onWheel]);
+
+  // Copy / paste the selected clip.
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+      if (!(e.ctrlKey || e.metaKey)) return;
+      const k = e.key.toLowerCase();
+      const pl = dataRef.current.project.playlist;
+      if (k === 'c' && selClip.current) {
+        const c = pl.find((x) => x.id === selClip.current);
+        if (c) { clipboard.current = { patternId: c.patternId, track: c.track, length: c.length }; e.preventDefault(); }
+      } else if (k === 'v' && clipboard.current) {
+        const cb = clipboard.current;
+        const base = engine.playing ? engine.currentPosition() : (((pl.find((x) => x.id === selClip.current) || {}).start) || 0);
+        const snap = Math.max(snapTicks(dataRef.current.ui.snap), PPQ);
+        dispatch({ type: 'clip.add', patternId: cb.patternId, track: cb.track, start: Math.round(base / snap) * snap, length: cb.length });
+        e.preventDefault();
+        bump((n) => n + 1);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [dispatch, engine]);
 
   const bars = Math.ceil(songLength(project) / barLen);
 
@@ -367,6 +416,12 @@ export default function Playlist() {
         <button type="button" className={s.btn} onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 1.25, 0.02, 1.2); draw(); }}>+</button>
         <button type="button" className={s.btn} onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 0.8, 0.02, 1.2); draw(); }}>−</button>
         <button type="button" className={s.btn} onClick={() => play('song')}>Play song</button>
+        <button
+          type="button"
+          className={s.btn}
+          title="Add a marker at the playhead (double-click a marker to remove)"
+          onClick={() => { const v = view.current; const at = engine.playing ? engine.currentPosition() : v.scrollX / v.pxPerTick; dispatch({ type: 'marker.add', tick: Math.round(at / barLen) * barLen }); }}
+        >+ Marker</button>
         <button
           type="button"
           className={project.loop !== false && project.loopEnd > project.loopStart ? `${s.btn} ${s.on}` : s.btn}
