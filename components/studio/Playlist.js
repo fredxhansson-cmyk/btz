@@ -248,6 +248,15 @@ export default function Playlist() {
       return;
     }
     if (hit) {
+      if (e.metaKey || e.ctrlKey) {
+        const at = Math.round(p.tick / snap) * snap;
+        dispatch({ type: 'clip.split', id: hit.id, at });
+        drag.current = null; bump((n) => n + 1); return;
+      }
+      if (e.altKey) {
+        dispatch({ type: 'clip.add', patternId: hit.patternId, track: hit.track, start: hit.start + hit.length, length: hit.length });
+        drag.current = null; bump((n) => n + 1); return;
+      }
       press.current.start(e, () => {
         dispatch({ type: 'clip.remove', id: hit.id });
         drag.current = null;
@@ -372,7 +381,7 @@ export default function Playlist() {
           >Clear loop</button>
         )}
         <div className={s.spacer} />
-        <span className={s.dim}>{project.playlist.length} clips · {bars} bars</span>
+        <span className={s.dim}>Ctrl+click = split · Alt+click = duplicate · double-click = edit · {project.playlist.length} clips · {bars} bars</span>
       </div>
       <div className={s.canvasWrap} ref={wrapRef}>
         <canvas
