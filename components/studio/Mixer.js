@@ -181,12 +181,20 @@ function Sends({ insert }) {
 function Mastering() {
   const { project, dispatch, engine, setHint } = useStudio();
   const ref = useRef(null);
+  const barRef = useRef(null);
   const vals = useRef({ i: null, s: -70, m: -70, p: 0 });
   const target = project.master.target == null ? -14 : project.master.target;
 
   useRaf(() => {
     const l = engine.updateLoudness();
     vals.current = { i: l.integrated, s: l.short, m: l.momentary, p: l.peak };
+    if (barRef.current) {
+      const norm = (v) => Math.max(0, Math.min(1, (v + 30) / 24)); // -30..-6 LUFS -> 0..1
+      const cur = l.integrated != null && l.integrated > -60 ? l.integrated : (l.short > -60 ? l.short : null);
+      barRef.current.style.width = `${(cur != null ? norm(cur) : 0) * 100}%`;
+      const diff = cur != null ? Math.abs(cur - target) : 99;
+      barRef.current.style.background = diff < 1 ? 'var(--track-1)' : (cur != null && cur > target ? 'var(--rec)' : 'var(--accent)');
+    }
     if (!ref.current) return;
     const fmt = (v) => (v == null || v < -60 ? '—' : v.toFixed(1));
     ref.current.textContent = `Integrated ${fmt(l.integrated)} LUFS · short ${fmt(l.short)} · momentary ${fmt(l.momentary)} · peak ${(20 * Math.log10(Math.max(1e-4, l.peak))).toFixed(1)} dB`;
@@ -224,9 +232,32 @@ function Mastering() {
         ))}
       </div>
 
+      <div className={s.lufsBar} title="Integrated loudness vs your target (green = on target)">
+        <div className={s.lufsFill} ref={barRef} />
+        <div className={s.lufsTarget} style={{ left: `${Math.max(0, Math.min(100, ((target + 30) / 24) * 100))}%` }} />
+      </div>
+
       <div className={s.loudRow}>
         <span className={s.loudRead} ref={ref}>—</span>
         <div className={s.spacer} />
+        <button
+          type="button"
+          className={`${s.btn} ${s.on}`}
+          title="One click: apply a streaming master chain and match the level to your target"
+          onClick={() => {
+            const pr = MASTER_PRESETS.find((x) => x.id === 'streaming') || MASTER_PRESETS[1];
+            dispatch({ type: 'master.preset', presetId: pr.id, chain: pr.chain, target: pr.target });
+            const measured = vals.current.i;
+            if (measured != null && isFinite(measured) && measured > -60) {
+              const next = matchGain(project.master.vol, measured, pr.target);
+              dispatch({ type: 'master', patch: { vol: next } });
+              setHint(`Auto-mastered: streaming chain + level matched to ${pr.target} LUFS.`);
+            } else {
+              engine.resetLoudness();
+              setHint('Auto-master applied. Play the track once and it matches the level to target.');
+            }
+          }}
+        >✨ Auto-master</button>
         <button type="button" className={s.btn} onClick={() => engine.resetLoudness()}>Reset measurement</button>
         <button
           type="button"
