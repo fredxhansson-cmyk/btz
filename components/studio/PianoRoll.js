@@ -587,6 +587,18 @@ export default function PianoRoll() {
           {project.patterns.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
         <button type="button" className={`${s.btn} ${s.on}`} onClick={addToArrangement} title="Place this pattern into the song arrangement">＋ Arrangement</button>
+        <button type="button" className={s.btn} title="Save the current notes as a take you can return to" onClick={() => { dispatch({ type: 'take.save', patternId: pattern.id, channelId: channel.id }); setHint('Take saved.'); }}>Save take</button>
+        {pattern.takes && pattern.takes[channel.id] && pattern.takes[channel.id].length > 0 && (
+          <select
+            className={s.select}
+            value=""
+            title="Load a saved take (comping)"
+            onChange={(e) => { if (e.target.value) { dispatch({ type: 'take.load', patternId: pattern.id, channelId: channel.id, takeId: e.target.value }); setHint('Take loaded.'); } }}
+          >
+            <option value="">Takes ({pattern.takes[channel.id].length})</option>
+            {pattern.takes[channel.id].map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+          </select>
+        )}
         <div className={s.modeSw}>
           {[['draw', 'Draw'], ['select', 'Select'], ['erase', 'Erase']].map(([id, label]) => (
             <button
