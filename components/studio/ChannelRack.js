@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import s from '../../styles/studio.module.css';
 import { useStudio, useRaf } from '../../lib/studio/StudioContext';
-import { STEP_TICKS, BAR_TICKS, clamp } from '../../lib/studio/constants';
+import { STEP_TICKS, BAR_TICKS, clamp, keyName } from '../../lib/studio/constants';
 import { patternSteps } from '../../lib/studio/sequencer';
 import { INSTRUMENTS } from '../../lib/studio/audio/instruments';
 import Knob from './Knob';
@@ -11,13 +11,15 @@ const STEP_W = 26;
 function ChannelRow({ channel, pattern, steps, selected }) {
   const { dispatch, engine, setUi, project } = useStudio();
   const paint = useRef(null);
+  const drag = useRef(null);
   const notes = (pattern.notes && pattern.notes[channel.id]) || [];
 
   const on = useMemo(() => {
     const set = new Map();
     for (const n of notes) {
       const idx = Math.floor(n.t / STEP_TICKS);
-      if (!set.has(idx) || set.get(idx) < n.v) set.set(idx, n.v);
+      const cur = set.get(idx);
+      if (!cur || cur.v < n.v) set.set(idx, { v: n.v, k: n.k });
     }
     return set;
   }, [notes]);
@@ -96,13 +98,31 @@ function ChannelRow({ channel, pattern, steps, selected }) {
 
       <div
         className={s.stepRow}
-        onPointerLeave={() => { paint.current = null; }}
-        onPointerUp={() => { paint.current = null; }}
+        onPointerLeave={() => { paint.current = null; drag.current = null; }}
+        onPointerUp={() => {
+          const d = drag.current;
+          if (d) { if (d.mode === 'click') toggle(d.step, 'off'); drag.current = null; }
+          paint.current = null;
+        }}
+        onPointerMove={(e) => {
+          const d = drag.current;
+          if (!d) return;
+          const dy = d.startY - e.clientY;
+          if (d.mode === 'click' && Math.abs(dy) > 3) d.mode = 'pitch';
+          if (d.mode === 'pitch') {
+            const key = clamp(d.baseKey + Math.round(dy / 7), 0, 127);
+            if (key !== d.lastKey) {
+              d.lastKey = key;
+              dispatch({ type: 'step.pitch', patternId: pattern.id, channelId: channel.id, step: d.step, key, live: true });
+              engine.preview(channel.id, key, 0.9);
+            }
+          }
+        }}
         onContextMenu={(e) => e.preventDefault()}
       >
         {Array.from({ length: steps }, (_, i) => {
-          const vel = on.get(i);
-          const isOn = vel != null;
+          const cell = on.get(i);
+          const isOn = cell != null;
           const beat = i % 4 === 0;
           const bar = i % 16 === 0;
           return (
@@ -110,20 +130,28 @@ function ChannelRow({ channel, pattern, steps, selected }) {
               key={i}
               type="button"
               className={[s.step, isOn ? s.stepOn : '', beat ? s.stepBeat : '', bar ? s.stepBar : ''].filter(Boolean).join(' ')}
-              style={isOn ? { background: channel.color, opacity: 0.45 + vel * 0.55 } : undefined}
+              style={isOn ? { background: channel.color, opacity: 0.45 + cell.v * 0.55 } : undefined}
+              title={isOn ? `${keyName(cell.k)} — drag up/down to change note` : undefined}
               onPointerDown={(e) => {
                 e.preventDefault();
-                const erase = e.button === 2 || isOn;
-                paint.current = erase ? 'off' : 'on';
-                toggle(i, erase ? 'off' : 'on');
-                if (!erase) engine.preview(channel.id);
+                if (e.button === 2) { paint.current = 'off'; toggle(i, 'off'); return; }
+                if (isOn) {
+                  // start a pitch drag; a plain click (no vertical move) removes the step
+                  drag.current = { step: i, startY: e.clientY, baseKey: cell.k, lastKey: cell.k, mode: 'click' };
+                  return;
+                }
+                paint.current = 'on';
+                toggle(i, 'on');
+                engine.preview(channel.id);
               }}
               onPointerEnter={() => {
                 if (!paint.current) return;
                 if (paint.current === 'on' && !isOn) toggle(i, 'on');
                 if (paint.current === 'off' && isOn) toggle(i, 'off');
               }}
-            />
+            >
+              {isOn && <span className={s.stepNote}>{keyName(cell.k)}</span>}
+            </button>
           );
         })}
       </div>
@@ -225,8 +253,8 @@ export default function ChannelRack() {
         <div className={s.spacer} />
         <span className={s.dim}>
           {ui.touch
-            ? 'Tap = step on/off · tap and hold = remove · drag to paint'
-            : 'Left-click = add step · Right-click = remove · drag to paint'}
+            ? 'Tap = add/remove · drag a lit step up/down = pitch'
+            : 'Click = add · right-click = remove · drag a lit step up/down = pitch'}
         </span>
       </div>
     </div>
