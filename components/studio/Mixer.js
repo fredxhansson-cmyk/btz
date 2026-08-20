@@ -303,6 +303,7 @@ export default function Mixer() {
         <span className={s.dim}>Selected: {insert ? insert.name : '—'}</span>
         <div className={s.spacer} />
         <button type="button" className={s.btn} onClick={() => dispatch({ type: 'insert.add' })}>+ Insert</button>
+        <button type="button" className={s.btn} onClick={() => dispatch({ type: 'insert.addBus' })} title="Add a group bus — route channels into it to mix them together">+ Bus</button>
       </div>
 
       <Spectrum />
@@ -321,6 +322,17 @@ export default function Mixer() {
               <option value="">+ Add effect</option>
               {EFFECT_LIST.map((fx) => <option key={fx.id} value={fx.id}>{fx.name}</option>)}
             </select>
+            {!isMaster && insert && (
+              <select
+                className={s.select}
+                value={insert.output || 'master'}
+                onChange={(e) => dispatch({ type: 'insert.update', id: insert.id, patch: { output: e.target.value } })}
+                title="Route this channel's output to a group bus or the master"
+              >
+                <option value="master">Out → Master</option>
+                {project.inserts.filter((i) => i.id !== insert.id).map((i) => <option key={i.id} value={i.id}>Out → {i.name}</option>)}
+              </select>
+            )}
           </div>
           <div className={s.fxList}>
             {isMaster && <Mastering />}
