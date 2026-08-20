@@ -22,7 +22,7 @@ const KEYS = MAX_KEY - MIN_KEY + 1;
 let clipboard = [];   // survives view switches
 
 export default function PianoRoll() {
-  const { project, dispatch, engine, ui, setUi, setHint, play } = useStudio();
+  const { project, dispatch, engine, ui, setUi, setHint, play, addToArrangement } = useStudio();
   const wrapRef = useRef(null);
   const canvasRef = useRef(null);
   const view = useRef({ scrollX: 0, scrollY: 0, pxPerTick: 0.5, rowH: 13, inited: false });
@@ -586,6 +586,7 @@ export default function PianoRoll() {
         <select className={s.select} value={pattern.id} onChange={(e) => dispatch({ type: 'pattern.select', id: e.target.value })}>
           {project.patterns.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
+        <button type="button" className={`${s.btn} ${s.on}`} onClick={addToArrangement} title="Place this pattern into the song arrangement">＋ Arrangement</button>
         <div className={s.modeSw}>
           {[['draw', 'Draw'], ['select', 'Select'], ['erase', 'Erase']].map(([id, label]) => (
             <button

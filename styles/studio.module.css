@@ -9,7 +9,7 @@
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-ui);
-  font-size: 13.5px;
+  font-size: 14px;
   user-select: none;
   overflow: hidden;
 }
@@ -166,7 +166,7 @@
 .group { display: flex; align-items: center; gap: 5px; }
 .btn {
   background: var(--surface); border: 1px solid var(--line); color: var(--text);
-  padding: 6px 12px; border-radius: var(--r-8); cursor: pointer; font-size: 12.5px;
+  padding: 7px 13px; border-radius: var(--r-8); cursor: pointer; font-size: 13px;
 }
 .btn:hover { background: #3a3f48; }
 .btn.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent-ink); }
@@ -219,8 +219,8 @@
 }
 .chanName:hover { background: #31363e; color: #fff; }
 .tinyBtn {
-  width: 19px; height: 19px; border-radius: 3px; flex: none; cursor: pointer;
-  background: var(--panel); border: 1px solid var(--line); color: #868d97; font-size: 11px; line-height: 1;
+  width: 24px; height: 24px; border-radius: var(--r-4); flex: none; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--line-2); color: var(--text-2); font-size: 12.5px; line-height: 1;
 }
 .muteOn { background: var(--red); color: #2a0000; border-color: #7a1f1f; }
 .soloOn { background: var(--accent); color: var(--accent-ink); border-color: var(--accent-ink); }
@@ -228,12 +228,12 @@
 .miniKnobs { display: flex; gap: 2px; }
 .insBadge {
   background: var(--surface); border: 1px solid var(--line2); color: var(--text-3);
-  font-size: 10.5px; padding: 2px 5px; border-radius: 3px; cursor: pointer; flex: none;
+  font-size: 11.5px; padding: 4px 8px; border-radius: var(--r-4); cursor: pointer; flex: none;
 }
 .insBadge:hover { color: var(--blue); border-color: var(--blue); }
 .xBtn {
-  width: 18px; height: 18px; border-radius: 3px; flex: none; cursor: pointer;
-  background: transparent; border: 0; color: var(--text-4); font-size: 14px; line-height: 1;
+  width: 30px; height: 30px; border-radius: var(--r-8); flex: none; cursor: pointer;
+  background: transparent; border: 0; color: var(--text-3); font-size: 18px; line-height: 1;
 }
 .xBtn:hover { color: var(--red); background: rgba(255,90,90,0.12); }
 
@@ -586,8 +586,8 @@
 .soundRow { display: flex; align-items: center; gap: 2px; border-radius: 4px; }
 .soundRow:hover { background: rgba(255,255,255,0.06); }
 .previewBtn {
-  width: 20px; height: 20px; flex: none; border-radius: 3px; cursor: pointer;
-  background: var(--panel); border: 1px solid var(--line); color: var(--text-3); font-size: 10.5px; line-height: 1;
+  width: 32px; height: 30px; flex: none; border-radius: var(--r-8); cursor: pointer;
+  background: var(--surface); border: 1px solid var(--line-3); color: var(--accent); font-size: 15px; line-height: 1;
 }
 .previewBtn:hover { background: var(--accent); color: var(--accent-ink); border-color: var(--accent-ink); }
 .soundName {
@@ -727,10 +727,11 @@
 }
 .chip.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .aiGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
-.aiCard { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
+.aiCard { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-10); padding: 11px; }
+.aiCardBtns > button { height: 30px; min-width: 34px; }
 .aiKept { border-color: var(--green); box-shadow: 0 0 0 1px rgba(126,231,135,0.25); }
 .aiCardTop { display: flex; align-items: center; gap: 6px; font-size: 13px; margin-bottom: 6px; }
-.aiCardBtns { display: flex; align-items: center; gap: 4px; }
+.aiCardBtns { display: flex; align-items: center; gap: 6px; }
 .grooveGrid { display: flex; flex-wrap: wrap; gap: 8px; }
 .grooveRow {
   display: flex; align-items: center; gap: 6px; background: var(--panel);

@@ -160,7 +160,7 @@ function ChannelRow({ channel, pattern, steps, selected }) {
 }
 
 export default function ChannelRack() {
-  const { project, dispatch, engine, ui, setUi } = useStudio();
+  const { project, dispatch, engine, ui, setUi, addToArrangement } = useStudio();
   const pattern = project.patterns.find((p) => p.id === project.activePattern) || project.patterns[0];
   const steps = patternSteps(pattern);
   const headRef = useRef(null);
@@ -210,6 +210,12 @@ export default function ChannelRack() {
           />
         </div>
         <div className={s.spacer} />
+        <button
+          type="button"
+          className={`${s.btn} ${s.on}`}
+          onClick={addToArrangement}
+          title="Place this pattern into the song arrangement"
+        >＋ Add to Arrangement</button>
         <button
           type="button"
           className={s.btn}
