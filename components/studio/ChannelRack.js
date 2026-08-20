@@ -6,7 +6,7 @@ import { patternSteps } from '../../lib/studio/sequencer';
 import { INSTRUMENTS } from '../../lib/studio/audio/instruments';
 import Knob from './Knob';
 
-const STEP_W = 26;
+const STEP_W = 34;
 
 function ChannelRow({ channel, pattern, steps, selected }) {
   const { dispatch, engine, setUi, project, recordAuto } = useStudio();
@@ -137,7 +137,7 @@ function ChannelRow({ channel, pattern, steps, selected }) {
               type="button"
               className={[s.step, isOn ? s.stepOn : '', beat ? s.stepBeat : '', bar ? s.stepBar : ''].filter(Boolean).join(' ')}
               style={isOn ? { background: channel.color, opacity: 0.45 + cell.v * 0.55 } : undefined}
-              title={isOn ? `${keyName(cell.k)} — drag up/down to change note` : undefined}
+              title={isOn ? `${keyName(cell.k)} — drag up/down or scroll to change the note` : undefined}
               onPointerDown={(e) => {
                 e.preventDefault();
                 if (e.button === 2) { paint.current = 'off'; toggle(i, 'off'); return; }
@@ -154,6 +154,12 @@ function ChannelRow({ channel, pattern, steps, selected }) {
                 if (!paint.current) return;
                 if (paint.current === 'on' && !isOn) toggle(i, 'on');
                 if (paint.current === 'off' && isOn) toggle(i, 'off');
+              }}
+              onWheel={(e) => {
+                if (!isOn) return;
+                const key = clamp(cell.k + (e.deltaY < 0 ? 1 : -1), 0, 127);
+                dispatch({ type: 'step.pitch', patternId: pattern.id, channelId: channel.id, step: i, key, live: true });
+                engine.preview(channel.id, key, 0.9);
               }}
             >
               {isOn && <span className={s.stepNote}>{keyName(cell.k)}</span>}
