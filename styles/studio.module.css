@@ -123,7 +123,7 @@
 }
 .sideTitle {
   display: block; padding: 8px 10px; font-size: 10px; letter-spacing: 1.5px;
-  color: #666d77; border-bottom: 1px solid var(--line);
+  color: var(--muted); text-transform: uppercase; border-bottom: 1px solid var(--line);
 }
 .sideSec { border-bottom: 1px solid #202329; }
 .sideHead {
@@ -136,10 +136,10 @@
 .sideItem {
   display: flex; align-items: center; gap: 7px; width: 100%;
   background: transparent; border: 0; color: var(--text); text-align: left;
-  padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11.5px;
+  padding: 9px 9px; border-radius: var(--r-9); cursor: pointer; font-size: 12.5px;
 }
-.sideItem:hover { background: rgba(255,255,255,0.07); }
-.sideItem.sel { background: rgba(77,225,193,0.18); }
+.sideItem:hover { background: var(--hover); }
+.sideItem.sel { background: var(--selected); }
 .sideItemMain {
   display: flex; align-items: center; gap: 7px; flex: 1;
   background: transparent; border: 0; color: inherit; text-align: left; cursor: pointer; font-size: 11.5px;
@@ -150,7 +150,7 @@
   color: #9aa1ab; padding: 5px; border-radius: 4px; cursor: pointer; font-size: 11px;
 }
 .sideAdd:hover { border-color: var(--accent); color: var(--accent); }
-.swatch { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+.swatch { width: 3px; height: 16px; border-radius: var(--r-2); flex: none; }
 .dim { color: var(--dim); font-size: 11px; }
 .helpBox { padding: 4px 8px; color: #8d949e; font-size: 11px; line-height: 1.7; }
 .helpBox p { margin: 0; }
@@ -569,8 +569,8 @@
 /* --------------------------------------------------------- sound library */
 .sideTop { display: flex; align-items: center; gap: 4px; padding: 6px; border-bottom: 1px solid var(--line); }
 .search {
-  flex: 1; min-width: 0; background: #14161a; border: 1px solid var(--line);
-  color: var(--text); border-radius: 5px; padding: 6px 8px; font-size: 11.5px;
+  flex: 1; min-width: 0; background: var(--field); border: 1px solid var(--line-strong);
+  color: var(--text); border-radius: var(--r-10); padding: 9px 11px; font-size: 12px;
 }
 .search:focus { outline: none; border-color: var(--accent); }
 .sideCount {
