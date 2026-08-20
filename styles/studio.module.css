@@ -8,7 +8,7 @@
   grid-template-columns: minmax(0, 1fr);
   background: var(--bg);
   color: var(--text);
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-ui);
   font-size: 12px;
   user-select: none;
   overflow: hidden;
@@ -32,7 +32,7 @@
   width: 22px; height: 22px; border-radius: 5px;
   background: linear-gradient(150deg, var(--accent), #9bd633);
   color: var(--accent-ink); display: grid; place-items: center; font-size: 11px;
-  box-shadow: 0 1px 4px rgba(200,242,76,0.35);
+  box-shadow: 0 1px 4px rgba(77,225,193,0.35);
 }
 .brandName { font-size: 13px; letter-spacing: 1.4px; color: #e7ebf0; }
 .brandName b { color: var(--accent); font-weight: 700; }
@@ -110,7 +110,7 @@
   display: flex; align-items: center; gap: 7px;
 }
 .tab:hover { color: var(--text); }
-.tab.on { color: #fff; border-bottom-color: var(--accent); background: rgba(200,242,76,0.08); }
+.tab.on { color: #fff; border-bottom-color: var(--accent); background: rgba(77,225,193,0.08); }
 .tabHint { font-size: 9px; color: #5c636d; border: 1px solid #3a3f47; border-radius: 3px; padding: 0 3px; }
 
 /* ------------------------------------------------------------------ body */
@@ -140,7 +140,7 @@
   padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11.5px;
 }
 .sideItem:hover { background: rgba(255,255,255,0.07); }
-.sideItem.sel { background: rgba(200,242,76,0.18); }
+.sideItem.sel { background: rgba(77,225,193,0.18); }
 .sideItemMain {
   display: flex; align-items: center; gap: 7px; flex: 1;
   background: transparent; border: 0; color: inherit; text-align: left; cursor: pointer; font-size: 11.5px;
@@ -198,13 +198,13 @@
 .rulerBar { border-left-color: #4a5058; color: #98a0aa; }
 .stepPlayhead {
   position: absolute; top: 0; left: 0; width: 26px;
-  background: rgba(200,242,76,0.12); border-left: 2px solid rgba(200,242,76,0.85);
+  background: rgba(77,225,193,0.12); border-left: 2px solid rgba(77,225,193,0.85);
   pointer-events: none; opacity: 0; z-index: 2;
 }
 
 .chanRow { display: flex; align-items: center; height: 30px; border-bottom: 1px solid #0c0e12; }
 .chanRow:hover { background: rgba(255,255,255,0.02); }
-.chanSel { background: rgba(200,242,76,0.07); }
+.chanSel { background: rgba(77,225,193,0.07); }
 .chanLeft { width: 330px; flex: none; display: flex; align-items: center; gap: 5px; padding-right: 8px; }
 .chanColor { width: 4px; height: 24px; border-radius: 2px; flex: none; }
 .led { background: transparent; border: 0; padding: 0 2px; cursor: pointer; }
@@ -212,7 +212,7 @@
   display: block; width: 9px; height: 9px; border-radius: 50%;
   background: #35393f; border: 1px solid #14161a;
 }
-.ledOn { background: var(--accent); box-shadow: 0 0 7px rgba(200,242,76,0.75); }
+.ledOn { background: var(--accent); box-shadow: 0 0 7px rgba(77,225,193,0.75); }
 .chanName {
   flex: 1; min-width: 0; text-align: left; background: #262a31; border: 1px solid var(--line);
   color: var(--text); padding: 4px 7px; border-radius: 4px; cursor: pointer; font-size: 11.5px;
@@ -267,7 +267,7 @@
   background: #262a31; border: 1px solid var(--line); border-radius: 5px; padding: 7px 4px; cursor: pointer;
 }
 .strip:hover { background: #2b3038; }
-.stripSel { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(200,242,76,0.35); }
+.stripSel { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(77,225,193,0.35); }
 .stripMaster { background: #2d2a26; border-color: #4a3a20; }
 .stripName {
   font-size: 10.5px; color: #d6dae0; text-align: center; width: 100%;
@@ -372,7 +372,7 @@
 }
 .pad:hover { border-color: #5b626c; }
 .pad:active { transform: translateY(1px); }
-.padSel { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(200,242,76,0.4), inset 0 1px 0 rgba(255,255,255,0.08); }
+.padSel { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(77,225,193,0.4), inset 0 1px 0 rgba(255,255,255,0.08); }
 .padMuted { opacity: 0.42; }
 .padEmpty { background: #212429; border-style: dashed; cursor: default; opacity: 0.45; }
 .padGlow {
@@ -390,7 +390,7 @@
 }
 .padChoke {
   position: absolute; top: 6px; right: 7px; font-size: 8px; color: #ffd8a8;
-  background: rgba(200,242,76,0.18); border-radius: 3px; padding: 1px 3px; pointer-events: none;
+  background: rgba(77,225,193,0.18); border-radius: 3px; padding: 1px 3px; pointer-events: none;
 }
 .padHint { font-size: 10.5px; color: #7d848e; line-height: 1.6; }
 .padHint b { color: var(--accent); font-weight: 600; }
@@ -433,8 +433,8 @@
 .stepCursor {
   position: absolute; top: 8px; bottom: 8px; width: var(--stepw, 38px);
   left: calc(12px + var(--step) * (var(--stepw, 38px) + 4px));
-  border: 1px solid rgba(200,242,76,0.9); border-radius: 5px;
-  background: rgba(200,242,76,0.12); pointer-events: none; opacity: 0;
+  border: 1px solid rgba(77,225,193,0.9); border-radius: 5px;
+  background: rgba(77,225,193,0.12); pointer-events: none; opacity: 0;
 }
 
 .dmKnobs {
@@ -443,7 +443,7 @@
 }
 .dmOverview { flex: 1; min-height: 0; overflow: auto; padding: 8px 12px; }
 .ovRow { display: flex; align-items: center; gap: 8px; height: 22px; }
-.ovSel { background: rgba(200,242,76,0.08); border-radius: 4px; }
+.ovSel { background: rgba(77,225,193,0.08); border-radius: 4px; }
 .ovName {
   width: 118px; flex: none; display: flex; align-items: center; gap: 6px;
   background: transparent; border: 0; color: #9aa1ab; font-size: 10.5px;
@@ -473,7 +473,7 @@
 }
 .laneItem { display: flex; align-items: center; gap: 6px; padding: 3px 4px; border-radius: 4px; }
 .laneItem:hover { background: rgba(255,255,255,0.05); }
-.laneItem.sel { background: rgba(200,242,76,0.14); }
+.laneItem.sel { background: rgba(77,225,193,0.14); }
 .laneName {
   flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px;
   background: transparent; border: 0; color: var(--text); cursor: pointer;
@@ -624,7 +624,7 @@
   font-size: 8.5px; letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .navBtn span + * { min-width: 0; }
-.navBtn.on { color: #fff; border-top-color: var(--accent); background: rgba(200,242,76,0.09); }
+.navBtn.on { color: #fff; border-top-color: var(--accent); background: rgba(77,225,193,0.09); }
 .navIcon { font-size: 14px; line-height: 1; }
 
 /* bigger targets when a finger is the pointer */

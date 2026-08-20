@@ -1,48 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
 /* ============================================================================
    BTZ Design System — tokens (single source of truth)
-   The whole app (CSS modules + canvas via lib/studio/theme.js) reads from here.
-   A redesign = change these values, nothing else.
-   Mirrored to the Claude Design "BTZ" project.
+   Pulled from the Claude Design "BTZ" project (styles.css) and mapped onto the
+   app's token names. A redesign = change these values, nothing else.
    ========================================================================== */
 :root {
-  /* --- surfaces (near-black, layered) --- */
-  --bg:      #0a0b0e;   /* app background */
-  --panel:   #14161c;   /* raised panels: drum grid, mixer, library */
-  --panel2:  #0f1116;   /* deep wells / step-grid background */
-  --surface: #1b1e26;   /* buttons, inputs, cells */
-  --line:    #05060a;   /* hard borders */
-  --line2:   #262a33;   /* soft dividers */
+  /* --- surfaces (warm near-black, layered) --- */
+  --bg:      #0c0c0b;   /* app background */
+  --panel:   #0f0f0e;   /* raised panels: drum grid, mixer, library */
+  --panel2:  #0d0d0c;   /* deep wells / step-grid background */
+  --surface: #161613;   /* buttons, inputs, cells (field) */
+  --line:    #22221c;   /* borders */
+  --line2:   #2a2a23;   /* soft dividers */
 
-  /* --- text --- */
-  --text:      #e7ebf0;
-  --dim:       #8b93a1;
-  --text-mute: #5b626e;
+  /* --- text (warm off-white) --- */
+  --text:      #edebe6;
+  --dim:       #b9b6ae;
+  --text-mute: #706e67;
 
-  /* --- accent: lime / chartreuse --- */
-  --accent:        #c8f24c;
-  --accent-strong: #d8ff62;
-  --accent-ink:    #16210a;                 /* text on accent */
-  --accent-soft:   rgba(200,242,76,0.14);   /* tint fills */
-  --accent-glow:   rgba(200,242,76,0.38);   /* glow */
+  /* --- accent: teal / mint --- */
+  --accent:        #4de1c1;
+  --accent-strong: #6ef0d4;
+  --accent-ink:    #0c0c0b;                 /* text on accent */
+  --accent-soft:   rgba(77,225,193,0.14);   /* tint fills */
+  --accent-glow:   rgba(77,225,193,0.40);   /* glow */
 
-  /* --- status --- */
-  --green: #8ce99a;
-  --blue:  #5b9dff;
-  --red:   #ff5a6a;
-  --warn:  #ffd93d;
+  /* --- status / semantic --- */
+  --green: #d6ff3f;   /* meter ok (lime) */
+  --blue:  #7fb2ff;
+  --red:   #ff5c36;   /* rec / clip (coral) */
+  --warn:  #ffb000;   /* amber */
+  --meter-grad: linear-gradient(90deg, #d6ff3f, #ffb000);
 
   /* --- radii (rounded) --- */
   --r-sm:   6px;
   --r-md:   10px;
   --r-lg:   14px;
   --r-pill: 999px;
-  --r-cell: 5px;
+  --r-cell: 6px;
 
   /* --- elevation / glow --- */
-  --shadow-pop: 0 14px 40px rgba(0,0,0,0.6);
-  --glow-accent: 0 0 12px var(--accent-glow);
+  --shadow-pop: 0 14px 40px rgba(0,0,0,0.62);
+  --glow-accent: 0 0 16px -2px var(--accent-glow);
 
   /* --- type --- */
-  --font-ui:   system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-ui:   'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
 }
