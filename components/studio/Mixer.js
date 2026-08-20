@@ -38,9 +38,11 @@ function Fader({ value, onChange, color = accent() }) {
 }
 
 function Strip({ insert, master }) {
-  const { project, dispatch, engine } = useStudio();
+  const { project, dispatch, engine, recordAuto } = useStudio();
   const meterRef = useRef(null);
   const selected = master ? project.selectedInsert === 'master' : project.selectedInsert === insert.id;
+  const volSpec = master ? { min: 0, max: 1.4, def: 0.75 } : { min: 0, max: 1.2, def: 0.8 };
+  const volTarget = master ? 'mix|master||vol' : `mix|insert|${insert ? insert.id : ''}|vol`;
 
   useRaf(() => {
     if (!meterRef.current) return;
@@ -50,9 +52,11 @@ function Strip({ insert, master }) {
   });
 
   const vol = master ? project.master.vol : insert.vol;
-  const setVol = (v, live) => (master
-    ? dispatch({ type: 'master', patch: { vol: v }, live, id: 'mastervol' })
-    : dispatch({ type: 'insert.update', id: insert.id, patch: { vol: v }, live, key: 'vol' }));
+  const setVol = (v, live) => {
+    if (master) dispatch({ type: 'master', patch: { vol: v }, live, id: 'mastervol' });
+    else dispatch({ type: 'insert.update', id: insert.id, patch: { vol: v }, live, key: 'vol' });
+    if (live && recordAuto) recordAuto(volTarget, volSpec, v);
+  };
 
   const routed = master ? [] : project.channels.filter((c) => c.insert === insert.id);
 
@@ -75,7 +79,7 @@ function Strip({ insert, master }) {
         size={26} label={null}
         spec={{ min: -1, max: 1, def: 0, label: 'Pan' }}
         value={master ? 0 : insert.pan}
-        onChange={(v, live) => !master && dispatch({ type: 'insert.update', id: insert.id, patch: { pan: v }, live, key: 'pan' })}
+        onChange={(v, live) => { if (!master) { dispatch({ type: 'insert.update', id: insert.id, patch: { pan: v }, live, key: 'pan' }); if (live && recordAuto) recordAuto(`mix|insert|${insert.id}|pan`, { min: -1, max: 1, def: 0 }, v); } }}
       />
       <div className={s.stripBody}>
         <Fader value={vol} onChange={setVol} color={master ? accent() : token('--blue')} />

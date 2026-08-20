@@ -250,6 +250,12 @@ export default function Automation() {
     <div className={s.panel}>
       <div className={s.panelHead}>
         <span className={s.panelTitle}>Automation</span>
+        <button
+          type="button"
+          className={ui.recAuto ? `${s.btn} ${s.recWrite}` : s.btn}
+          onClick={() => { setUi({ recAuto: !ui.recAuto }); setHint(ui.recAuto ? 'Automation write off.' : 'Automation write armed — play and move mixer knobs to record.'); }}
+          title="Arm automation write: play, then move mixer faders/pans to record a curve"
+        >{ui.recAuto ? '◉ Writing' : '◉ Write'}</button>
         <select className={s.select} value={pattern.id} onChange={(e) => dispatch({ type: 'pattern.select', id: e.target.value })}>
           {project.patterns.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>

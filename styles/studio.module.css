@@ -809,3 +809,5 @@
 .lufsBar { position: relative; height: 12px; margin: 6px 0 8px; background: var(--meter-track); border: 1px solid var(--line); border-radius: var(--r-sm); overflow: hidden; }
 .lufsFill { height: 100%; width: 0; background: var(--accent); border-radius: var(--r-sm) 0 0 var(--r-sm); }
 .lufsTarget { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--text); box-shadow: 0 0 0 1px var(--bg); }
+
+.recWrite { background: var(--rec); color: #fff; border-color: var(--rec); box-shadow: 0 0 10px -2px var(--rec); }
