@@ -155,7 +155,7 @@ export default function Playlist() {
       const by = y + (TRACK_H - MSH) / 2;
       ctx.font = '11px system-ui, sans-serif';
       ctx.fillStyle = token('--text-4');
-      ctx.fillText(`Tr ${t + 1}`, 8, y + 21);
+      ctx.fillText((d.project.trackNames && d.project.trackNames[t]) || `Tr ${t + 1}`, 8, y + 21);
       const muted = !!tMute[t];
       const soloed = !!tSolo[t];
       ctx.font = '10px system-ui, sans-serif';
@@ -350,7 +350,15 @@ export default function Playlist() {
       if (mk) { dispatch({ type: 'marker.remove', id: mk.id }); bump((n) => n + 1); }
       return;
     }
-    if (p.inLabels) return;
+    if (p.inLabels) {
+      const t = p.track;
+      if (t >= 0 && t < TRACKS && p.x < M_X) {
+        const cur = (dataRef.current.project.trackNames || {})[t] || `Track ${t + 1}`;
+        const name = window.prompt('Track name', cur);
+        if (name != null) { dispatch({ type: 'track.rename', track: t, name }); bump((n) => n + 1); }
+      }
+      return;
+    }
     const hit = clipAt(p.tick, p.track);
     if (hit) { dispatch({ type: 'pattern.select', id: hit.patternId }); setUi({ view: 'piano' }); }
   }, [dispatch, setUi]); // eslint-disable-line react-hooks/exhaustive-deps
