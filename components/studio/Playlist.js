@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import s from '../../styles/studio.module.css';
-import { accent, accentA } from '../../lib/studio/theme';
+import { accent, accentA, token } from '../../lib/studio/theme';
 import { useStudio, useRaf } from '../../lib/studio/StudioContext';
 import { BAR_TICKS, PPQ, snapTicks, SNAPS, clamp } from '../../lib/studio/constants';
 import { patternTicks, songLength } from '../../lib/studio/sequencer';
@@ -10,6 +10,10 @@ const LABEL_W = 96;
 const HEAD_H = 22;
 const TRACK_H = 34;
 const TRACKS = 10;
+const MSW = 17;
+const MSH = 16;
+const M_X = LABEL_W - 2 * MSW - 7;
+const S_X = LABEL_W - MSW - 4;
 
 export default function Playlist() {
   const { project, dispatch, engine, ui, setUi, play } = useStudio();
@@ -43,6 +47,10 @@ export default function Playlist() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const v = view.current;
     const d = dataRef.current;
+    const tMute = d.project.trackMute || {};
+    const tSolo = d.project.trackSolo || {};
+    const anySolo = Object.values(tSolo).some(Boolean);
+    const trackMuted = (t) => tMute[t] || (anySolo && !tSolo[t]);
 
     ctx.fillStyle = '#1b1d22';
     ctx.fillRect(0, 0, w, h);
@@ -92,7 +100,7 @@ export default function Playlist() {
       if (x + cw < LABEL_W || x > w) continue;
       const selected = drag.current && drag.current.id === clip.id;
       ctx.fillStyle = pat.color;
-      ctx.globalAlpha = 0.85;
+      ctx.globalAlpha = trackMuted(clip.track) ? 0.25 : 0.85;
       ctx.fillRect(Math.max(LABEL_W, x), y + 2, x < LABEL_W ? cw - (LABEL_W - x) : cw, TRACK_H - 5);
       ctx.globalAlpha = 1;
       ctx.strokeStyle = selected ? '#fff' : 'rgba(0,0,0,0.6)';
@@ -140,11 +148,23 @@ export default function Playlist() {
     ctx.fillRect(0, HEAD_H, LABEL_W, h - HEAD_H);
     ctx.fillStyle = '#0e1013';
     ctx.fillRect(LABEL_W - 1, 0, 1, h);
-    ctx.font = '11px system-ui, sans-serif';
     for (let t = 0; t < TRACKS; t++) {
       const y = HEAD_H + t * TRACK_H;
-      ctx.fillStyle = '#7d848e';
-      ctx.fillText(`Track ${t + 1}`, 10, y + 21);
+      const by = y + (TRACK_H - MSH) / 2;
+      ctx.font = '11px system-ui, sans-serif';
+      ctx.fillStyle = token('--text-4');
+      ctx.fillText(`Tr ${t + 1}`, 8, y + 21);
+      const muted = !!tMute[t];
+      const soloed = !!tSolo[t];
+      ctx.font = '10px system-ui, sans-serif';
+      ctx.fillStyle = muted ? token('--rec') : token('--surface');
+      ctx.fillRect(M_X, by, MSW, MSH);
+      ctx.fillStyle = muted ? '#ffffff' : token('--text-4');
+      ctx.fillText('M', M_X + 4, by + 11);
+      ctx.fillStyle = soloed ? accent() : token('--surface');
+      ctx.fillRect(S_X, by, MSW, MSH);
+      ctx.fillStyle = soloed ? token('--accent-ink') : token('--text-4');
+      ctx.fillText('S', S_X + 5, by + 11);
     }
 
     // loop handles in the ruler
@@ -208,7 +228,18 @@ export default function Playlist() {
       play('song', tick);
       return;
     }
-    if (p.inLabels || p.track < 0 || p.track >= TRACKS) return;
+    if (p.inLabels) {
+      const t = p.track;
+      if (t >= 0 && t < TRACKS) {
+        const by = HEAD_H + t * TRACK_H + (TRACK_H - MSH) / 2;
+        if (p.y >= by && p.y <= by + MSH) {
+          if (p.x >= M_X && p.x < M_X + MSW) { dispatch({ type: 'track.mute', track: t }); bump((n) => n + 1); return; }
+          if (p.x >= S_X && p.x < S_X + MSW) { dispatch({ type: 'track.solo', track: t }); bump((n) => n + 1); return; }
+        }
+      }
+      return;
+    }
+    if (p.track < 0 || p.track >= TRACKS) return;
 
     const hit = clipAt(p.tick, p.track);
     if (e.button === 2) {
@@ -282,6 +313,13 @@ export default function Playlist() {
     bump((n) => n + 1);
   }, []);
 
+  const onDoubleClick = useCallback((e) => {
+    const p = posFromEvent(e);
+    if (p.inHead || p.inLabels) return;
+    const hit = clipAt(p.tick, p.track);
+    if (hit) { dispatch({ type: 'pattern.select', id: hit.patternId }); setUi({ view: 'piano' }); }
+  }, [dispatch, setUi]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const onWheel = useCallback((e) => {
     const v = view.current;
     if (e.ctrlKey || e.metaKey) v.pxPerTick = clamp(v.pxPerTick * (e.deltaY < 0 ? 1.15 : 0.87), 0.02, 1.2);
@@ -344,6 +382,7 @@ export default function Playlist() {
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
+          onDoubleClick={onDoubleClick}
           onContextMenu={(e) => e.preventDefault()}
         />
       </div>
