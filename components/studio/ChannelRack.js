@@ -9,7 +9,7 @@ import Knob from './Knob';
 const STEP_W = 26;
 
 function ChannelRow({ channel, pattern, steps, selected }) {
-  const { dispatch, engine, setUi, project } = useStudio();
+  const { dispatch, engine, setUi, project, recordAuto } = useStudio();
   const paint = useRef(null);
   const drag = useRef(null);
   const notes = (pattern.notes && pattern.notes[channel.id]) || [];
@@ -77,13 +77,13 @@ function ChannelRow({ channel, pattern, steps, selected }) {
             size={22} label={null}
             spec={{ min: -1, max: 1, def: 0, label: 'Pan' }}
             value={channel.pan}
-            onChange={(v, live) => dispatch({ type: 'channel.update', id: channel.id, patch: { pan: v }, live, key: 'pan' })}
+            onChange={(v, live) => { dispatch({ type: 'channel.update', id: channel.id, patch: { pan: v }, live, key: 'pan' }); if (live && recordAuto) recordAuto(`mix|channel|${channel.id}|pan`, { min: -1, max: 1, def: 0 }, v); }}
           />
           <Knob
             size={22} label={null} color="#7ee787"
             spec={{ min: 0, max: 1.2, def: 0.8, label: 'Volume' }}
             value={channel.vol}
-            onChange={(v, live) => dispatch({ type: 'channel.update', id: channel.id, patch: { vol: v }, live, key: 'vol' })}
+            onChange={(v, live) => { dispatch({ type: 'channel.update', id: channel.id, patch: { vol: v }, live, key: 'vol' }); if (live && recordAuto) recordAuto(`mix|channel|${channel.id}|vol`, { min: 0, max: 1.2, def: 0.8 }, v); }}
           />
         </div>
         <button
