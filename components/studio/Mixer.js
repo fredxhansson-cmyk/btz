@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import s from '../../styles/studio.module.css';
 import { accent, token } from '../../lib/studio/theme';
 import { useStudio, useRaf } from '../../lib/studio/StudioContext';
 import { clamp, gainToDb } from '../../lib/studio/constants';
 import { EFFECT_LIST, EFFECTS, mergedFxParams } from '../../lib/studio/audio/effects';
-import { MASTER_PRESETS, masterPreset, matchGain } from '../../lib/studio/mastering';
+import { MASTER_PRESETS, masterPreset, matchGain, measureBufferLufs } from '../../lib/studio/mastering';
 import Knob, { ParamGrid } from './Knob';
 
 function Fader({ value, onChange, color = accent() }) {
@@ -189,6 +189,35 @@ function Mastering() {
   const vals = useRef({ i: null, s: -70, m: -70, p: 0 });
   const target = project.master.target == null ? -14 : project.master.target;
 
+  // Reference track: load a professionally-mastered song, measure its loudness,
+  // A/B against your mix and match your target to it.
+  const [refTrack, setRefTrack] = useState(null);
+  const refBuf = useRef(null);
+  const refSrc = useRef(null);
+  const fileRef = useRef(null);
+  const loadRef = async (file) => {
+    try {
+      const ctx = engine.ensureContext();
+      const buf = await ctx.decodeAudioData(await file.arrayBuffer());
+      refBuf.current = buf;
+      const lufs = measureBufferLufs(buf);
+      setRefTrack({ name: file.name.replace(/\.[^.]+$/, '').slice(0, 26), lufs, playing: false });
+      setHint(`Reference "${file.name}" — ${lufs.toFixed(1)} LUFS.`);
+    } catch (e) { setHint(`Could not read the reference: ${e.message}`); }
+  };
+  const toggleRefPlay = () => {
+    if (refSrc.current) { try { refSrc.current.stop(); } catch (e) { /* noop */ } refSrc.current = null; setRefTrack((r) => (r ? { ...r, playing: false } : r)); return; }
+    if (!refBuf.current) return;
+    const ctx = engine.ensureContext();
+    const src = ctx.createBufferSource();
+    src.buffer = refBuf.current;
+    src.connect(ctx.destination);
+    src.onended = () => { refSrc.current = null; setRefTrack((r) => (r ? { ...r, playing: false } : r)); };
+    src.start();
+    refSrc.current = src;
+    setRefTrack((r) => (r ? { ...r, playing: true } : r));
+  };
+
   useRaf(() => {
     const l = engine.updateLoudness();
     vals.current = { i: l.integrated, s: l.short, m: l.momentary, p: l.peak };
@@ -276,6 +305,25 @@ function Mastering() {
           }}
         >Match target level</button>
       </div>
+
+      <div className={s.loudRow}>
+        <button type="button" className={s.btn} onClick={() => fileRef.current && fileRef.current.click()}>Load reference…</button>
+        {refTrack && (
+          <>
+            <span className={s.dim}>Ref: {refTrack.name} · {refTrack.lufs.toFixed(1)} LUFS</span>
+            <div className={s.spacer} />
+            <button type="button" className={refTrack.playing ? `${s.btn} ${s.on}` : s.btn} onClick={toggleRefPlay}>{refTrack.playing ? '■ Stop' : '▶ A/B'}</button>
+            <button
+              type="button"
+              className={s.btn}
+              title="Set your loudness target to match the reference"
+              onClick={() => { dispatch({ type: 'master', patch: { target: Math.round(refTrack.lufs) } }); setHint(`Target set to the reference: ${Math.round(refTrack.lufs)} LUFS.`); }}
+            >Match target to ref</button>
+          </>
+        )}
+        <input ref={fileRef} type="file" accept="audio/*" className={s.hiddenFile} onChange={(e) => { const f = e.target.files && e.target.files[0]; if (f) loadRef(f); e.target.value = ''; }} />
+      </div>
+
       <div className={s.helpBox}>
         Play the whole track once with the meter running — the integrated level is the one
         streaming services normalize against.
