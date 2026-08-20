@@ -31,8 +31,12 @@
   /* track / channel colors */
   --track-1:#D6FF3F; --track-2:#FF5C36; --track-3:#4DE1C1; --track-4:#B490FF; --track-5:#FFB000; --track-6:#7FB2FF;
 
-  /* radius */
-  --r-2:2px; --r-3:3px; --r-4:4px; --r-7:7px; --r-8:8px; --r-9:9px; --r-10:10px; --r-11:11px; --r-12:12px; --r-13:13px; --r-full:999px;
+  /* radius — 4-step scale from the design system (+ back-compat aliases) */
+  --r-xs:4px; --r-sm:8px; --r-md:12px; --r-lg:16px; --r-full:999px;
+  --r-2:2px; --r-3:4px; --r-4:4px; --r-7:8px; --r-8:8px; --r-9:8px; --r-10:10px; --r-11:12px; --r-12:12px; --r-13:12px;
+
+  /* control heights + minimum touch target (from the design system) */
+  --ctl:48px; --ctl-sm:40px; --ctl-lg:56px; --hit:44px;
 
   /* spacing */
   --s-2:2px; --s-3:3px; --s-4:4px; --s-5:5px; --s-6:6px; --s-7:7px; --s-8:8px; --s-9:9px; --s-10:10px; --s-11:11px; --s-12:12px; --s-14:14px; --s-16:16px; --s-18:18px; --s-20:20px;
@@ -54,11 +58,8 @@
   --blue: var(--track-6);
   --red: var(--rec);
   --warn: var(--track-5);
-  --r-sm: var(--r-8);
-  --r-md: var(--r-10);
-  --r-lg: var(--r-12);
   --r-pill: var(--r-full);
-  --r-cell: var(--r-4);
+  --r-cell: var(--r-xs);
   --shadow-pop: 0 14px 40px rgba(0,0,0,0.62);
   --glow-accent: 0 0 16px -2px var(--accent-glow);
   --font-ui: var(--font);

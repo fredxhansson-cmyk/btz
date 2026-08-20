@@ -64,7 +64,7 @@
 
 .transport { display: flex; gap: 4px; }
 .tbtn {
-  width: 40px; height: 40px; border-radius: var(--r-10); cursor: pointer;
+  width: var(--hit); height: var(--hit); border-radius: var(--r-10); cursor: pointer;
   background: var(--field-2); border: 1px solid var(--line-3); color: var(--text-2); font-size: 14px;
 }
 .tbtn:hover { background: var(--hover-strong); }
@@ -811,3 +811,10 @@
 .lufsTarget { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--text); box-shadow: 0 0 0 1px var(--bg); }
 
 .recWrite { background: var(--rec); color: #fff; border-color: var(--rec); box-shadow: 0 0 10px -2px var(--rec); }
+
+/* Design-system control heights: comfortable, touch-first tap targets. */
+.btn { min-height: 34px; }
+.select, .patSelect, .selectWide { min-height: 34px; }
+.touch .btn, .touch .tab, .touch .seg, .touch .menuBtn, .touch .select,
+.touch .patSelect, .touch .selectWide, .touch .tbtn { min-height: var(--hit); }
+.touch .tbtn { width: var(--hit); }
