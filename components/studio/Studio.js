@@ -13,6 +13,7 @@ import HelpOverlay from './HelpOverlay';
 import RecordPanel from './RecordPanel';
 import AiPanel from './AiPanel';
 import PluginPanel from './PluginPanel';
+import Onboarding from './Onboarding';
 import { clamp } from '../../lib/studio/constants';
 import { ROLES, padChannels } from '../../lib/studio/drums';
 import { isCoarsePointer } from '../../lib/studio/touch';
@@ -74,6 +75,16 @@ function Workspace({ installPrompt, onInstalled }) {
   const [help, setHelp] = useState(false);
   const [recOpen, setRecOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
+  const [onboard, setOnboard] = useState(false);
+
+  // Show the welcome guide on the first visit; reopenable via the Guide tab.
+  useEffect(() => {
+    try { if (!localStorage.getItem('btz.onboarding.v1')) setOnboard(true); } catch (e) { /* ignore */ }
+  }, []);
+  const closeOnboard = () => {
+    setOnboard(false);
+    try { localStorage.setItem('btz.onboarding.v1', '1'); } catch (e) { /* ignore */ }
+  };
 
   // Touch layout: bottom navigation, slide-over browser and bigger targets.
   useEffect(() => {
@@ -174,6 +185,7 @@ function Workspace({ installPrompt, onInstalled }) {
       {help && <HelpOverlay onClose={() => setHelp(false)} />}
       {recOpen && <RecordPanel onClose={() => setRecOpen(false)} />}
       {aiOpen && <AiPanel onClose={() => setAiOpen(false)} />}
+      {onboard && <Onboarding onClose={closeOnboard} />}
       {dropping && (
         <div className={s.dropHint}>
           <div className={s.dropCard}>Drop audio files to create sampler channels</div>
@@ -200,10 +212,13 @@ function Workspace({ installPrompt, onInstalled }) {
           Instrument
         </button>
         <button type="button" className={`${s.tab} ${s.aiTab}`} onClick={() => setAiOpen(true)}>
-          BTZ Brain<span className={s.tabHint}>AI</span>
+          <span className={s.aiSpark}>✨</span>BTZ Brain<span className={s.tabHint}>AI</span>
         </button>
         <button type="button" className={s.tab} onClick={() => setRecOpen(true)}>
           Record<span className={s.tabHint}>mic</span>
+        </button>
+        <button type="button" className={s.tab} onClick={() => setOnboard(true)}>
+          Guide
         </button>
         <button type="button" className={s.tab} onClick={() => setHelp(true)}>
           Help<span className={s.tabHint}>?</span>

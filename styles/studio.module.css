@@ -744,7 +744,48 @@
 }
 .statBox b { font-size: 20px; color: var(--accent); font-family: ui-monospace, monospace; }
 .statBox span { font-size: 11.5px; color: #7d848e; }
-.aiTab { color: #b197fc; }
-.aiTab .tabHint { border-color: #6b4fb0; color: #b197fc; }
+.aiTab {
+  color: var(--accent-ink); background: var(--accent); border: 0; border-radius: var(--r-pill);
+  padding: 7px 15px; margin: 4px 4px; font-weight: 600;
+  box-shadow: 0 0 18px -4px var(--accent-glow);
+}
+.aiTab:hover, .aiTab.on { color: var(--accent-ink); background: var(--accent-strong); }
+.aiTab .tabHint {
+  border-color: transparent; color: var(--accent-ink);
+  background: rgba(0,0,0,0.16); font-weight: 700;
+}
+.aiSpark { font-size: 13px; line-height: 1; margin-right: -2px; }
 .genreRow { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px; border-bottom: 1px solid #202329; }
 .genreRow .chip { font-size: 11.5px; padding: 3px 8px; }
+
+/* ------------------------------------------------------------- onboarding */
+.onbCard {
+  width: min(760px, 94vw); max-height: 90vh; overflow: auto;
+  background: var(--panel); border: 1px solid var(--line-4); border-radius: var(--r-13);
+  box-shadow: var(--shadow-pop);
+}
+.onbHead { display: flex; align-items: flex-start; gap: 13px; padding: 22px 24px 18px; border-bottom: 1px solid var(--line); }
+.onbHeadText { min-width: 0; }
+.onbMark {
+  width: 42px; height: 42px; border-radius: var(--r-11); background: var(--accent); color: var(--accent-ink);
+  display: grid; place-items: center; font-size: 18px; flex: none;
+}
+.onbTitle { font-size: 21px; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
+.onbSub { font-size: 14px; color: var(--text-3); margin-top: 3px; }
+.onbClose { margin-left: auto; background: transparent; border: 0; color: var(--text-4); font-size: 16px; cursor: pointer; padding: 4px 6px; }
+.onbClose:hover { color: var(--text); }
+.onbGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; padding: 20px 24px; }
+.onbFeat { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-11); padding: 15px 16px; }
+.onbFeatAccent { border-color: var(--accent); background: linear-gradient(180deg, var(--accent-soft), transparent), var(--card); }
+.onbIcon { font-size: 19px; line-height: 1; }
+.onbFeatTitle { font-size: 15px; font-weight: 600; color: var(--text); margin: 9px 0 5px; }
+.onbFeatDesc { font-size: 13.5px; line-height: 1.55; color: var(--text-3); }
+.onbFoot { display: flex; align-items: center; gap: 16px; padding: 6px 24px 24px; flex-wrap: wrap; }
+.onbFootHint { font-size: 13px; color: var(--muted); flex: 1; min-width: 220px; line-height: 1.5; }
+.onbFootHint b { color: var(--accent); font-weight: 600; }
+.onbStart {
+  background: var(--accent); color: var(--accent-ink); border: 0; border-radius: var(--r-10);
+  padding: 13px 26px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap;
+}
+.onbStart:hover { opacity: 0.9; }
+.touch .onbGrid { grid-template-columns: 1fr; }
