@@ -15,11 +15,14 @@ import AiPanel from './AiPanel';
 import PluginPanel from './PluginPanel';
 import Onboarding from './Onboarding';
 import PopOut from './PopOut';
+import AuthArea from '../AuthArea';
 import { clamp } from '../../lib/studio/constants';
 import { ROLES, padChannels } from '../../lib/studio/drums';
 import { isCoarsePointer } from '../../lib/studio/touch';
 import { refreshTheme } from '../../lib/studio/theme';
 import { useRaf } from '../../lib/studio/StudioContext';
+
+const CLERK = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 const KEYMAP = {
   z: 0, s: 1, x: 2, d: 3, c: 4, v: 5, g: 6, b: 7, h: 8, n: 9, j: 10, m: 11, ',': 12, l: 13, '.': 14,
@@ -333,6 +336,7 @@ function Workspace({ installPrompt, onInstalled }) {
             title="Install BTZ on this device"
           >Install app</button>
         )}
+        {CLERK && <AuthArea className={s.btn} />}
         <button
           type="button"
           className={s.btn}

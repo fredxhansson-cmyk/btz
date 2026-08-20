@@ -1,13 +1,14 @@
 /** @type {import('next').NextConfig} */
 const csp = [
   "default-src 'self'",
-  "img-src 'self' data: blob:",
+  "img-src 'self' data: blob: https://img.clerk.com https://*.clerk.com",
   "media-src 'self' data: blob:",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-  "style-src 'self' 'unsafe-inline'",
-  "font-src 'self' data:",
-  "connect-src 'self' data: blob:",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com https://js.stripe.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' data: https://fonts.gstatic.com",
+  "connect-src 'self' data: blob: https://*.clerk.accounts.dev https://*.clerk.com https://clerk-telemetry.com https://api.stripe.com",
   "worker-src 'self' blob:",
+  "frame-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com https://js.stripe.com https://hooks.stripe.com https://accounts.google.com",
   "frame-ancestors 'none'",
 ].join('; ');
 

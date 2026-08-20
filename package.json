@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@breezystack/lamejs": "^1.2.7",
+    "@clerk/nextjs": "^5.7.6",
     "next": "14.0.0",
     "react": "^18",
     "react-dom": "^18"
