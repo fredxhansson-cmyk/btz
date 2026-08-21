@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import s from '../../styles/studio.module.css';
 import { useStudio, useRaf } from '../../lib/studio/StudioContext';
+import { clamp } from '../../lib/studio/constants';
 
 // Compact, always-on mixer + mastering column for the desktop shell — the
 // right-hand panel from the FLOW Studio redesign. Live meters + quick M/S;
@@ -17,6 +18,8 @@ function Strip({ insert }) {
   const { project, dispatch, engine } = useStudio();
   const aRef = useRef(null);
   const bRef = useRef(null);
+  const zoneRef = useRef(null);
+  const dragging = useRef(false);
   const color = (project.channels.find((c) => c.insert === insert.id) || {}).color || 'var(--accent)';
 
   useRaf(() => {
@@ -27,14 +30,39 @@ function Strip({ insert }) {
 
   const faderPct = Math.max(0, Math.min(100, (insert.vol / 1.4) * 100));
 
+  // Drag anywhere in the vertical meter/fader zone to set this channel's volume.
+  const setVolFromEvent = (e) => {
+    const el = zoneRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const frac = clamp(1 - (e.clientY - r.top) / r.height, 0, 1);
+    dispatch({ type: 'insert.update', id: insert.id, patch: { vol: frac * 1.4 }, live: true, key: 'vol' });
+  };
+  const onFaderDown = (e) => {
+    e.stopPropagation();
+    dispatch({ type: 'select.insert', id: insert.id });
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragging.current = true;
+    setVolFromEvent(e);
+  };
+  const onFaderMove = (e) => { if (dragging.current) setVolFromEvent(e); };
+  const onFaderUp = (e) => { dragging.current = false; try { e.currentTarget.releasePointerCapture(e.pointerId); } catch (err) { /* ignore */ } };
+
   return (
     <div
       className={s.mcStrip}
       onPointerDown={() => dispatch({ type: 'select.insert', id: insert.id })}
-      title={`${insert.name} — open in Mixer for full control`}
+      title={`${insert.name} — drag the fader to set level; opens in Mixer for full control`}
     >
       <div className={s.mcPan} style={{ borderColor: color }}>{panLabel(insert.pan)}</div>
-      <div className={s.mcMeters}>
+      <div
+        className={s.mcMeters}
+        ref={zoneRef}
+        onPointerDown={onFaderDown}
+        onPointerMove={onFaderMove}
+        onPointerUp={onFaderUp}
+        title={`Volume ${Math.round(faderPct)}% — drag to change`}
+      >
         <div className={s.mcMeter}><div ref={aRef} className={s.mcMeterFill} style={{ background: `linear-gradient(0deg, ${color}, #FFB000)` }} /></div>
         <div className={s.mcMeter}><div ref={bRef} className={s.mcMeterFill} style={{ background: `linear-gradient(0deg, ${color}, #FFB000)` }} /></div>
         <div className={s.mcFader}><div className={s.mcFaderKnob} style={{ bottom: `${faderPct}%` }} /></div>

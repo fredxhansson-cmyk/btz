@@ -162,11 +162,11 @@
 }
 .mcStrip:hover { background: var(--hover); }
 .mcPan { width: 30px; height: 30px; flex: none; border-radius: 999px; border: 2px solid var(--accent); display: grid; place-items: center; font-size: 8.5px; color: var(--text-3); }
-.mcMeters { flex: 1; width: 100%; display: flex; justify-content: center; gap: 4px; min-height: 40px; }
-.mcMeter { width: 6px; border-radius: 3px; background: var(--meter-track); position: relative; overflow: hidden; }
+.mcMeters { flex: 1; width: 100%; display: flex; justify-content: center; gap: 4px; min-height: 40px; cursor: ns-resize; touch-action: none; }
+.mcMeter { width: 6px; border-radius: 3px; background: var(--meter-track); position: relative; overflow: hidden; pointer-events: none; }
 .mcMeterFill { position: absolute; left: 0; right: 0; bottom: 0; height: 0; }
-.mcFader { width: 3px; border-radius: 2px; background: var(--fader-track); position: relative; }
-.mcFaderKnob { position: absolute; left: -4px; right: -4px; height: 10px; border-radius: 3px; background: var(--fader-knob); }
+.mcFader { width: 4px; border-radius: 2px; background: var(--fader-track); position: relative; pointer-events: none; }
+.mcFaderKnob { position: absolute; left: -6px; right: -6px; height: 12px; border-radius: 3px; background: var(--fader-knob); box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
 .mcMS { display: flex; gap: 3px; }
 .mcTiny { font-size: 8.5px; font-weight: 700; padding: 2px 5px; border-radius: 4px; background: var(--meter-track); color: var(--muted-2); border: 0; cursor: pointer; font-family: inherit; }
 .mcMute { background: var(--rec); color: var(--accent-ink); }
