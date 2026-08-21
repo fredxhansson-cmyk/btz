@@ -30,8 +30,12 @@ const KEYMAP = {
   q: 12, 2: 13, w: 14, 3: 15, e: 16, r: 17, 5: 18, t: 19, 6: 20, y: 21, 7: 22, u: 23, i: 24,
 };
 
+// Distinct glyphs — but the text label under each is what carries the meaning.
 const NAV_ICONS = {
-  playlist: '▤', rack: '▦', piano: '🎹', drums: '⬢', mixer: '⧉', automation: '⤢',
+  playlist: '▤', rack: '🎛', piano: '🎹', drums: '▦', mixer: '🎚', automation: '∿',
+};
+const NAV_SHORT = {
+  playlist: 'Arrange', rack: 'Instr', piano: 'Piano', drums: 'Beat', automation: 'Auto', mixer: 'Mixer',
 };
 
 const TABS = [
@@ -242,6 +246,7 @@ function Workspace({ installPrompt, onInstalled }) {
       <div className={s.body}>
         {!ui.touch && (
           <nav className={s.iconRail}>
+            <span className={s.railGroupLbl}>Views</span>
             {TABS.map((t) => (
               <button
                 key={t.id}
@@ -249,26 +254,40 @@ function Workspace({ installPrompt, onInstalled }) {
                 title={`${t.label} · ${t.hint}`}
                 className={ui.view === t.id ? `${s.railBtn} ${s.on}` : s.railBtn}
                 onClick={() => setUi({ view: t.id })}
-              >{NAV_ICONS[t.id]}</button>
+              >
+                <span className={s.railIcon}>{NAV_ICONS[t.id]}</span>
+                <span className={s.railLbl}>{NAV_SHORT[t.id]}</span>
+              </button>
             ))}
-            <div className={s.railSpacer} />
-            <button type="button" title="BTZ Brain — AI generator" className={`${s.railBtn} ${s.aiRail}`} onClick={() => setAiOpen(true)}>✨</button>
-            <button type="button" title="Record from mic / input" className={s.railBtn} onClick={() => setRecOpen(true)}>◉</button>
+            <span className={s.railGroupLbl}>Tools</span>
+            <button type="button" title="BTZ Brain — AI beat generator" className={`${s.railBtn} ${s.aiRail}`} onClick={() => setAiOpen(true)}>
+              <span className={s.railIcon}>✨</span><span className={s.railLbl}>AI</span>
+            </button>
+            <button type="button" title="Record from mic or instrument" className={s.railBtn} onClick={() => setRecOpen(true)}>
+              <span className={s.railIcon}>◉</span><span className={s.railLbl}>Record</span>
+            </button>
             <button
               type="button"
               title="Instrument / plugin panel"
               className={ui.pluginOpen ? `${s.railBtn} ${s.on}` : s.railBtn}
               onClick={() => setUi({ pluginOpen: !ui.pluginOpen })}
-            >▣</button>
+            >
+              <span className={s.railIcon}>▣</span><span className={s.railLbl}>Plugin</span>
+            </button>
             <button
               type="button"
-              title="Open this panel in its own window — drag it to a second screen"
+              title="Pop this panel out into its own window (second screen)"
               className={detached.includes(ui.view) ? `${s.railBtn} ${s.on}` : s.railBtn}
               onClick={detach}
-            >⧉</button>
-            <div className={s.railDiv} />
-            <button type="button" title="Guided tour" className={s.railBtn} onClick={() => setOnboard(true)}>◎</button>
-            <button type="button" title="Keyboard shortcuts & help" className={s.railBtn} onClick={() => setHelp(true)}>?</button>
+            >
+              <span className={s.railIcon}>⧉</span><span className={s.railLbl}>Pop&nbsp;out</span>
+            </button>
+            <button type="button" title="Guided tour of the studio" className={s.railBtn} onClick={() => setOnboard(true)}>
+              <span className={s.railIcon}>◎</span><span className={s.railLbl}>Guide</span>
+            </button>
+            <button type="button" title="Keyboard shortcuts &amp; help" className={s.railBtn} onClick={() => setHelp(true)}>
+              <span className={s.railIcon}>?</span><span className={s.railLbl}>Help</span>
+            </button>
           </nav>
         )}
         {ui.touch && ui.browserOpen && (
