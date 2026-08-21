@@ -172,7 +172,7 @@ function ChannelRow({ channel, pattern, steps, selected }) {
 }
 
 export default function ChannelRack() {
-  const { project, dispatch, engine, ui, setUi, addToArrangement } = useStudio();
+  const { project, dispatch, engine, ui, setUi, addToArrangement, popOut } = useStudio();
   const pattern = project.patterns.find((p) => p.id === project.activePattern) || project.patterns[0];
   const steps = patternSteps(pattern);
   const headRef = useRef(null);
@@ -238,6 +238,18 @@ export default function ChannelRack() {
           className={s.btn}
           onClick={() => dispatch({ type: 'pattern.clone', id: pattern.id })}
         >Duplicate</button>
+        <button
+          type="button"
+          className={s.btn}
+          onClick={() => { if (window.confirm('Clear all notes in this pattern?')) dispatch({ type: 'pattern.clearAll', patternId: pattern.id }); }}
+          title="Remove every note/step in this pattern"
+        >Clear all</button>
+        <button
+          type="button"
+          className={s.btn}
+          onClick={() => popOut('rack')}
+          title="Open this panel in its own window (second screen)"
+        >⧉ Pop out</button>
       </div>
 
       <div className={s.rackBody}>

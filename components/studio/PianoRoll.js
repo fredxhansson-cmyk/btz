@@ -22,7 +22,7 @@ const KEYS = MAX_KEY - MIN_KEY + 1;
 let clipboard = [];   // survives view switches
 
 export default function PianoRoll() {
-  const { project, dispatch, engine, ui, setUi, setHint, play, addToArrangement } = useStudio();
+  const { project, dispatch, engine, ui, setUi, setHint, play, addToArrangement, popOut } = useStudio();
   const wrapRef = useRef(null);
   const canvasRef = useRef(null);
   const view = useRef({ scrollX: 0, scrollY: 0, pxPerTick: 0.5, rowH: 13, inited: false });
@@ -587,6 +587,13 @@ export default function PianoRoll() {
           {project.patterns.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
         <button type="button" className={`${s.btn} ${s.on}`} onClick={addToArrangement} title="Place this pattern into the song arrangement">＋ Arrangement</button>
+        <button
+          type="button"
+          className={s.btn}
+          title={`Clear every note on the ${channel.name} lane in this pattern`}
+          onClick={() => { if (window.confirm(`Clear all notes on ${channel.name}?`)) dispatch({ type: 'pattern.clearChannel', patternId: pattern.id, channelId: channel.id }); }}
+        >Clear lane</button>
+        <button type="button" className={s.btn} title="Open the piano roll in its own window (second screen)" onClick={() => popOut('piano')}>⧉ Pop out</button>
         <button type="button" className={s.btn} title="Save the current notes as a take you can return to" onClick={() => { dispatch({ type: 'take.save', patternId: pattern.id, channelId: channel.id }); setHint('Take saved.'); }}>Save take</button>
         {pattern.takes && pattern.takes[channel.id] && pattern.takes[channel.id].length > 0 && (
           <select

@@ -376,7 +376,7 @@ function Mastering() {
 }
 
 export default function Mixer() {
-  const { project, dispatch } = useStudio();
+  const { project, dispatch, popOut } = useStudio();
   const isMaster = project.selectedInsert === 'master';
   const insert = isMaster
     ? { id: 'master', name: 'Master', fx: project.master.chain || [] }
@@ -395,6 +395,7 @@ export default function Mixer() {
         <div className={s.spacer} />
         <button type="button" className={s.btn} onClick={() => dispatch({ type: 'insert.add' })}>+ Insert</button>
         <button type="button" className={s.btn} onClick={() => dispatch({ type: 'insert.addBus' })} title="Add a group bus — route channels into it to mix them together">+ Bus</button>
+        <button type="button" className={s.btn} onClick={() => popOut('mixer')} title="Open the mixer in its own window (second screen)">⧉ Pop out</button>
       </div>
 
       <Spectrum />

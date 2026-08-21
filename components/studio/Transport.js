@@ -100,6 +100,8 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
     { sep: true },
     { label: 'New pattern', onClick: () => dispatch({ type: 'pattern.add' }) },
     { label: 'Duplicate pattern', onClick: () => dispatch({ type: 'pattern.clone', id: project.activePattern }) },
+    { sep: true },
+    { label: 'Clear pattern (all notes)', onClick: () => dispatch({ type: 'pattern.clearAll', patternId: project.activePattern }) },
     { label: 'Clear playlist', onClick: () => dispatch({ type: 'clip.clear' }) },
   ];
 

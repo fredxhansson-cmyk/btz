@@ -73,7 +73,7 @@ function Pad({ channel, role, selected, onSelect }) {
 }
 
 export default function DrumMachine() {
-  const { project, dispatch, engine, ui, setUi, setHint } = useStudio();
+  const { project, dispatch, engine, ui, setUi, setHint, popOut } = useStudio();
   const pattern = project.patterns.find((p) => p.id === project.activePattern) || project.patterns[0];
   const steps = patternSteps(pattern);
   const byRole = useMemo(() => padChannels(project), [project]);
@@ -292,6 +292,7 @@ export default function DrumMachine() {
         <div className={s.spacer} />
         <button type="button" className={s.btn} onClick={() => tool('clearPad')}>Clear pad</button>
         <button type="button" className={s.btn} onClick={() => tool('clearAll')}>Clear all</button>
+        <button type="button" className={s.btn} onClick={() => popOut('drums')} title="Open the drum machine in its own window (second screen)">⧉ Pop out</button>
       </div>
 
       <div className={s.dmBody}>

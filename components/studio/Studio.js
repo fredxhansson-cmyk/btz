@@ -80,13 +80,13 @@ function Workspace({ installPrompt, onInstalled }) {
   const {
     project, dispatch, engine, ui, setUi, togglePlay, saveFile,
     recordNote, finishRecordedNote, loadSampleFile,
+    detached, popOut, attach,
   } = useStudio();
   const [dropping, setDropping] = useState(false);
   const [help, setHelp] = useState(false);
   const [recOpen, setRecOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
   const [onboard, setOnboard] = useState(false);
-  const [detached, setDetached] = useState([]);
 
   // Show the welcome guide on the first visit; reopenable via the Guide tab.
   useEffect(() => {
@@ -136,8 +136,7 @@ function Workspace({ installPrompt, onInstalled }) {
     }
   };
   const labelFor = (id) => (TABS.find((t) => t.id === id) || {}).label || id;
-  const detach = () => setDetached((d) => (d.includes(ui.view) ? d : [...d, ui.view]));
-  const attach = (id) => setDetached((d) => d.filter((x) => x !== id));
+  const detach = () => popOut(ui.view);
   const held = useRef(new Map());
   const projectRef = useRef(project);
   projectRef.current = project;
@@ -212,13 +211,21 @@ function Workspace({ installPrompt, onInstalled }) {
   }, [dispatch, engine, recordNote, finishRecordedNote, saveFile, setUi, togglePlay]);
 
   const onDrop = (e) => {
+    e.preventDefault();
+    setDropping(false); // always clear the overlay, even on an empty / invalid drop
     const files = [...(e.dataTransfer.files || [])].filter((f) => f.type.startsWith('audio/') || /\.(wav|mp3|ogg|flac|m4a|aac)$/i.test(f.name));
     if (!files.length) return;
-    e.preventDefault();
-    setDropping(false);
     files.slice(0, 8).forEach((f) => loadSampleFile(f));
     setUi({ view: 'rack' });
   };
+
+  // Escape always dismisses the drop overlay so it can never trap the user.
+  useEffect(() => {
+    if (!dropping) return undefined;
+    const esc = (e) => { if (e.key === 'Escape') setDropping(false); };
+    window.addEventListener('keydown', esc);
+    return () => window.removeEventListener('keydown', esc);
+  }, [dropping]);
 
   return (
     <div
@@ -237,8 +244,16 @@ function Workspace({ installPrompt, onInstalled }) {
         </PopOut>
       ))}
       {dropping && (
-        <div className={s.dropHint}>
-          <div className={s.dropCard}>Drop audio files to create sampler channels</div>
+        <div
+          className={s.dropHint}
+          onClick={() => setDropping(false)}
+          onDragLeave={() => setDropping(false)}
+        >
+          <div className={s.dropCard} onClick={(e) => e.stopPropagation()}>
+            <button type="button" className={s.dropClose} onClick={() => setDropping(false)} title="Cancel">✕</button>
+            <div className={s.dropCardTitle}>Drop audio files to create sampler channels</div>
+            <div className={s.dropCardHint}>Click anywhere or press Esc to cancel</div>
+          </div>
         </div>
       )}
       <Transport onOpenRecord={() => setRecOpen(true)} onOpenAi={() => setAiOpen(true)} />
