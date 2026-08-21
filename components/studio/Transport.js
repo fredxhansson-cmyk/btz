@@ -112,7 +112,7 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
   return (
     <header className={s.header} onPointerDown={(e) => e.stopPropagation()}>
       <div className={s.brand}>
-        <span className={s.brandMark}>▶</span>
+        <span className={s.brandMark}>B</span>
         <span className={s.brandName}>B<b>TZ</b></span>
       </div>
 

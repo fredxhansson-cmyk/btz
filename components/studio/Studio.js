@@ -7,6 +7,7 @@ import ChannelRack from './ChannelRack';
 import PianoRoll from './PianoRoll';
 import Playlist from './Playlist';
 import Mixer from './Mixer';
+import MixerColumn from './MixerColumn';
 import DrumMachine from './DrumMachine';
 import Automation from './Automation';
 import HelpOverlay from './HelpOverlay';
@@ -287,6 +288,7 @@ function Workspace({ installPrompt, onInstalled }) {
           </div>
           {ui.pluginOpen && <PluginPanel />}
         </main>
+        {!ui.touch && ui.view !== 'mixer' && <MixerColumn />}
       </div>
 
       {ui.touch && (
