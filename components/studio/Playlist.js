@@ -9,7 +9,9 @@ import { longPress, pinchZoom } from '../../lib/studio/touch';
 const LABEL_W = 96;
 const HEAD_H = 22;
 const TRACK_H = 34;
-const TRACKS = 10;
+const DEFAULT_TRACKS = 10;
+const MAX_TRACKS = 32;
+const MIN_TRACKS = 1;
 const MSW = 17;
 const MSH = 16;
 const M_X = LABEL_W - 2 * MSW - 7;
@@ -30,7 +32,8 @@ export default function Playlist() {
 
   const dataRef = useRef({});
   const barLen = project.barTicks || BAR_TICKS;
-  dataRef.current = { project, ui, barLen };
+  const trackCount = clamp(project.arrangeTracks || DEFAULT_TRACKS, MIN_TRACKS, MAX_TRACKS);
+  dataRef.current = { project, ui, barLen, tracks: trackCount };
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -49,6 +52,7 @@ export default function Playlist() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const v = view.current;
     const d = dataRef.current;
+    const TRACKS = d.tracks || DEFAULT_TRACKS;
     const tMute = d.project.trackMute || {};
     const tSolo = d.project.trackSolo || {};
     const anySolo = Object.values(tSolo).some(Boolean);
@@ -264,6 +268,7 @@ export default function Playlist() {
       play('song', tick);
       return;
     }
+    const TRACKS = dataRef.current.tracks || DEFAULT_TRACKS;
     if (p.inLabels) {
       const t = p.track;
       if (t >= 0 && t < TRACKS) {
@@ -336,7 +341,7 @@ export default function Playlist() {
     if (!clip) return;
     if (dr.mode === 'move') {
       const start = Math.max(0, Math.round((p.tick - dr.offset) / dr.snap) * dr.snap);
-      const track = clamp(p.track, 0, TRACKS - 1);
+      const track = clamp(p.track, 0, (dataRef.current.tracks || DEFAULT_TRACKS) - 1);
       if (start !== clip.start || track !== clip.track) {
         dispatch({ type: 'clip.update', id: clip.id, patch: { start, track }, live: true, key: 'move' });
       }
@@ -440,8 +445,21 @@ export default function Playlist() {
             {SNAPS.map((sn) => <option key={sn.id} value={sn.id}>{sn.label}</option>)}
           </select>
         </div>
-        <button type="button" className={s.btn} onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 1.25, 0.02, 1.2); draw(); }}>+</button>
-        <button type="button" className={s.btn} onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 0.8, 0.02, 1.2); draw(); }}>−</button>
+        <div className={s.group}>
+          <span className={s.dim}>Zoom</span>
+          <button type="button" className={s.btn} title="Zoom in" onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 1.25, 0.02, 1.2); draw(); }}>+</button>
+          <button type="button" className={s.btn} title="Zoom out" onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 0.8, 0.02, 1.2); draw(); }}>−</button>
+        </div>
+        <div className={s.group}>
+          <span className={s.dim}>Tracks</span>
+          <button type="button" className={s.btn} title="Add an arrangement track" onClick={() => dispatch({ type: 'track.add' })}>＋ Track</button>
+          <button
+            type="button"
+            className={s.btn}
+            title="Remove the last arrangement track (and any clips on it)"
+            onClick={() => { if (window.confirm('Remove the last track and any clips on it?')) dispatch({ type: 'track.remove' }); }}
+          >－ Track</button>
+        </div>
         <button type="button" className={s.btn} onClick={() => play('song')}>Play song</button>
         <button
           type="button"
