@@ -20,8 +20,8 @@
   /* text */
   --text:#EDEBE6; --text-2:#B9B6AE; --text-3:#A8A59E; --text-4:#8C8A83; --muted:#706E67; --muted-2:#6C6A63; --muted-3:#55534E; --muted-4:#3D3C37;
 
-  /* accent + semantic */
-  --accent:#4DE1C1; --accent-ink:#0C0C0B;
+  /* accent + semantic — lime/chartreuse per the FLOW Studio redesign */
+  --accent:#D6FF3F; --accent-ink:#0C0C0B;
   --rec:#FF5C36; --rec-bg:#1C1412; --rec-line:#3A2420;
   --fader-knob:#C9C6BE; --meter-grad:linear-gradient(90deg,#D6FF3F,#FFB000);
 
@@ -51,9 +51,9 @@
   --line2: var(--line-2);
   --dim: var(--text-2);
   --text-mute: var(--muted);
-  --accent-strong: #6EF0D4;
-  --accent-soft: rgba(77,225,193,0.14);
-  --accent-glow: rgba(77,225,193,0.40);
+  --accent-strong: #E8FF8A;
+  --accent-soft: rgba(214,255,63,0.14);
+  --accent-glow: rgba(214,255,63,0.40);
   --green: var(--track-1);
   --blue: var(--track-6);
   --red: var(--rec);
@@ -80,7 +80,7 @@
   --text:#1A1A16; --text-2:#3A3934; --text-3:#4B4A43; --text-4:#5E5C54; --muted:#6B6960; --muted-2:#7A786E; --muted-3:#9B998E; --muted-4:#BEBCAF;
 
   /* accent + semantic */
-  --accent:#0D8C74; --accent-ink:#FFFFFF;
+  --accent:#5F7D00; --accent-ink:#FFFFFF;
   --rec:#B8380B; --rec-bg:#FAE7E0; --rec-line:#E7BDAB;
   --fader-knob:#3A3934; --meter-grad:linear-gradient(90deg,#6F8C00,#B87A00);
 
@@ -91,8 +91,8 @@
   --track-1:#6F8C00; --track-2:#C6410F; --track-3:#0D8C74; --track-4:#5E3BB8; --track-5:#A96A00; --track-6:#2560B5;
 
   /* alias literals that need light-mode variants */
-  --accent-strong: #12B092;
-  --accent-soft: rgba(13,140,116,0.14);
-  --accent-glow: rgba(13,140,116,0.32);
+  --accent-strong: #7A9E00;
+  --accent-soft: rgba(95,125,0,0.14);
+  --accent-glow: rgba(95,125,0,0.30);
   --shadow-pop: 0 14px 40px rgba(60,57,52,0.22);
 }

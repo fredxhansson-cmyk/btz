@@ -109,7 +109,7 @@
   display: flex; align-items: center; gap: 7px;
 }
 .tab:hover { color: var(--text); }
-.tab.on { color: #fff; border-bottom-color: var(--accent); background: rgba(77,225,193,0.08); }
+.tab.on { color: #fff; border-bottom-color: var(--accent); background: rgba(214,255,63,0.08); }
 .tabHint { font-size: 10.5px; color: var(--muted); border: 1px solid var(--line-3); border-radius: 3px; padding: 0 3px; }
 
 /* ------------------------------------------------------------------ body */
@@ -119,23 +119,23 @@
 
 /* --- vertical view rail (desktop primary nav, from the design system) --- */
 .iconRail {
-  width: 76px; flex: none; display: flex; flex-direction: column; align-items: center;
+  width: 60px; flex: none; display: flex; flex-direction: column; align-items: center;
   gap: 6px; padding: 14px 0; background: var(--chrome); border-right: 1px solid var(--line);
   overflow-y: auto; scrollbar-width: none;
 }
 .iconRail::-webkit-scrollbar { width: 0; }
 .railBtn {
-  width: 56px; min-height: 52px; flex: none; border: 0; border-radius: var(--r-md);
-  background: transparent; color: var(--text-4); cursor: pointer; font-family: inherit;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  width: 40px; height: 40px; flex: none; border: 0; border-radius: 11px;
+  background: transparent; color: var(--muted-2); cursor: pointer; font-family: inherit;
+  display: grid; place-items: center; font-size: 16px; line-height: 1;
   transition: background .12s ease, color .12s ease;
 }
 .railBtn:hover { background: var(--hover-strong); color: var(--text-2); }
-.railBtn.on { background: var(--line); color: var(--accent); box-shadow: inset 0 0 0 1px var(--line-3); }
-.railIcon { font-size: 20px; line-height: 1; }
-.railLbl { font-size: 9px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
-.railSpacer { flex: 1; min-height: 6px; }
-.aiRail .railIcon { color: var(--accent); }
+.railBtn.on { background: var(--line); color: var(--accent); }
+.railIcon { font-size: 16px; line-height: 1; }
+.railSpacer { flex: 1; min-height: 8px; }
+.railDiv { width: 26px; height: 1px; background: var(--line-2); flex: none; margin: 2px 0; }
+.aiRail { color: var(--accent); }
 
 .side {
   width: 220px; flex: none; background: var(--panel); border-right: 1px solid var(--line);
@@ -217,13 +217,13 @@
 .rulerBar { border-left-color: #4a5058; color: #98a0aa; }
 .stepPlayhead {
   position: absolute; top: 0; left: 0; width: 26px;
-  background: rgba(77,225,193,0.12); border-left: 2px solid rgba(77,225,193,0.85);
+  background: rgba(214,255,63,0.12); border-left: 2px solid rgba(214,255,63,0.85);
   pointer-events: none; opacity: 0; z-index: 2;
 }
 
 .chanRow { display: flex; align-items: center; height: 30px; border-bottom: 1px solid var(--gridsurface); }
 .chanRow:hover { background: rgba(255,255,255,0.02); }
-.chanSel { background: rgba(77,225,193,0.07); }
+.chanSel { background: rgba(214,255,63,0.07); }
 .chanLeft { width: 330px; flex: none; display: flex; align-items: center; gap: 5px; padding-right: 8px; }
 .chanColor { width: 4px; height: 24px; border-radius: 2px; flex: none; }
 .led { background: transparent; border: 0; padding: 0 2px; cursor: pointer; }
@@ -231,7 +231,7 @@
   display: block; width: 9px; height: 9px; border-radius: 50%;
   background: #35393f; border: 1px solid var(--card);
 }
-.ledOn { background: var(--accent); box-shadow: 0 0 7px rgba(77,225,193,0.75); }
+.ledOn { background: var(--accent); box-shadow: 0 0 7px rgba(214,255,63,0.75); }
 .chanName {
   flex: 1; min-width: 0; text-align: left; background: var(--surface); border: 1px solid var(--line);
   color: var(--text); padding: 4px 7px; border-radius: 4px; cursor: pointer; font-size: 13px;
@@ -286,7 +286,7 @@
   background: var(--surface); border: 1px solid var(--line); border-radius: 5px; padding: 7px 4px; cursor: pointer;
 }
 .strip:hover { background: #2b3038; }
-.stripSel { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(77,225,193,0.35); }
+.stripSel { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(214,255,63,0.35); }
 .stripMaster { background: #2d2a26; border-color: #4a3a20; }
 .stripName {
   font-size: 12px; color: var(--text-2); text-align: center; width: 100%;
@@ -391,7 +391,7 @@
 }
 .pad:hover { border-color: #5b626c; }
 .pad:active { transform: translateY(1px); }
-.padSel { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(77,225,193,0.4), inset 0 1px 0 rgba(255,255,255,0.08); }
+.padSel { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(214,255,63,0.4), inset 0 1px 0 rgba(255,255,255,0.08); }
 .padMuted { opacity: 0.42; }
 .padEmpty { background: var(--line-2); border-style: dashed; cursor: default; opacity: 0.45; }
 .padGlow {
@@ -409,7 +409,7 @@
 }
 .padChoke {
   position: absolute; top: 6px; right: 7px; font-size: 9.5px; color: #ffd8a8;
-  background: rgba(77,225,193,0.18); border-radius: 3px; padding: 1px 3px; pointer-events: none;
+  background: rgba(214,255,63,0.18); border-radius: 3px; padding: 1px 3px; pointer-events: none;
 }
 .padHint { font-size: 12px; color: #7d848e; line-height: 1.6; }
 .padHint b { color: var(--accent); font-weight: 600; }
@@ -452,8 +452,8 @@
 .stepCursor {
   position: absolute; top: 8px; bottom: 8px; width: var(--stepw, 38px);
   left: calc(12px + var(--step) * (var(--stepw, 38px) + 4px));
-  border: 1px solid rgba(77,225,193,0.9); border-radius: 5px;
-  background: rgba(77,225,193,0.12); pointer-events: none; opacity: 0;
+  border: 1px solid rgba(214,255,63,0.9); border-radius: 5px;
+  background: rgba(214,255,63,0.12); pointer-events: none; opacity: 0;
 }
 
 .dmKnobs {
@@ -462,7 +462,7 @@
 }
 .dmOverview { flex: 1; min-height: 0; overflow: auto; padding: 8px 12px; }
 .ovRow { display: flex; align-items: center; gap: 8px; height: 22px; }
-.ovSel { background: rgba(77,225,193,0.08); border-radius: 4px; }
+.ovSel { background: rgba(214,255,63,0.08); border-radius: 4px; }
 .ovName {
   width: 118px; flex: none; display: flex; align-items: center; gap: 6px;
   background: transparent; border: 0; color: var(--text-3); font-size: 12px;
@@ -492,7 +492,7 @@
 }
 .laneItem { display: flex; align-items: center; gap: 6px; padding: 3px 4px; border-radius: 4px; }
 .laneItem:hover { background: rgba(255,255,255,0.05); }
-.laneItem.sel { background: rgba(77,225,193,0.14); }
+.laneItem.sel { background: rgba(214,255,63,0.14); }
 .laneName {
   flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px;
   background: transparent; border: 0; color: var(--text); cursor: pointer;
