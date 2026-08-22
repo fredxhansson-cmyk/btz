@@ -28,7 +28,8 @@ export default function PianoRoll() {
   const vThumbRef = useRef(null);
   const vDrag = useRef(null);
   const loupeRef = useRef(null);
-  const loupe = useRef({ active: false, x: 0, y: 0 });
+  const loupe = useRef({ active: false, x: 0, y: 0, label: '' });
+  const lastTap = useRef({ t: 0, x: 0, y: 0 });
   const view = useRef({ scrollX: 0, scrollY: 0, pxPerTick: 0.5, rowH: 13, inited: false });
   const drag = useRef(null);
   const marquee = useRef(null);
@@ -259,37 +260,17 @@ export default function PianoRoll() {
       vThumbRef.current.style.transform = `translateY(${top}px)`;
     }
 
-    // Magnifier loupe (touch): a zoomed bubble of the area under the finger,
-    // offset above it so the finger never covers the exact spot you're placing.
+    // Simple tone label (touch): a small bubble above the finger showing the
+    // pitch you're on — always snappy because it tracks the pointer, not the
+    // (re-rendered) note graphics.
     const lp = loupe.current;
     const loupeEl = loupeRef.current;
     if (loupeEl) {
       if (lp.active) {
-        const LW = 128; const LH = 128; const ZOOM = 2.6;
-        if (loupeEl.width !== Math.floor(LW * dpr)) {
-          loupeEl.width = Math.floor(LW * dpr);
-          loupeEl.height = Math.floor(LH * dpr);
-          loupeEl.style.width = `${LW}px`;
-          loupeEl.style.height = `${LH}px`;
-        }
-        const lctx = loupeEl.getContext('2d');
-        lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        lctx.imageSmoothingEnabled = false;
-        const srcW = LW / ZOOM; const srcH = LH / ZOOM;
-        const sx = clamp(lp.x - srcW / 2, 0, Math.max(0, w - srcW));
-        const sy = clamp(lp.y - srcH / 2, 0, Math.max(0, h - srcH));
-        lctx.clearRect(0, 0, LW, LH);
-        lctx.drawImage(canvas, sx * dpr, sy * dpr, srcW * dpr, srcH * dpr, 0, 0, LW, LH);
-        // crosshair marks the exact target under the finger
-        lctx.strokeStyle = accentA(0.9);
-        lctx.lineWidth = 1;
-        lctx.beginPath();
-        lctx.moveTo(LW / 2, LH / 2 - 8); lctx.lineTo(LW / 2, LH / 2 + 8);
-        lctx.moveTo(LW / 2 - 8, LH / 2); lctx.lineTo(LW / 2 + 8, LH / 2);
-        lctx.stroke();
-        let px = clamp(lp.x - LW / 2, 4, Math.max(4, w - LW - 4));
-        let py = lp.y - LH - 26;
-        if (py < 4) py = Math.min(h - LH - 4, lp.y + 26);
+        loupeEl.textContent = lp.label || '';
+        const px = clamp(lp.x - 34, 4, Math.max(4, w - 72));
+        let py = lp.y - 52;
+        if (py < HEAD_H) py = lp.y + 24;
         loupeEl.style.transform = `translate(${px}px, ${py}px)`;
         loupeEl.style.display = 'block';
       } else if (loupeEl.style.display !== 'none') {
@@ -373,9 +354,29 @@ export default function PianoRoll() {
     const p = posFromEvent(e);
     const v = view.current;
     const d = dataRef.current;
+    const touch = e.pointerType === 'touch';
     canvasRef.current.setPointerCapture(e.pointerId);
-    // Touch magnifier follows the finger for precise note placement.
-    if (e.pointerType === 'touch' && !p.inHead) loupe.current = { active: true, x: p.x, y: p.y };
+
+    // Double-tap on a note removes it (the touch delete gesture).
+    if (touch && !p.inHead && !p.inKeys && !p.inVel) {
+      const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+      const near = Math.hypot(p.x - lastTap.current.x, p.y - lastTap.current.y);
+      if (now - lastTap.current.t < 320 && near < 26) {
+        const target = noteAt(p.tick, p.key) || noteNear(p);
+        if (target) {
+          dispatch({ type: 'note.remove', patternId: pattern.id, channelId: channel.id, ids: [target.id] });
+          sel.current.delete(target.id);
+          lastTap.current = { t: 0, x: 0, y: 0 };
+          drag.current = null; loupe.current.active = false;
+          bump((n) => n + 1);
+          return;
+        }
+      }
+      lastTap.current = { t: now, x: p.x, y: p.y };
+    }
+
+    // Tone label follows the finger for precise placement.
+    if (touch && !p.inHead) loupe.current = { active: true, x: p.x, y: p.y, label: keyName(clamp(p.key, MIN_KEY, MAX_KEY)) };
 
     if (p.inHead) {
       play(d.ui.mode === 'song' ? 'song' : 'pattern', Math.max(0, Math.floor(p.tick / d.barLen) * d.barLen));
@@ -401,7 +402,6 @@ export default function PianoRoll() {
     }
 
     const snap = snapTicks(d.ui.snap);
-    const touch = e.pointerType === 'touch';
     let hit = noteAt(p.tick, p.key);
     const tool = d.ui.tool || 'draw';
 
@@ -463,7 +463,19 @@ export default function PianoRoll() {
     setNotes([...d.notes, ...fresh], 'draw');
     sel.current = new Set(fresh.map((n) => n.id));
     fresh.forEach((n, i) => engine.preview(channel.id, n.k, 0.85 - i * 0.05, 0.3));
-    drag.current = { mode: 'resize', id: fresh[0].id, ids: fresh.map((n) => n.id), snap, fresh: true };
+    if (touch) {
+      // On touch, keep dragging the just-placed note to pick its pitch/position
+      // straight away — no need to lift and tap it again.
+      loupe.current = { active: true, x: p.x, y: p.y, label: keyName(key) };
+      drag.current = {
+        mode: 'move',
+        origin: { tick: p.tick, key: p.key },
+        snap,
+        items: fresh.map((n) => ({ id: n.id, t: n.t, k: n.k })),
+      };
+    } else {
+      drag.current = { mode: 'resize', id: fresh[0].id, ids: fresh.map((n) => n.id), snap, fresh: true };
+    }
   }, [channel, dispatch, engine, pattern.id, play]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const applyVel = (id, p) => {
@@ -480,7 +492,14 @@ export default function PianoRoll() {
     if (!dr) return;
     const p = posFromEvent(e);
     const d = dataRef.current;
-    if (loupe.current.active && e.pointerType === 'touch') { loupe.current.x = p.x; loupe.current.y = p.y; }
+    if (loupe.current.active && e.pointerType === 'touch') {
+      loupe.current.x = p.x; loupe.current.y = p.y;
+      let lk = clamp(p.key, MIN_KEY, MAX_KEY);
+      if (dr.mode === 'move' && dr.items && dr.items.length) {
+        lk = clamp(dr.items[0].k + (p.key - dr.origin.key), MIN_KEY, MAX_KEY);
+      }
+      loupe.current.label = keyName(lk);
+    }
 
     if (dr.mode === 'audition') {
       const key = clamp(p.key, MIN_KEY, MAX_KEY);
@@ -823,7 +842,7 @@ export default function PianoRoll() {
             <div className={s.vThumb} ref={vThumbRef} />
           </div>
         )}
-        <canvas className={s.loupe} ref={loupeRef} />
+        <div className={s.tone} ref={loupeRef} />
       </div>
     </div>
   );

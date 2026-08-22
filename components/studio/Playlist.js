@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import s from '../../styles/studio.module.css';
 import { accent, accentA, token } from '../../lib/studio/theme';
 import { useStudio, useRaf } from '../../lib/studio/StudioContext';
-import { BAR_TICKS, PPQ, snapTicks, SNAPS, clamp } from '../../lib/studio/constants';
+import { BAR_TICKS, PPQ, snapTicks, SNAPS, clamp, uid } from '../../lib/studio/constants';
 import { patternTicks, songLength } from '../../lib/studio/sequencer';
 import { longPress, pinchZoom } from '../../lib/studio/touch';
 
@@ -26,7 +26,8 @@ export default function Playlist() {
   const clipboard = useRef(null);
   const selClip = useRef(null);
   const loupeRef = useRef(null);
-  const loupe = useRef({ active: false, x: 0, y: 0 });
+  const loupe = useRef({ active: false, x: 0, y: 0, label: '' });
+  const lastTap = useRef({ t: 0, x: 0, y: 0 });
   const [, bump] = useState(0);
   const gesture = useRef(null);
   const press = useRef(null);
@@ -230,35 +231,16 @@ export default function Playlist() {
       }
     }
 
-    // magnifier loupe (touch) — see under the finger while moving/stretching clips
+    // Simple position label (touch): shows the bar under the finger while
+    // placing/moving clips — snappy, no laggy pixel magnifier.
     const lp = loupe.current;
     const loupeEl = loupeRef.current;
     if (loupeEl) {
       if (lp.active) {
-        const LW = 128; const LH = 128; const ZOOM = 2.6;
-        if (loupeEl.width !== Math.floor(LW * dpr)) {
-          loupeEl.width = Math.floor(LW * dpr);
-          loupeEl.height = Math.floor(LH * dpr);
-          loupeEl.style.width = `${LW}px`;
-          loupeEl.style.height = `${LH}px`;
-        }
-        const lctx = loupeEl.getContext('2d');
-        lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        lctx.imageSmoothingEnabled = false;
-        const srcW = LW / ZOOM; const srcH = LH / ZOOM;
-        const sx = clamp(lp.x - srcW / 2, 0, Math.max(0, w - srcW));
-        const sy = clamp(lp.y - srcH / 2, 0, Math.max(0, h - srcH));
-        lctx.clearRect(0, 0, LW, LH);
-        lctx.drawImage(canvas, sx * dpr, sy * dpr, srcW * dpr, srcH * dpr, 0, 0, LW, LH);
-        lctx.strokeStyle = accentA(0.9);
-        lctx.lineWidth = 1;
-        lctx.beginPath();
-        lctx.moveTo(LW / 2, LH / 2 - 8); lctx.lineTo(LW / 2, LH / 2 + 8);
-        lctx.moveTo(LW / 2 - 8, LH / 2); lctx.lineTo(LW / 2 + 8, LH / 2);
-        lctx.stroke();
-        const px = clamp(lp.x - LW / 2, 4, Math.max(4, w - LW - 4));
-        let py = lp.y - LH - 26;
-        if (py < 4) py = Math.min(h - LH - 4, lp.y + 26);
+        loupeEl.textContent = lp.label || '';
+        const px = clamp(lp.x - 40, 4, Math.max(4, w - 84));
+        let py = lp.y - 50;
+        if (py < HEAD_H) py = lp.y + 24;
         loupeEl.style.transform = `translate(${px}px, ${py}px)`;
         loupeEl.style.display = 'block';
       } else if (loupeEl.style.display !== 'none') {
@@ -266,6 +248,8 @@ export default function Playlist() {
       }
     }
   }, [engine]);
+
+  const barLabel = (tick) => `Bar ${Math.floor(Math.max(0, tick) / barLen) + 1}`;
 
   useRaf(draw);
   useEffect(() => { draw(); }, [draw, project]);
@@ -293,9 +277,28 @@ export default function Playlist() {
     if (gesture.current.down(e)) { drag.current = null; press.current.cancel(); loupe.current.active = false; return; }
     const p = posFromEvent(e);
     const v = view.current;
+    const touch = e.pointerType === 'touch';
     canvasRef.current.setPointerCapture(e.pointerId);
     const snap = Math.max(snapTicks(ui.snap), PPQ);
-    if (e.pointerType === 'touch' && !p.inHead && !p.inLabels) loupe.current = { active: true, x: p.x, y: p.y };
+
+    // Double-tap on a clip removes it (touch delete gesture).
+    if (touch && !p.inHead && !p.inLabels) {
+      const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+      const near = Math.hypot(p.x - lastTap.current.x, p.y - lastTap.current.y);
+      if (now - lastTap.current.t < 320 && near < 26) {
+        const target = clipAt(p.tick, p.track);
+        if (target) {
+          dispatch({ type: 'clip.remove', id: target.id });
+          lastTap.current = { t: 0, x: 0, y: 0 };
+          drag.current = null; loupe.current.active = false;
+          bump((n) => n + 1);
+          return;
+        }
+      }
+      lastTap.current = { t: now, x: p.x, y: p.y };
+    }
+
+    if (touch && !p.inHead && !p.inLabels) loupe.current = { active: true, x: p.x, y: p.y, label: barLabel(p.tick) };
 
     if (p.inHead) {
       const tick = Math.max(0, Math.floor(p.tick / barLen) * barLen);
@@ -355,8 +358,16 @@ export default function Playlist() {
       return;
     }
     const start = Math.max(0, Math.round(p.tick / barLen) * barLen);
-    dispatch({ type: 'clip.add', patternId: project.activePattern, track: p.track, start });
-    drag.current = { mode: 'none' };
+    if (touch) {
+      // On touch, keep dragging the just-placed clip to position it right away.
+      const id = uid('cl');
+      dispatch({ type: 'clip.add', id, patternId: project.activePattern, track: p.track, start });
+      loupe.current = { active: true, x: p.x, y: p.y, label: barLabel(start) };
+      drag.current = { mode: 'move', id, snap, offset: p.tick - start, track: p.track };
+    } else {
+      dispatch({ type: 'clip.add', patternId: project.activePattern, track: p.track, start });
+      drag.current = { mode: 'none' };
+    }
     bump((n) => n + 1);
   }, [dispatch, play, project.activePattern, ui.snap]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -366,7 +377,10 @@ export default function Playlist() {
     const dr = drag.current;
     if (!dr || dr.mode === 'none') return;
     const p = posFromEvent(e);
-    if (loupe.current.active && e.pointerType === 'touch') { loupe.current.x = p.x; loupe.current.y = p.y; }
+    if (loupe.current.active && e.pointerType === 'touch') {
+      loupe.current.x = p.x; loupe.current.y = p.y;
+      loupe.current.label = barLabel(Math.max(0, p.tick - (dr.offset || 0)));
+    }
     if (dr.mode === 'loop') {
       const tick = Math.max(0, Math.round(p.tick / barLen) * barLen);
       const a = Math.min(dr.from, tick);
@@ -548,7 +562,7 @@ export default function Playlist() {
           onDoubleClick={onDoubleClick}
           onContextMenu={(e) => e.preventDefault()}
         />
-        <canvas className={s.loupe} ref={loupeRef} />
+        <div className={s.tone} ref={loupeRef} />
       </div>
     </div>
   );
