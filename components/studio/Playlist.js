@@ -251,6 +251,13 @@ export default function Playlist() {
 
   const barLabel = (tick) => `Bar ${Math.floor(Math.max(0, tick) / barLen) + 1}`;
 
+  const deleteSelClip = () => {
+    if (!selClip.current) return;
+    dispatch({ type: 'clip.remove', id: selClip.current });
+    selClip.current = null;
+    bump((n) => n + 1);
+  };
+
   useRaf(draw);
   useEffect(() => { draw(); }, [draw, project]);
 
@@ -563,6 +570,15 @@ export default function Playlist() {
           onContextMenu={(e) => e.preventDefault()}
         />
         <div className={s.tone} ref={loupeRef} />
+        {ui.touch && selClip.current && (
+          <button
+            type="button"
+            className={s.trashFab}
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={deleteSelClip}
+            title="Delete selected clip"
+          >🗑</button>
+        )}
       </div>
     </div>
   );

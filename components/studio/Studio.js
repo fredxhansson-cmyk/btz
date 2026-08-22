@@ -80,7 +80,7 @@ function Workspace({ installPrompt, onInstalled }) {
   const {
     project, dispatch, engine, ui, setUi, togglePlay, saveFile,
     recordNote, finishRecordedNote, loadSampleFile,
-    detached, popOut, attach,
+    detached, popOut, attach, canUndo,
   } = useStudio();
   const [dropping, setDropping] = useState(false);
   const [help, setHelp] = useState(false);
@@ -324,6 +324,17 @@ function Workspace({ installPrompt, onInstalled }) {
         </main>
         {!ui.touch && ui.view !== 'mixer' && <MixerColumn />}
       </div>
+
+      {ui.touch && (
+        <button
+          type="button"
+          className={s.undoFab}
+          onClick={() => dispatch({ type: 'undo' })}
+          disabled={!canUndo}
+          title="Undo"
+          aria-label="Undo"
+        >↶</button>
+      )}
 
       {ui.touch && (
         <nav className={s.bottomNav}>

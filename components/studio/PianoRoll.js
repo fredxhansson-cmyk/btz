@@ -335,6 +335,14 @@ export default function PianoRoll() {
 
   const selected = () => notes.filter((n) => sel.current.has(n.id));
 
+  const deleteSelection = () => {
+    if (!sel.current.size) return;
+    dispatch({ type: 'note.remove', patternId: pattern.id, channelId: channel.id, ids: [...sel.current] });
+    sel.current.clear();
+    setHint('Note deleted.');
+    bump((n) => n + 1);
+  };
+
   const applyToSelection = (fn, label) => {
     const chosen = selected();
     const list = chosen.length ? chosen : notes;
@@ -843,6 +851,15 @@ export default function PianoRoll() {
           </div>
         )}
         <div className={s.tone} ref={loupeRef} />
+        {ui.touch && sel.current.size > 0 && (
+          <button
+            type="button"
+            className={s.trashFab}
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={deleteSelection}
+            title="Delete selected note"
+          >🗑</button>
+        )}
       </div>
     </div>
   );

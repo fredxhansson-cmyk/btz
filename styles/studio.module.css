@@ -779,6 +779,28 @@
   will-change: transform;
 }
 
+/* Touch: trash button to delete the current selection (an obvious alternative
+   to double-tap) — appears in the editor bottom-right when something is picked. */
+.trashFab {
+  position: absolute; right: 34px; bottom: 74px; z-index: 9;
+  width: 46px; height: 46px; border-radius: 50%; cursor: pointer;
+  background: var(--rec-bg); border: 1px solid var(--rec-line); color: var(--rec);
+  font-size: 20px; line-height: 1; display: grid; place-items: center;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+}
+.trashFab:active { background: var(--rec); color: #fff; }
+
+/* Touch: floating undo to reverse an accidental delete/move from anywhere. */
+.undoFab {
+  position: fixed; right: 16px; bottom: 120px; z-index: 60;
+  width: 46px; height: 46px; border-radius: 50%; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--line-2); color: var(--text);
+  font-size: 22px; line-height: 1; display: grid; place-items: center;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+}
+.undoFab:disabled { opacity: 0.35; }
+.undoFab:active:not(:disabled) { background: var(--hover-strong); }
+
 /* compact touch header + overflow sheet */
 .touch .timeBox, .touch .masterBox, .touch .sep, .touch .deskOnly { display: none; }
 /* Keep the File/Edit menu bar reachable in the compact layout — the dropdowns
