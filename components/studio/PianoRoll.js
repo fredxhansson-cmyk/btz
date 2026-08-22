@@ -427,12 +427,9 @@ export default function PianoRoll() {
     if (!hit && touch) hit = noteNear(p);
 
     if (hit) {
-      // long press on touch removes the note, like a right-click does
-      press.current.start(e, () => {
-        dispatch({ type: 'note.remove', patternId: pattern.id, channelId: channel.id, ids: [hit.id] });
-        sel.current.delete(hit.id);
-        drag.current = null;
-      });
+      // NOTE: no long-press-to-delete here — it fought press-and-drag-to-move
+      // (a brief hold before dragging deleted the note). Delete via the Erase
+      // tool or right-click instead.
       const rightEdge = KEY_W + (hit.t + hit.d) * v.pxPerTick - v.scrollX;
       // Always keep the left of the block for MOVING; only a wide-enough block
       // gets a right-hand strip for stretching. This keeps short notes movable

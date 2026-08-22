@@ -337,10 +337,8 @@ export default function Playlist() {
         dispatch({ type: 'clip.add', patternId: hit.patternId, track: hit.track, start: hit.start + hit.length, length: hit.length });
         drag.current = null; bump((n) => n + 1); return;
       }
-      press.current.start(e, () => {
-        dispatch({ type: 'clip.remove', id: hit.id });
-        drag.current = null;
-      });
+      // No long-press-to-delete — it fought press-and-drag-to-move. Remove
+      // clips with right-click / the erase gesture instead.
       const rightEdge = LABEL_W + (hit.start + hit.length) * v.pxPerTick - v.scrollX;
       // Keep the clip body for MOVING; only a wide-enough clip gets a right-hand
       // strip for stretching, so narrow clips stay movable.
