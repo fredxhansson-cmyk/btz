@@ -5,7 +5,8 @@ const GROUPS = [
   {
     title: 'Transport',
     rows: [
-      ['Space', 'Play / stop'],
+      ['Space', 'Play / pause (keeps playhead)'],
+      ['Stop button', 'Stop and return to start'],
       ['R', 'Arm recording (via the button)'],
       ['Click in the ruler', 'Play from that bar'],
       ['Shift + drag in the playlist ruler', 'Set loop region'],

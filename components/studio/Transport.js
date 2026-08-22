@@ -38,9 +38,9 @@ function Menu({ label, items, openId, setOpenId }) {
 
 export default function Transport({ onOpenRecord, onOpenAi }) {
   const {
-    project, dispatch, engine, ui, setUi, play, stop, setMode,
+    project, dispatch, engine, ui, setUi, play, stop, pause, setMode,
     newProject, saveFile, openFile, exportAudio, exportMidiFile, importMidiFile,
-    canUndo, canRedo, playing, busy,
+    canUndo, canRedo, playing, paused, busy,
   } = useStudio();
   const [openId, setOpenId] = useState(null);
   const [sheet, setSheet] = useState(false);
@@ -53,8 +53,11 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
 
   useRaf(() => {
     if (timeRef.current) {
+      // Keep the readout at the paused position instead of snapping to 0, so a
+      // paused transport shows where playback will resume from.
+      const pos = (engine.playing || engine.pausedTick) ? engine.currentPosition() : 0;
       timeRef.current.textContent = ticksToBBT(
-        engine.playing ? engine.currentPosition() : 0,
+        pos,
         project.barTicks,
         project.beatTicks,
       );
@@ -128,16 +131,23 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
       <div className={s.transport}>
         <button
           type="button"
-          className={playing ? `${s.tbtn} ${s.playOn}` : s.tbtn}
-          onClick={() => (playing ? stop() : play())}
-          title="Play / Stop (space)"
-        >▶</button>
-        <button type="button" className={s.tbtn} onClick={stop} title="Stop">■</button>
+          className={playing ? `${s.tbtn} ${s.playOn}` : (paused ? `${s.tbtn} ${s.pauseOn}` : s.tbtn)}
+          onClick={() => (playing ? pause() : play())}
+          aria-pressed={playing}
+          title={playing ? 'Pause (space)' : (paused ? 'Resume (space)' : 'Play (space)')}
+        >{playing ? '⏸' : '▶'}</button>
+        <button
+          type="button"
+          className={s.tbtn}
+          onClick={stop}
+          title="Stop — return to start"
+        >■</button>
         <button
           type="button"
           className={ui.recording ? `${s.tbtn} ${s.recOn}` : s.tbtn}
           onClick={() => setUi({ recording: !ui.recording })}
-          title="Record from keyboard (R)"
+          aria-pressed={ui.recording}
+          title={ui.recording ? 'Recording — click to stop arming (R)' : 'Record from keyboard (R)'}
         >●</button>
         <button
           type="button"

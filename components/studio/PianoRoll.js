@@ -25,6 +25,8 @@ export default function PianoRoll() {
   const { project, dispatch, engine, ui, setUi, setHint, play, addToArrangement, popOut } = useStudio();
   const wrapRef = useRef(null);
   const canvasRef = useRef(null);
+  const vThumbRef = useRef(null);
+  const vDrag = useRef(null);
   const view = useRef({ scrollX: 0, scrollY: 0, pxPerTick: 0.5, rowH: 13, inited: false });
   const drag = useRef(null);
   const marquee = useRef(null);
@@ -242,6 +244,17 @@ export default function PianoRoll() {
         ctx.fillStyle = accent();
         ctx.fillRect(Math.round(x), 0, 1.5, h - VEL_H);
       }
+    }
+
+    // keep the touch scrollbar thumb in sync (also tracks pinch/octave scrolls)
+    if (vThumbRef.current) {
+      const total = KEYS * v.rowH;
+      const trackH = gridH;
+      const thumbH = Math.max(32, Math.min(trackH, trackH * (gridH / total)));
+      const maxScroll = Math.max(1, total - gridH);
+      const top = (v.scrollY / maxScroll) * (trackH - thumbH);
+      vThumbRef.current.style.height = `${thumbH}px`;
+      vThumbRef.current.style.transform = `translateY(${top}px)`;
     }
   }, [engine]);
 
@@ -493,6 +506,31 @@ export default function PianoRoll() {
     return () => el.removeEventListener('wheel', handler);
   }, [onWheel]);
 
+  // Touch scrollbar: drag the thumb to scroll the keyboard vertically.
+  const maxScrollY = () => {
+    const wrap = wrapRef.current;
+    const gridH = (wrap ? wrap.clientHeight : 300) - HEAD_H - VEL_H;
+    return Math.max(1, KEYS * view.current.rowH - gridH);
+  };
+  const onVScrollDown = useCallback((e) => {
+    e.stopPropagation();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    vDrag.current = { y: e.clientY, scrollY: view.current.scrollY };
+  }, []);
+  const onVScrollMove = useCallback((e) => {
+    if (!vDrag.current) return;
+    e.stopPropagation();
+    const wrap = wrapRef.current; if (!wrap) return;
+    const gridH = wrap.clientHeight - HEAD_H - VEL_H;
+    const total = KEYS * view.current.rowH;
+    const thumbH = Math.max(32, Math.min(gridH, gridH * (gridH / total)));
+    const maxS = maxScrollY();
+    const scale = maxS / Math.max(1, gridH - thumbH);
+    view.current.scrollY = clamp(vDrag.current.scrollY + (e.clientY - vDrag.current.y) * scale, 0, maxS);
+    draw();
+  }, [draw]);
+  const onVScrollUp = useCallback(() => { vDrag.current = null; }, []);
+
   /* ------------------------------------------------------------ shortcuts */
 
   useEffect(() => {
@@ -706,6 +744,18 @@ export default function PianoRoll() {
           onPointerCancel={onPointerUp}
           onContextMenu={(e) => e.preventDefault()}
         />
+        {ui.touch && (
+          <div
+            className={s.vScroll}
+            onPointerDown={onVScrollDown}
+            onPointerMove={onVScrollMove}
+            onPointerUp={onVScrollUp}
+            onPointerCancel={onVScrollUp}
+            title="Drag to scroll the keyboard"
+          >
+            <div className={s.vThumb} ref={vThumbRef} />
+          </div>
+        )}
       </div>
     </div>
   );
