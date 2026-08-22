@@ -342,11 +342,11 @@ export default function Playlist() {
         drag.current = null;
       });
       const rightEdge = LABEL_W + (hit.start + hit.length) * v.pxPerTick - v.scrollX;
-      // Bigger resize handle on touch: right ~40% of the clip (capped) drags it
-      // out longer; the rest of the clip body moves it.
+      // Keep the clip body for MOVING; only a wide-enough clip gets a right-hand
+      // strip for stretching, so narrow clips stay movable.
       const cwpx = hit.length * v.pxPerTick;
-      const edge = e.pointerType === 'touch' ? Math.max(14, Math.min(28, cwpx * 0.4)) : 8;
-      if (p.x >= rightEdge - edge) {
+      const edge = e.pointerType === 'touch' ? Math.min(28, Math.max(0, cwpx - 24)) : 8;
+      if (edge > 6 && p.x >= rightEdge - edge) {
         drag.current = { mode: 'resize', id: hit.id, snap };
       } else {
         drag.current = { mode: 'move', id: hit.id, snap, offset: p.tick - hit.start, track: p.track };

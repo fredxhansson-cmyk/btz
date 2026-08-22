@@ -434,13 +434,14 @@ export default function PianoRoll() {
         drag.current = null;
       });
       const rightEdge = KEY_W + (hit.t + hit.d) * v.pxPerTick - v.scrollX;
-      // Bigger resize handle on touch: right ~45% of the block (capped), so the
-      // left part still moves and the right part stretches to a longer note.
+      // Always keep the left of the block for MOVING; only a wide-enough block
+      // gets a right-hand strip for stretching. This keeps short notes movable
+      // instead of trapping every tap in resize mode (which ignores pitch).
       const cwpx = hit.d * v.pxPerTick;
-      const edge = touch ? Math.max(12, Math.min(24, cwpx * 0.45)) : 6;
+      const edge = touch ? Math.min(22, Math.max(0, cwpx - 16)) : 6;
       if (!e.shiftKey && !sel.current.has(hit.id)) { sel.current.clear(); sel.current.add(hit.id); }
       else sel.current.add(hit.id);
-      if (p.x >= rightEdge - edge) {
+      if (edge > 4 && p.x >= rightEdge - edge) {
         drag.current = { mode: 'resize', id: hit.id, snap, ids: [...sel.current] };
       } else {
         drag.current = {
