@@ -327,6 +327,22 @@ export default function PianoRoll() {
     return null;
   };
 
+  // Finger-friendly grab: if no exact hit, accept the nearest note within a
+  // row and a few pixels of slack so small blocks can still be picked up.
+  const noteNear = (p) => {
+    const v = view.current;
+    const tickTol = 9 / v.pxPerTick;
+    let best = null; let bestD = Infinity;
+    for (const n of dataRef.current.notes) {
+      if (Math.abs(n.k - p.key) > 1) continue;
+      if (p.tick < n.t - tickTol || p.tick > n.t + n.d + tickTol) continue;
+      const d = Math.abs(n.k - p.key) * 3
+        + Math.max(0, n.t - p.tick) + Math.max(0, p.tick - (n.t + n.d));
+      if (d < bestD) { bestD = d; best = n; }
+    }
+    return best;
+  };
+
   const setNotes = (next, gesture) => dispatch({
     type: 'notes.set',
     patternId: pattern.id,
@@ -385,7 +401,8 @@ export default function PianoRoll() {
     }
 
     const snap = snapTicks(d.ui.snap);
-    const hit = noteAt(p.tick, p.key);
+    const touch = e.pointerType === 'touch';
+    let hit = noteAt(p.tick, p.key);
     const tool = d.ui.tool || 'draw';
 
     if (e.button === 2 || tool === 'erase') {
@@ -405,6 +422,10 @@ export default function PianoRoll() {
       return;
     }
 
+    // On touch, grab the nearest note even if the tap wasn't dead-on, so small
+    // blocks can be moved/stretched instead of accidentally drawing a new one.
+    if (!hit && touch) hit = noteNear(p);
+
     if (hit) {
       // long press on touch removes the note, like a right-click does
       press.current.start(e, () => {
@@ -413,9 +434,13 @@ export default function PianoRoll() {
         drag.current = null;
       });
       const rightEdge = KEY_W + (hit.t + hit.d) * v.pxPerTick - v.scrollX;
+      // Bigger resize handle on touch: right ~45% of the block (capped), so the
+      // left part still moves and the right part stretches to a longer note.
+      const cwpx = hit.d * v.pxPerTick;
+      const edge = touch ? Math.max(12, Math.min(24, cwpx * 0.45)) : 6;
       if (!e.shiftKey && !sel.current.has(hit.id)) { sel.current.clear(); sel.current.add(hit.id); }
       else sel.current.add(hit.id);
-      if (Math.abs(p.x - rightEdge) < 6) {
+      if (p.x >= rightEdge - edge) {
         drag.current = { mode: 'resize', id: hit.id, snap, ids: [...sel.current] };
       } else {
         drag.current = {
