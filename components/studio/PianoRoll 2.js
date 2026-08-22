@@ -25,10 +25,6 @@ export default function PianoRoll() {
   const { project, dispatch, engine, ui, setUi, setHint, play, addToArrangement, popOut } = useStudio();
   const wrapRef = useRef(null);
   const canvasRef = useRef(null);
-  const vThumbRef = useRef(null);
-  const vDrag = useRef(null);
-  const loupeRef = useRef(null);
-  const loupe = useRef({ active: false, x: 0, y: 0 });
   const view = useRef({ scrollX: 0, scrollY: 0, pxPerTick: 0.5, rowH: 13, inited: false });
   const drag = useRef(null);
   const marquee = useRef(null);
@@ -247,55 +243,6 @@ export default function PianoRoll() {
         ctx.fillRect(Math.round(x), 0, 1.5, h - VEL_H);
       }
     }
-
-    // keep the touch scrollbar thumb in sync (also tracks pinch/octave scrolls)
-    if (vThumbRef.current) {
-      const total = KEYS * v.rowH;
-      const trackH = gridH;
-      const thumbH = Math.max(32, Math.min(trackH, trackH * (gridH / total)));
-      const maxScroll = Math.max(1, total - gridH);
-      const top = (v.scrollY / maxScroll) * (trackH - thumbH);
-      vThumbRef.current.style.height = `${thumbH}px`;
-      vThumbRef.current.style.transform = `translateY(${top}px)`;
-    }
-
-    // Magnifier loupe (touch): a zoomed bubble of the area under the finger,
-    // offset above it so the finger never covers the exact spot you're placing.
-    const lp = loupe.current;
-    const loupeEl = loupeRef.current;
-    if (loupeEl) {
-      if (lp.active) {
-        const LW = 128; const LH = 128; const ZOOM = 2.6;
-        if (loupeEl.width !== Math.floor(LW * dpr)) {
-          loupeEl.width = Math.floor(LW * dpr);
-          loupeEl.height = Math.floor(LH * dpr);
-          loupeEl.style.width = `${LW}px`;
-          loupeEl.style.height = `${LH}px`;
-        }
-        const lctx = loupeEl.getContext('2d');
-        lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        lctx.imageSmoothingEnabled = false;
-        const srcW = LW / ZOOM; const srcH = LH / ZOOM;
-        const sx = clamp(lp.x - srcW / 2, 0, Math.max(0, w - srcW));
-        const sy = clamp(lp.y - srcH / 2, 0, Math.max(0, h - srcH));
-        lctx.clearRect(0, 0, LW, LH);
-        lctx.drawImage(canvas, sx * dpr, sy * dpr, srcW * dpr, srcH * dpr, 0, 0, LW, LH);
-        // crosshair marks the exact target under the finger
-        lctx.strokeStyle = accentA(0.9);
-        lctx.lineWidth = 1;
-        lctx.beginPath();
-        lctx.moveTo(LW / 2, LH / 2 - 8); lctx.lineTo(LW / 2, LH / 2 + 8);
-        lctx.moveTo(LW / 2 - 8, LH / 2); lctx.lineTo(LW / 2 + 8, LH / 2);
-        lctx.stroke();
-        let px = clamp(lp.x - LW / 2, 4, Math.max(4, w - LW - 4));
-        let py = lp.y - LH - 26;
-        if (py < 4) py = Math.min(h - LH - 4, lp.y + 26);
-        loupeEl.style.transform = `translate(${px}px, ${py}px)`;
-        loupeEl.style.display = 'block';
-      } else if (loupeEl.style.display !== 'none') {
-        loupeEl.style.display = 'none';
-      }
-    }
   }, [engine]);
 
   useRaf(draw);
@@ -353,13 +300,11 @@ export default function PianoRoll() {
 
   const onPointerDown = useCallback((e) => {
     if (!gesture.current) gesture.current = pinchZoom(view, draw, { min: 0.08, max: 4, maxScrollY: KEYS * view.current.rowH - 120 });
-    if (gesture.current.down(e)) { drag.current = null; press.current.cancel(); loupe.current.active = false; return; }
+    if (gesture.current.down(e)) { drag.current = null; press.current.cancel(); return; }
     const p = posFromEvent(e);
     const v = view.current;
     const d = dataRef.current;
     canvasRef.current.setPointerCapture(e.pointerId);
-    // Touch magnifier follows the finger for precise note placement.
-    if (e.pointerType === 'touch' && !p.inHead) loupe.current = { active: true, x: p.x, y: p.y };
 
     if (p.inHead) {
       play(d.ui.mode === 'song' ? 'song' : 'pattern', Math.max(0, Math.floor(p.tick / d.barLen) * d.barLen));
@@ -451,13 +396,12 @@ export default function PianoRoll() {
   };
 
   const onPointerMove = useCallback((e) => {
-    if (gesture.current && gesture.current.move(e)) { loupe.current.active = false; return; }
+    if (gesture.current && gesture.current.move(e)) return;
     press.current.move(e);
     const dr = drag.current;
     if (!dr) return;
     const p = posFromEvent(e);
     const d = dataRef.current;
-    if (loupe.current.active && e.pointerType === 'touch') { loupe.current.x = p.x; loupe.current.y = p.y; }
 
     if (dr.mode === 'audition') {
       const key = clamp(p.key, MIN_KEY, MAX_KEY);
@@ -525,7 +469,6 @@ export default function PianoRoll() {
       setHint(`${sel.current.size} notes selected.`);
     }
     drag.current = null;
-    loupe.current.active = false;
     bump((n) => n + 1);
     draw();
   }, [channel, draw, engine, setHint]);
@@ -549,31 +492,6 @@ export default function PianoRoll() {
     el.addEventListener('wheel', handler, { passive: false });
     return () => el.removeEventListener('wheel', handler);
   }, [onWheel]);
-
-  // Touch scrollbar: drag the thumb to scroll the keyboard vertically.
-  const maxScrollY = () => {
-    const wrap = wrapRef.current;
-    const gridH = (wrap ? wrap.clientHeight : 300) - HEAD_H - VEL_H;
-    return Math.max(1, KEYS * view.current.rowH - gridH);
-  };
-  const onVScrollDown = useCallback((e) => {
-    e.stopPropagation();
-    e.currentTarget.setPointerCapture(e.pointerId);
-    vDrag.current = { y: e.clientY, scrollY: view.current.scrollY };
-  }, []);
-  const onVScrollMove = useCallback((e) => {
-    if (!vDrag.current) return;
-    e.stopPropagation();
-    const wrap = wrapRef.current; if (!wrap) return;
-    const gridH = wrap.clientHeight - HEAD_H - VEL_H;
-    const total = KEYS * view.current.rowH;
-    const thumbH = Math.max(32, Math.min(gridH, gridH * (gridH / total)));
-    const maxS = maxScrollY();
-    const scale = maxS / Math.max(1, gridH - thumbH);
-    view.current.scrollY = clamp(vDrag.current.scrollY + (e.clientY - vDrag.current.y) * scale, 0, maxS);
-    draw();
-  }, [draw]);
-  const onVScrollUp = useCallback(() => { vDrag.current = null; }, []);
 
   /* ------------------------------------------------------------ shortcuts */
 
@@ -788,19 +706,6 @@ export default function PianoRoll() {
           onPointerCancel={onPointerUp}
           onContextMenu={(e) => e.preventDefault()}
         />
-        {ui.touch && (
-          <div
-            className={s.vScroll}
-            onPointerDown={onVScrollDown}
-            onPointerMove={onVScrollMove}
-            onPointerUp={onVScrollUp}
-            onPointerCancel={onVScrollUp}
-            title="Drag to scroll the keyboard"
-          >
-            <div className={s.vThumb} ref={vThumbRef} />
-          </div>
-        )}
-        <canvas className={s.loupe} ref={loupeRef} />
       </div>
     </div>
   );

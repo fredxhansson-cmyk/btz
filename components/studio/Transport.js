@@ -135,7 +135,7 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
           onClick={() => (playing ? pause() : play())}
           aria-pressed={playing}
           title={playing ? 'Pause (space)' : (paused ? 'Resume (space)' : 'Play (space)')}
-        >{playing ? '⏸' : '▶'}</button>
+        >{playing ? <span className={s.pauseGlyph} aria-label="Pause" /> : '▶'}</button>
         <button
           type="button"
           className={s.tbtn}
