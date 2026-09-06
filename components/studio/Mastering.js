@@ -1,7 +1,11 @@
 import React, { useRef, useState } from 'react';
 import s from '../../styles/studio.module.css';
 import { useStudio, useRaf } from '../../lib/studio/StudioContext';
-import { MASTER_PRESETS, matchGain, measureBufferLufs } from '../../lib/studio/mastering';
+import {
+  MASTER_PRESETS, matchGain, measureBufferLufs,
+  analyzeTonalBalance, suggestMasterChain, describeMoves, AI_MASTER_STYLES,
+} from '../../lib/studio/mastering';
+import { renderProject } from '../../lib/studio/audio/render';
 
 /**
  * The mastering panel — loudness metering, streaming presets, one-click
@@ -14,6 +18,45 @@ export function Mastering() {
   const barRef = useRef(null);
   const vals = useRef({ i: null, s: -70, m: -70, p: 0 });
   const target = project.master.target == null ? -14 : project.master.target;
+
+  // Analysis-driven AI master: render the track, measure its tonal balance and
+  // loudness, then set EQ + chain + level automatically toward a target curve.
+  const [aiStyle, setAiStyle] = useState('balanced');
+  const [aiBusy, setAiBusy] = useState(null);
+  const [aiReport, setAiReport] = useState(null);
+  const refBalance = useRef(null);
+
+  const aiMaster = async () => {
+    setAiBusy('Renderar…');
+    try {
+      const p = project;
+      const sr = engine.ctx ? engine.ctx.sampleRate : 44100;
+      const mode = (p.playlist && p.playlist.length) ? 'song' : 'pattern';
+      const buffer = await renderProject(p, engine.buffers, {
+        mode,
+        repeats: mode === 'song' ? 1 : 2,
+        sampleRate: Math.min(sr, 32000),
+        onProgress: (f) => setAiBusy(`Analyserar… ${Math.round(f * 100)}%`),
+      });
+      const balance = analyzeTonalBalance(buffer);
+      const measured = measureBufferLufs(buffer);
+      const { chain, target: tgt, moves } = suggestMasterChain(balance, {
+        style: aiStyle, target, refBalance: refBalance.current || undefined,
+      });
+      dispatch({ type: 'master.preset', presetId: 'ai', chain, target: tgt });
+      engine.resetLoudness();
+      if (measured != null && isFinite(measured) && measured > -60) {
+        const next = matchGain(project.master.vol, measured, tgt);
+        dispatch({ type: 'master', patch: { vol: next } });
+      }
+      setAiReport({ moves, measured, target: tgt, matched: !!refBalance.current });
+      setHint(`AI-mastring: ${describeMoves(moves)} · nivå ${measured > -60 ? measured.toFixed(1) : '—'} → ${tgt} LUFS.`);
+    } catch (e) {
+      setHint(`AI-mastring misslyckades: ${e.message}`);
+    } finally {
+      setAiBusy(null);
+    }
+  };
 
   // Reference track: load a professionally-mastered song, measure its loudness,
   // A/B against your mix and match your target to it.
@@ -28,6 +71,7 @@ export function Mastering() {
       const buf = await ctx.decodeAudioData(await file.arrayBuffer());
       refBuf.current = buf;
       engine.refSpectrum = null;
+      refBalance.current = analyzeTonalBalance(buf);
       const lufs = measureBufferLufs(buf);
       setRefTrack({ name: file.name.replace(/\.[^.]+$/, '').slice(0, 26), lufs, playing: false });
       setHint(`Reference "${file.name}" — ${lufs.toFixed(1)} LUFS.`);
@@ -111,6 +155,34 @@ export function Mastering() {
             }}
           >{p.name}</button>
         ))}
+      </div>
+
+      <div className={s.aiMasterBox}>
+        <div className={s.aiMasterHead}>
+          <span className={s.aiMasterTitle}>✨ AI-mastring</span>
+          <span className={s.dim}>analyserar mixens tonbalans och sätter EQ, kedja och nivå automatiskt</span>
+        </div>
+        <div className={s.loudRow}>
+          <span className={s.dim}>Stil</span>
+          <select className={s.select} value={aiStyle} onChange={(e) => setAiStyle(e.target.value)}>
+            {Object.keys(AI_MASTER_STYLES).map((k) => (
+              <option key={k} value={k}>{({ balanced: 'Balanserad', loud: 'Hög/klubb', warm: 'Varm', bright: 'Ljus/luftig' })[k] || k}</option>
+            ))}
+          </select>
+          <div className={s.spacer} />
+          <button type="button" className={`${s.btn} ${s.on}`} disabled={!!aiBusy} onClick={aiMaster}>
+            {aiBusy || (refBalance.current ? '🎯 Analysera & matcha referens' : '✨ Analysera & mastra')}
+          </button>
+        </div>
+        {aiReport && (
+          <div className={s.aiReport}>
+            <b>Klart.</b> {describeMoves(aiReport.moves)}
+            {aiReport.matched ? ' · matchad mot referensens tonkurva' : ''}
+            {' · nivå '}
+            {aiReport.measured > -60 ? `${aiReport.measured.toFixed(1)} → ${aiReport.target} LUFS` : `mål ${aiReport.target} LUFS`}.
+            <span className={s.dim}> Allt landade på master-kedjan — justera stegen fritt nedan.</span>
+          </div>
+        )}
       </div>
 
       <div className={s.lufsBar} title="Integrated loudness vs your target (green = on target)">

@@ -1060,6 +1060,19 @@
 .promptRow { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .promptGo { font-size: 15px; padding: 0 20px; min-height: var(--ctl); font-weight: 700; }
 
+/* ------------------------------------------------------------ AI mastering */
+.aiMasterBox {
+  margin: 8px; padding: 12px; border-radius: var(--r-md);
+  background: var(--accent-soft); border: 1px solid var(--accent);
+}
+.aiMasterHead { display: flex; flex-direction: column; gap: 2px; margin-bottom: 10px; }
+.aiMasterTitle { font-size: 14px; font-weight: 700; color: var(--accent-strong); }
+.aiReport {
+  margin-top: 10px; padding: 10px 12px; border-radius: var(--r-8);
+  background: var(--card); border: 1px solid var(--line-3); color: var(--text-2);
+  font-size: 13px; line-height: 1.5;
+}
+
 /* ------------------------------------------------------ standalone mastering */
 .masteringWrap { flex: 1; min-height: 0; overflow: auto; padding: 14px; }
 .masteringWrap .masterBox2 { max-width: 820px; margin: 0 auto; }
