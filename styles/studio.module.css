@@ -1072,7 +1072,7 @@
 /* ------------------------------------------------------- custom workspace */
 .wsGrid {
   flex: 1; min-height: 0; display: grid; gap: 8px; padding: 8px;
-  grid-auto-rows: minmax(300px, 1fr); overflow: auto; background: var(--stage);
+  grid-auto-rows: min-content; align-content: start; overflow: auto; background: var(--stage);
 }
 .wsCard {
   display: flex; flex-direction: column; min-height: 0; overflow: hidden;
@@ -1080,11 +1080,18 @@
 }
 .wsCardOver { border-color: var(--accent); box-shadow: var(--glow-accent); }
 .wsCardHead {
-  display: flex; align-items: center; gap: 8px; padding: 5px 8px;
+  display: flex; align-items: center; gap: 6px; padding: 5px 8px; flex-wrap: nowrap;
   background: var(--surface); border-bottom: 1px solid var(--line); cursor: grab;
 }
 .wsCardHead:active { cursor: grabbing; }
-.wsGrip { color: var(--text-4); font-size: 15px; letter-spacing: -2px; }
+.wsGrip { color: var(--text-4); font-size: 15px; letter-spacing: -2px; flex: none; }
+.wsCtl { display: inline-flex; align-items: center; gap: 3px; flex: none; }
+.wsMini {
+  width: 22px; height: 24px; border-radius: 6px; cursor: pointer; font-size: 11px;
+  background: var(--field); border: 1px solid var(--line-3); color: var(--text-2);
+}
+.wsMini:hover { background: var(--hover-strong); color: var(--text); }
+.wsCtlVal { font-size: 11px; color: var(--text-4); min-width: 30px; text-align: center; font-variant-numeric: tabular-nums; }
 .wsCardBody { flex: 1; min-height: 0; display: flex; overflow: hidden; }
 .wsCardBody > * { flex: 1; min-width: 0; min-height: 0; }
 

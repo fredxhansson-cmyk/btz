@@ -88,7 +88,7 @@ function isTyping(el) {
 
 function Workspace({ installPrompt, onInstalled }) {
   const {
-    project, dispatch, engine, ui, setUi, togglePlay, saveFile,
+    project, dispatch, engine, ui, setUi, togglePlay, saveFile, stop,
     recordNote, finishRecordedNote, loadSampleFile,
     detached, popOut, attach, canUndo,
     newProject, exportAudio, exportMidiFile,
@@ -191,7 +191,12 @@ function Workspace({ installPrompt, onInstalled }) {
         return;
       }
       if ((e.ctrlKey || e.metaKey) && k === 'y') { e.preventDefault(); dispatch({ type: 'redo' }); return; }
+      if ((e.ctrlKey || e.metaKey) && k === 'e') { e.preventDefault(); exportAudio({ scope: 'song', format: e.shiftKey ? 'mp3' : 'wav', bitrate: 320 }); return; }
+      if ((e.ctrlKey || e.metaKey) && k === ',') { e.preventDefault(); setSettingsOpen(true); return; }
+      if ((e.ctrlKey || e.metaKey) && k === 'b') { e.preventDefault(); setUi((u) => ({ browserOpen: !u.browserOpen })); return; }
+      if ((e.ctrlKey || e.metaKey) && k === 'm') { e.preventDefault(); setUi((u) => ({ metronome: !u.metronome })); return; }
       if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.key === 'Home') { e.preventDefault(); stop(); return; }
       if (e.key === 'ArrowUp') { setUi((u) => ({ octave: clamp(u.octave + 1, 0, 8) })); return; }
       if (e.key === 'ArrowDown') { setUi((u) => ({ octave: clamp(u.octave - 1, 0, 8) })); return; }
       if (k === 'r' && !KEYMAP[k]) { /* r is also a piano key, handled below */ }
@@ -232,7 +237,7 @@ function Workspace({ installPrompt, onInstalled }) {
       window.removeEventListener('keydown', down);
       window.removeEventListener('keyup', up);
     };
-  }, [dispatch, engine, recordNote, finishRecordedNote, saveFile, setUi, togglePlay]);
+  }, [dispatch, engine, recordNote, finishRecordedNote, saveFile, setUi, togglePlay, stop, exportAudio]);
 
   const onDrop = (e) => {
     e.preventDefault();

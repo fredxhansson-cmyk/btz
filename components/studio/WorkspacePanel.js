@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import s from '../../styles/studio.module.css';
-import { uid } from '../../lib/studio/constants';
+import { uid, clamp } from '../../lib/studio/constants';
 import ChannelRack from './ChannelRack';
 import PianoRoll from './PianoRoll';
 import Playlist from './Playlist';
@@ -12,8 +12,7 @@ import VideoPanel from './VideoPanel';
 import LiveInputsPanel from './LiveInputsPanel';
 import Browser from './Browser';
 
-// The blocks a workspace slot can show. 'workspace' itself is excluded to avoid
-// nesting the container inside itself.
+// The blocks a workspace slot can show.
 const BLOCKS = [
   { id: 'rack', label: 'Instruments' },
   { id: 'piano', label: 'Piano Roll' },
@@ -26,7 +25,6 @@ const BLOCKS = [
   { id: 'liveinputs', label: 'Live inputs' },
   { id: 'browser', label: 'Sounds' },
 ];
-const LABELS = BLOCKS.reduce((a, b) => { a[b.id] = b.label; return a; }, {});
 
 function renderBlock(view) {
   switch (view) {
@@ -44,68 +42,95 @@ function renderBlock(view) {
   }
 }
 
-// Ready-made layouts for common jobs — a starting point you can then customise.
+// Ready-made layouts for common jobs — a starting point you can customise.
 const PRESETS = {
+  Prod: { cols: 3, panels: ['browser', 'rack', 'piano', 'drums', 'mixer', 'mastering'] },
   Beatmaking: { cols: 2, panels: ['browser', 'rack', 'drums', 'mixer'] },
   Melody: { cols: 2, panels: ['piano', 'rack', 'mixer', 'automation'] },
-  Mixing: { cols: 2, panels: ['mixer', 'mastering'] },
+  Mix: { cols: 2, panels: ['mixer', 'automation'] },
+  Master: { cols: 2, panels: ['mastering', 'mixer'] },
   Film: { cols: 2, panels: ['video', 'piano', 'playlist', 'mixer'] },
+  Live: { cols: 2, panels: ['liveinputs', 'mixer', 'rack'] },
 };
 
-const KEY = 'btz.workspace.v1';
-function load() {
-  if (typeof window === 'undefined') return null;
-  try { return JSON.parse(window.localStorage.getItem(KEY)); } catch (e) { return null; }
-}
-function save(data) {
-  if (typeof window === 'undefined') return;
-  try { window.localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { /* noop */ }
-}
+const DEF_H = 360;
+const KEY = 'btz.workspace.v2';
+const TKEY = 'btz.workspace.templates';
+
+function load() { if (typeof window === 'undefined') return null; try { return JSON.parse(window.localStorage.getItem(KEY)); } catch (e) { return null; } }
+function save(data) { if (typeof window === 'undefined') return; try { window.localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { /* noop */ } }
+function loadTemplates() { if (typeof window === 'undefined') return []; try { return JSON.parse(window.localStorage.getItem(TKEY)) || []; } catch (e) { return []; } }
+function saveTemplates(list) { if (typeof window === 'undefined') return; try { window.localStorage.setItem(TKEY, JSON.stringify(list)); } catch (e) { /* noop */ } }
+
+const toPanels = (arr) => arr.map((p) => (typeof p === 'string'
+  ? { key: uid('ws'), view: p, span: 1, h: DEF_H }
+  : { key: uid('ws'), view: p.view, span: p.span || 1, h: p.h || DEF_H }));
 
 export default function WorkspacePanel() {
   const stored = load();
   const [panels, setPanels] = useState(() => (stored && stored.panels
-    ? stored.panels.map((view) => ({ key: uid('ws'), view }))
-    : [{ key: uid('ws'), view: 'rack' }, { key: uid('ws'), view: 'piano' }, { key: uid('ws'), view: 'mixer' }]));
+    ? toPanels(stored.panels)
+    : toPanels(['rack', 'piano', 'mixer'])));
   const [cols, setCols] = useState((stored && stored.cols) || 2);
+  const [templates, setTemplates] = useState(() => loadTemplates());
   const drag = useRef(null);
   const [over, setOver] = useState(-1);
 
-  useEffect(() => { save({ panels: panels.map((p) => p.view), cols }); }, [panels, cols]);
+  useEffect(() => {
+    save({ cols, panels: panels.map((p) => ({ view: p.view, span: p.span, h: p.h })) });
+  }, [panels, cols]);
 
-  const setView = (i, view) => setPanels((p) => p.map((x, idx) => (idx === i ? { ...x, view } : x)));
-  const remove = (i) => setPanels((p) => p.filter((_, idx) => idx !== i));
-  const add = () => setPanels((p) => [...p, { key: uid('ws'), view: 'mixer' }]);
-  const applyPreset = (name) => {
-    const pr = PRESETS[name];
-    if (!pr) return;
-    setCols(pr.cols);
-    setPanels(pr.panels.map((view) => ({ key: uid('ws'), view })));
+  const patch = (i, p) => setPanels((list) => list.map((x, idx) => (idx === i ? { ...x, ...p } : x)));
+  const remove = (i) => setPanels((list) => list.filter((_, idx) => idx !== i));
+  const add = () => setPanels((list) => [...list, { key: uid('ws'), view: 'mixer', span: 1, h: DEF_H }]);
+
+  const applyLayout = (cfg) => { setCols(cfg.cols); setPanels(toPanels(cfg.panels)); };
+
+  const saveAsTemplate = () => {
+    const name = window.prompt('Name this layout template');
+    if (!name) return;
+    const cfg = { name, cols, panels: panels.map((p) => ({ view: p.view, span: p.span, h: p.h })) };
+    const next = [...templates.filter((t) => t.name !== name), cfg];
+    setTemplates(next); saveTemplates(next);
+  };
+  const deleteTemplate = (name) => {
+    const next = templates.filter((t) => t.name !== name);
+    setTemplates(next); saveTemplates(next);
   };
 
   const onDrop = (i) => {
-    const from = drag.current;
-    drag.current = null;
-    setOver(-1);
+    const from = drag.current; drag.current = null; setOver(-1);
     if (from == null || from === i) return;
-    setPanels((p) => {
-      const a = [...p];
-      const [m] = a.splice(from, 1);
-      a.splice(i, 0, m);
-      return a;
-    });
+    setPanels((list) => { const a = [...list]; const [m] = a.splice(from, 1); a.splice(i, 0, m); return a; });
   };
 
   return (
     <div className={s.panel}>
       <div className={s.panelHead}>
         <span className={s.panelTitle}>Workspace</span>
-        <span className={s.dim}>build your own layout — drag blocks to reorder</span>
         <div className={s.group}>
           <span className={s.dim}>Presets</span>
           {Object.keys(PRESETS).map((name) => (
-            <button key={name} type="button" className={s.btn} onClick={() => applyPreset(name)}>{name}</button>
+            <button key={name} type="button" className={s.btn} onClick={() => applyLayout(PRESETS[name])}>{name}</button>
           ))}
+        </div>
+        <div className={s.group}>
+          <span className={s.dim}>Templates</span>
+          <select
+            className={s.select}
+            value=""
+            onChange={(e) => { const t = templates.find((x) => x.name === e.target.value); if (t) applyLayout(t); e.target.value = ''; }}
+          >
+            <option value="">{templates.length ? 'Load…' : 'None saved'}</option>
+            {templates.map((t) => <option key={t.name} value={t.name}>{t.name}</option>)}
+          </select>
+          <button type="button" className={s.btn} onClick={saveAsTemplate}>Save layout…</button>
+          {templates.length > 0 && (
+            <select className={s.select} value="" onChange={(e) => { if (e.target.value) deleteTemplate(e.target.value); e.target.value = ''; }}>
+              <option value="">Delete…</option>
+              {templates.map((t) => <option key={t.name} value={t.name}>{t.name}</option>)}
+            </select>
+          )}
         </div>
         <div className={s.group}>
           <span className={s.dim}>Columns</span>
@@ -122,6 +147,7 @@ export default function WorkspacePanel() {
           <div
             key={p.key}
             className={over === i ? `${s.wsCard} ${s.wsCardOver}` : s.wsCard}
+            style={{ gridColumn: `span ${Math.min(p.span, cols)}`, height: `${p.h}px` }}
             onDragOver={(e) => { e.preventDefault(); if (over !== i) setOver(i); }}
             onDrop={() => onDrop(i)}
           >
@@ -133,16 +159,21 @@ export default function WorkspacePanel() {
               title="Drag to move this block"
             >
               <span className={s.wsGrip} aria-hidden="true">⠿</span>
-              <select
-                className={s.select}
-                value={p.view}
-                onChange={(e) => setView(i, e.target.value)}
-                onDragStart={(e) => e.preventDefault()}
-              >
+              <select className={s.select} value={p.view} onChange={(e) => patch(i, { view: e.target.value })} onDragStart={(e) => e.preventDefault()}>
                 {BLOCKS.map((b) => <option key={b.id} value={b.id}>{b.label}</option>)}
               </select>
               <div className={s.spacer} />
-              <button type="button" className={s.xBtn} title="Ta bort blocket" onClick={() => remove(i)}>×</button>
+              <span className={s.wsCtl} title="Width (columns)">
+                <button type="button" className={s.wsMini} onClick={() => patch(i, { span: clamp(p.span - 1, 1, 3) })}>◄</button>
+                <span className={s.wsCtlVal}>{Math.min(p.span, cols)}w</span>
+                <button type="button" className={s.wsMini} onClick={() => patch(i, { span: clamp(p.span + 1, 1, 3) })}>►</button>
+              </span>
+              <span className={s.wsCtl} title="Height">
+                <button type="button" className={s.wsMini} onClick={() => patch(i, { h: clamp(p.h - 80, 200, 900) })}>−</button>
+                <span className={s.wsCtlVal}>{p.h}</span>
+                <button type="button" className={s.wsMini} onClick={() => patch(i, { h: clamp(p.h + 80, 200, 900) })}>+</button>
+              </span>
+              <button type="button" className={s.xBtn} title="Remove block" onClick={() => remove(i)}>×</button>
             </div>
             <div className={s.wsCardBody}>{renderBlock(p.view)}</div>
           </div>
