@@ -27,7 +27,7 @@ export function Mastering() {
   const refBalance = useRef(null);
 
   const aiMaster = async () => {
-    setAiBusy('Renderar…');
+    setAiBusy('Rendering…');
     try {
       const p = project;
       const sr = engine.ctx ? engine.ctx.sampleRate : 44100;
@@ -36,7 +36,7 @@ export function Mastering() {
         mode,
         repeats: mode === 'song' ? 1 : 2,
         sampleRate: Math.min(sr, 32000),
-        onProgress: (f) => setAiBusy(`Analyserar… ${Math.round(f * 100)}%`),
+        onProgress: (f) => setAiBusy(`Analyzing… ${Math.round(f * 100)}%`),
       });
       const balance = analyzeTonalBalance(buffer);
       const measured = measureBufferLufs(buffer);
@@ -50,9 +50,9 @@ export function Mastering() {
         dispatch({ type: 'master', patch: { vol: next } });
       }
       setAiReport({ moves, measured, target: tgt, matched: !!refBalance.current });
-      setHint(`AI-mastring: ${describeMoves(moves)} · nivå ${measured > -60 ? measured.toFixed(1) : '—'} → ${tgt} LUFS.`);
+      setHint(`AI master: ${describeMoves(moves)} · level ${measured > -60 ? measured.toFixed(1) : '—'} → ${tgt} LUFS.`);
     } catch (e) {
-      setHint(`AI-mastring misslyckades: ${e.message}`);
+      setHint(`AI master failed: ${e.message}`);
     } finally {
       setAiBusy(null);
     }
@@ -159,28 +159,28 @@ export function Mastering() {
 
       <div className={s.aiMasterBox}>
         <div className={s.aiMasterHead}>
-          <span className={s.aiMasterTitle}>✨ AI-mastring</span>
-          <span className={s.dim}>analyserar mixens tonbalans och sätter EQ, kedja och nivå automatiskt</span>
+          <span className={s.aiMasterTitle}>✨ AI mastering</span>
+          <span className={s.dim}>analyzes the mix tonal balance and sets EQ, chain and level automatically</span>
         </div>
         <div className={s.loudRow}>
-          <span className={s.dim}>Stil</span>
+          <span className={s.dim}>Style</span>
           <select className={s.select} value={aiStyle} onChange={(e) => setAiStyle(e.target.value)}>
             {Object.keys(AI_MASTER_STYLES).map((k) => (
-              <option key={k} value={k}>{({ balanced: 'Balanserad', loud: 'Hög/klubb', warm: 'Varm', bright: 'Ljus/luftig' })[k] || k}</option>
+              <option key={k} value={k}>{({ balanced: 'Balanced', loud: 'Loud / club', warm: 'Warm', bright: 'Bright / airy' })[k] || k}</option>
             ))}
           </select>
           <div className={s.spacer} />
           <button type="button" className={`${s.btn} ${s.on}`} disabled={!!aiBusy} onClick={aiMaster}>
-            {aiBusy || (refBalance.current ? '🎯 Analysera & matcha referens' : '✨ Analysera & mastra')}
+            {aiBusy || (refBalance.current ? '🎯 Analyze & match reference' : '✨ Analyze & master')}
           </button>
         </div>
         {aiReport && (
           <div className={s.aiReport}>
-            <b>Klart.</b> {describeMoves(aiReport.moves)}
-            {aiReport.matched ? ' · matchad mot referensens tonkurva' : ''}
-            {' · nivå '}
-            {aiReport.measured > -60 ? `${aiReport.measured.toFixed(1)} → ${aiReport.target} LUFS` : `mål ${aiReport.target} LUFS`}.
-            <span className={s.dim}> Allt landade på master-kedjan — justera stegen fritt nedan.</span>
+            <b>Done.</b> {describeMoves(aiReport.moves)}
+            {aiReport.matched ? ' · matched to the reference tone curve' : ''}
+            {' · level '}
+            {aiReport.measured > -60 ? `${aiReport.measured.toFixed(1)} → ${aiReport.target} LUFS` : `target ${aiReport.target} LUFS`}.
+            <span className={s.dim}> Everything landed on the master chain — tweak the steps freely below.</span>
           </div>
         )}
       </div>

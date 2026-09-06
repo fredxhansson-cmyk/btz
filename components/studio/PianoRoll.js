@@ -347,7 +347,7 @@ export default function PianoRoll() {
     const chosen = selected();
     const list = chosen.length ? chosen : notes;
     if (!list.length) {
-      setHint(`Inga noter på "${channel.name}". Rita noter med Draw, eller välj ett annat instrument uppe till vänster.`);
+      setHint(`No notes on "${channel.name}". Draw notes with the Draw tool, or pick another instrument at the top left.`);
       return;
     }
     const changed = fn(list);

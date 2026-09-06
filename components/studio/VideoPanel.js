@@ -47,9 +47,9 @@ export default function VideoPanel() {
     <div className={s.panel}>
       <div className={s.panelHead}>
         <span className={s.panelTitle}>Video</span>
-        <span className={s.dim}>synka musiken mot film</span>
+        <span className={s.dim}>sync music to picture</span>
         <label className={s.btn} style={{ cursor: 'pointer' }}>
-          {ui.videoSrc ? 'Byt video…' : 'Ladda video…'}
+          {ui.videoSrc ? 'Change video…' : 'Load video…'}
           <input
             type="file"
             accept="video/*"
@@ -71,7 +71,7 @@ export default function VideoPanel() {
               className={muted ? s.btn : `${s.btn} ${s.on}`}
               onClick={() => setUi({ videoMuted: !muted })}
               title="Play the video's own audio too"
-            >{muted ? 'Filmljud av' : 'Filmljud på'}</button>
+            >{muted ? 'Film audio off' : 'Film audio on'}</button>
           </>
         )}
         <div className={s.spacer} />
@@ -93,9 +93,9 @@ export default function VideoPanel() {
           />
         ) : (
           <div className={s.helpBox}>
-            Ladda en videofil för att skora mot bild. I <b>SONG</b>-läge följer videon
-            spelhuvudet automatiskt — tryck play så rullar bild och musik ihop. Ljudet
-            kommer från studion; justera <b>Offset</b> för att linja upp bildens start.
+            Load a video file to score to picture. In <b>SONG</b> mode the video follows
+            the playhead automatically — press play and picture and music roll together.
+            Audio comes from the studio; use <b>Offset</b> to line up where the video starts.
           </div>
         )}
       </div>

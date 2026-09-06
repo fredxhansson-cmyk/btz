@@ -47,8 +47,8 @@ function renderBlock(view) {
 // Ready-made layouts for common jobs — a starting point you can then customise.
 const PRESETS = {
   Beatmaking: { cols: 2, panels: ['browser', 'rack', 'drums', 'mixer'] },
-  Melodi: { cols: 2, panels: ['piano', 'rack', 'mixer', 'automation'] },
-  Mixning: { cols: 2, panels: ['mixer', 'mastering'] },
+  Melody: { cols: 2, panels: ['piano', 'rack', 'mixer', 'automation'] },
+  Mixing: { cols: 2, panels: ['mixer', 'mastering'] },
   Film: { cols: 2, panels: ['video', 'piano', 'playlist', 'mixer'] },
 };
 
@@ -100,7 +100,7 @@ export default function WorkspacePanel() {
     <div className={s.panel}>
       <div className={s.panelHead}>
         <span className={s.panelTitle}>Workspace</span>
-        <span className={s.dim}>bygg din egen uppsättning — dra blocken för att flytta</span>
+        <span className={s.dim}>build your own layout — drag blocks to reorder</span>
         <div className={s.group}>
           <span className={s.dim}>Presets</span>
           {Object.keys(PRESETS).map((name) => (
@@ -108,7 +108,7 @@ export default function WorkspacePanel() {
           ))}
         </div>
         <div className={s.group}>
-          <span className={s.dim}>Kolumner</span>
+          <span className={s.dim}>Columns</span>
           {[1, 2, 3].map((n) => (
             <button key={n} type="button" className={cols === n ? `${s.btn} ${s.on}` : s.btn} onClick={() => setCols(n)}>{n}</button>
           ))}
@@ -130,7 +130,7 @@ export default function WorkspacePanel() {
               draggable
               onDragStart={() => { drag.current = i; }}
               onDragEnd={() => { drag.current = null; setOver(-1); }}
-              title="Dra för att flytta blocket"
+              title="Drag to move this block"
             >
               <span className={s.wsGrip} aria-hidden="true">⠿</span>
               <select
@@ -148,7 +148,7 @@ export default function WorkspacePanel() {
           </div>
         ))}
         {!panels.length && (
-          <div className={s.helpBox}>Inga block. Tryck ＋ Block eller välj en preset ovan.</div>
+          <div className={s.helpBox}>No blocks. Press ＋ Block or pick a preset above.</div>
         )}
       </div>
     </div>

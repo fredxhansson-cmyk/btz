@@ -110,7 +110,7 @@ export default function AiPanel({ onClose }) {
 
   const generateFromPrompt = async () => {
     const text = promptText.trim();
-    if (!text) { setHint('Skriv vad du vill ha — t.ex. "dark trap 140 F minor with piano".'); return; }
+    if (!text) { setHint('Describe what you want — e.g. "dark trap 140 F minor with piano".'); return; }
     setWorking(true);
     try {
       let spec = parsePrompt(text);
@@ -125,7 +125,7 @@ export default function AiPanel({ onClose }) {
           if (res.ok) {
             const data = await res.json();
             if (data && data.spec) spec = sanitizeSpec(data.spec, spec);
-            else if (data && data.enabled === false) setHint('AI-modell ej aktiverad på servern — körde lokalt (gratis).');
+            else if (data && data.enabled === false) setHint('AI model not enabled on the server — ran locally (free).');
           }
         } catch (e) { /* keep local spec */ }
       }
@@ -136,7 +136,7 @@ export default function AiPanel({ onClose }) {
       learnFromProject(b, next, 0.5);
       saveBrain(b);
       setBrain(b);
-      setHint(`Genererade: ${describeSpec(spec)} — allt är redigerbart i Drum Machine / Piano Roll.`);
+      setHint(`Generated: ${describeSpec(spec)} — fully editable in Drum Machine / Piano Roll.`);
       setUi({ view: 'drums' });
       onClose();
     } finally {
@@ -172,7 +172,7 @@ export default function AiPanel({ onClose }) {
                 className={s.promptInput}
                 value={promptText}
                 autoFocus
-                placeholder={'Beskriv beatet du vill ha…\nt.ex. "dark trap 140 in F minor with hard 808s and piano"'}
+                placeholder={'Describe the beat you want…\ne.g. "dark trap 140 in F minor with hard 808s and piano"'}
                 onChange={(e) => setPromptText(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); generateFromPrompt(); } }}
               />
@@ -187,17 +187,17 @@ export default function AiPanel({ onClose }) {
                   className={`${s.btn} ${s.on} ${s.promptGo}`}
                   disabled={working}
                   onClick={generateFromPrompt}
-                >{working ? 'Genererar…' : '✨ Generera beat'}</button>
-                <label className={s.checkRow} title="Använd en språkmodell om en API-nyckel är satt på servern. Annars körs den lokala motorn.">
+                >{working ? 'Generating…' : '✨ Generate beat'}</button>
+                <label className={s.checkRow} title="Use a language model if an API key is set on the server. Otherwise the local engine runs.">
                   <input type="checkbox" checked={useModel} onChange={(e) => setUseModel(e.target.checked)} />
-                  AI-modell (om nyckel finns)
+                  AI model (if key is set)
                 </label>
                 <span className={s.dim}>⌘/Ctrl + Enter</span>
               </div>
               <div className={s.helpBox}>
-                Skriver riktiga trumkanaler, groove, baslinje och (på begäran) ackord till
-                aktuellt mönster — <b>allt går att redigera efteråt</b> i Drum Machine och Piano Roll.
-                Den lokala motorn körs i din webbläsare och <b>kostar ingenting</b>.
+                Writes real drum channels, a groove, a bassline and (on request) chords into
+                the current pattern — <b>everything stays editable</b> in the Drum Machine and
+                Piano Roll. The local engine runs in your browser and <b>costs nothing</b>.
               </div>
             </div>
           </div>

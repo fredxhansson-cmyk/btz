@@ -79,7 +79,7 @@ export default function LiveInputsPanel() {
     <div className={s.panel}>
       <div className={s.panelHead}>
         <span className={s.panelTitle}>Live inputs</span>
-        <span className={s.dim}>mic · turntable · line — flera samtidigt, var och en till egen kanal</span>
+        <span className={s.dim}>mic · turntable · line — several at once, each to its own channel</span>
         <div className={s.spacer} />
         <button type="button" className={`${s.btn} ${s.on}`} onClick={add}>＋ Live input</button>
         <button
@@ -94,10 +94,10 @@ export default function LiveInputsPanel() {
         {error && <div className={s.helpBox} style={{ color: 'var(--rec)' }}>{error}</div>}
         {!rows.length && (
           <div className={s.helpBox}>
-            Tryck <b>＋ Live input</b> och tillåt mikrofon/ljudkort. Välj sedan enhet
-            (skivspelare/mic/line via ditt ljudkort) och vilken mixerkanal den ska in på —
-            då får den egen fader, panorering och FX i mixern. Sätt på <b>Monitoring</b>
-            genom att höja kanalens fader i mixern.
+            Press <b>＋ Live input</b> and allow the microphone / audio interface. Then pick
+            the device (turntable / mic / line via your interface) and which mixer channel it
+            feeds — it then gets its own fader, panning and FX in the mixer. Hear it by
+            raising that channel's fader in the Mixer.
           </div>
         )}
         {rows.map((r) => (
