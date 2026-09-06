@@ -228,6 +228,12 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOp
         <button type="button" className={ui.mode === 'song' ? `${s.seg} ${s.on}` : s.seg} onClick={() => setMode('song')}>SONG</button>
       </div>
 
+      <span
+        className={playing ? `${s.nowPlaying} ${s.on}` : s.nowPlaying}
+        title={playing ? 'Playing' : 'Stopped'}
+        aria-hidden="true"
+      ><i /><i /><i /></span>
+
       <div className={s.timeBox}>
         <div className={s.timeDisp} ref={timeRef}>001:1:00</div>
         <div className={s.timeLabel}>BAR:BEAT:TICK</div>

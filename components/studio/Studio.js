@@ -403,6 +403,7 @@ function Workspace({ installPrompt, onInstalled }) {
         </div>
         <main className={s.main}>
           <div className={s.viewArea}>
+            {!ui.touch && <span className={s.hudFrame} aria-hidden="true"><i /><i /><i /><i /></span>}
             {detached.includes(ui.view) ? (
               <div className={s.detachedNote}>
                 <span><b>{labelFor(ui.view)}</b> is open in a separate window.</span>
