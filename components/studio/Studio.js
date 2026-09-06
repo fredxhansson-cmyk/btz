@@ -274,7 +274,7 @@ function Workspace({ installPrompt, onInstalled }) {
     { id: 'transport-play', group: 'Transport', icon: '▶', label: 'Play / Pause', hint: 'Space', keywords: 'start stop', run: () => togglePlay() },
     { id: 'tool-record', group: 'Transport', icon: '🎙', label: 'Record audio (mic / line / turntable)…', keywords: 'input microphone', run: () => setRecOpen(true) },
 
-    { id: 'tool-ai', group: 'AI', icon: '✨', label: 'Open BTZ Brain (AI generator)…', keywords: 'generate beat idea', run: () => setAiOpen(true) },
+    { id: 'tool-ai', group: 'AI', icon: '✨', label: 'Open Fuse Brain (AI generator)…', keywords: 'generate beat idea', run: () => setAiOpen(true) },
 
     { id: 'file-new', group: 'File', icon: '＋', label: 'New empty project', keywords: 'clear start', run: () => newProject(false) },
     { id: 'file-demo', group: 'File', icon: '＋', label: 'Load demo project', keywords: 'example', run: () => newProject(true) },
@@ -359,7 +359,7 @@ function Workspace({ installPrompt, onInstalled }) {
               </button>
             ))}
             <span className={s.railGroupLbl}>Tools</span>
-            <button type="button" title="BTZ Brain — AI beat generator" className={`${s.railBtn} ${s.aiRail}`} onClick={() => setAiOpen(true)}>
+            <button type="button" title="Fuse Brain — AI beat generator" className={`${s.railBtn} ${s.aiRail}`} onClick={() => setAiOpen(true)}>
               <span className={s.railIcon}>✨</span><span className={s.railLbl}>AI</span>
             </button>
             <button type="button" title="Record from mic or instrument" className={s.railBtn} onClick={() => setRecOpen(true)}>
@@ -461,7 +461,7 @@ function Workspace({ installPrompt, onInstalled }) {
               await installPrompt.userChoice;
               if (onInstalled) onInstalled();
             }}
-            title="Install BTZ on this device"
+            title="Install Fuse on this device"
           >Install app</button>
         )}
         {CLERK && <AuthArea className={s.btn} />}

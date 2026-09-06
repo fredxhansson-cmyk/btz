@@ -144,7 +144,7 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOp
     { label: 'Workspace (custom layout)', onClick: () => setUi({ view: 'workspace' }) },
     { sep: true },
     { label: 'Record audio (mic / line)…', onClick: () => onOpenRecord && onOpenRecord() },
-    { label: 'BTZ Brain (AI)…', onClick: () => onOpenAi && onOpenAi() },
+    { label: 'Fuse Brain (AI)…', onClick: () => onOpenAi && onOpenAi() },
     { sep: true },
     { label: 'Settings…', onClick: () => onOpenSettings && onOpenSettings() },
   ];
@@ -163,7 +163,7 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOp
           <i style={{ background: 'var(--color-lime)', height: '100%' }} />
           <i style={{ background: 'var(--color-blue)', height: '40%' }} />
         </span>
-        <span className={s.brandName}>BTZ</span>
+        <span className={s.brandName}>Fuse</span>
       </div>
 
       <div className={s.menu}>
@@ -337,7 +337,7 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOp
                   Record audio…
                 </button>
                 <button type="button" className={s.sheetItem} onClick={() => { setSheet(false); if (onOpenAi) onOpenAi(); }}>
-                  BTZ Brain (AI)…
+                  Fuse Brain (AI)…
                 </button>
                 <button type="button" className={s.sheetItem} onClick={() => { setSheet(false); if (onOpenSettings) onOpenSettings(); }}>
                   Settings…

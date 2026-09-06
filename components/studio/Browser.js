@@ -118,7 +118,7 @@ export default function Browser() {
             {aiSounds.map((sd) => <SoundRow key={sd.id} sound={sd} onRemove={dropUser} />)}
             {!aiSounds.length && (
               <div className={s.helpBox}>
-                Open <b>BTZ Brain</b> and generate sounds — the ones you save land here and
+                Open <b>Fuse Brain</b> and generate sounds — the ones you save land here and
                 the library grows the more you use the app.
               </div>
             )}

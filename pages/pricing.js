@@ -12,7 +12,7 @@ const PLANS = [
   {
     id: 'pro', name: 'Pro', price: '$4', per: '/ month · $29 / yr', accent: true, plan: 'pro_monthly',
     tagline: 'Unlimited AI + every export.',
-    features: ['Unlimited BTZ Brain generations', 'MP3 / AIFF / stems export', 'Cloud project save', 'Extra sound packs', 'Priority updates'],
+    features: ['Unlimited Fuse Brain generations', 'MP3 / AIFF / stems export', 'Cloud project save', 'Extra sound packs', 'Priority updates'],
     cta: 'Go Pro',
   },
   {
@@ -36,7 +36,7 @@ async function startCheckout(plan) {
 export default function Pricing() {
   return (
     <>
-      <Head><title>BTZ — Pricing</title></Head>
+      <Head><title>Fuse — Pricing</title></Head>
       <main style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', fontFamily: "'Instrument Sans', system-ui, sans-serif", padding: 'clamp(28px,6vw,72px) 20px' }}>
         <div style={{ maxWidth: 1040, margin: '0 auto' }}>
           <Link href="/" style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: 14 }}>← Back to the studio</Link>

@@ -12,7 +12,7 @@ export default function PopOut({ title, theme, onClose, children }) {
     const w = window.open('', '', 'width=1040,height=720,left=180,top=120');
     if (!w) { onClose(); return undefined; }
     winRef.current = w;
-    w.document.title = `BTZ — ${title}`;
+    w.document.title = `Fuse — ${title}`;
     // Clone every stylesheet so the CSS modules + design tokens apply.
     document.querySelectorAll('link[rel="stylesheet"], style').forEach((node) => {
       try { w.document.head.appendChild(node.cloneNode(true)); } catch (e) { /* ignore */ }
