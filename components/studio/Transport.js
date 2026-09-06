@@ -34,7 +34,7 @@ function Menu({ label, items, openId, setOpenId }) {
                 onClick={() => { setOpenId(null); it.onClick(); }}
               >
                 <span>{it.label}</span>
-                {it.hint && <span className={s.dropHint}>{it.hint}</span>}
+                {it.hint && <span className={s.menuHint}>{it.hint}</span>}
               </button>
             )))}
           </div>
