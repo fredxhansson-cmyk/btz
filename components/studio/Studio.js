@@ -10,6 +10,7 @@ import Mixer from './Mixer';
 import MixerColumn from './MixerColumn';
 import MasteringView from './Mastering';
 import Settings from './Settings';
+import CommandPalette from './CommandPalette';
 import DrumMachine from './DrumMachine';
 import Automation from './Automation';
 import HelpOverlay from './HelpOverlay';
@@ -84,6 +85,7 @@ function Workspace({ installPrompt, onInstalled }) {
     project, dispatch, engine, ui, setUi, togglePlay, saveFile,
     recordNote, finishRecordedNote, loadSampleFile,
     detached, popOut, attach, canUndo,
+    newProject, exportAudio, exportMidiFile,
   } = useStudio();
   const [dropping, setDropping] = useState(false);
   const [help, setHelp] = useState(false);
@@ -91,6 +93,7 @@ function Workspace({ installPrompt, onInstalled }) {
   const [aiOpen, setAiOpen] = useState(false);
   const [onboard, setOnboard] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [cmdOpen, setCmdOpen] = useState(false);
 
   // Show the welcome guide on the first visit; reopenable via the Guide tab.
   useEffect(() => {
@@ -153,6 +156,12 @@ function Workspace({ installPrompt, onInstalled }) {
 
   useEffect(() => {
     const down = (e) => {
+      // ⌘K / Ctrl+K opens the command bar from anywhere, even a text field.
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setCmdOpen((v) => !v);
+        return;
+      }
       if (isTyping(e.target) || e.defaultPrevented) return;
       const k = e.key.toLowerCase();
 
@@ -233,6 +242,41 @@ function Workspace({ installPrompt, onInstalled }) {
     return () => window.removeEventListener('keydown', esc);
   }, [dropping]);
 
+  // Everything the command bar (⌘K) can find and do, in one place.
+  const commands = [
+    { id: 'v-playlist', group: 'View', icon: '▤', label: 'Go to Arrangement', hint: 'F5', keywords: 'song timeline arrange', run: () => setUi({ view: 'playlist' }) },
+    { id: 'v-rack', group: 'View', icon: '🎛', label: 'Go to Instruments', hint: 'F6', keywords: 'channel rack', run: () => setUi({ view: 'rack' }) },
+    { id: 'v-piano', group: 'View', icon: '🎹', label: 'Go to Piano Roll', hint: 'F7', keywords: 'notes melody', run: () => setUi({ view: 'piano' }) },
+    { id: 'v-drums', group: 'View', icon: '▦', label: 'Go to Drum Machine', hint: 'F8', keywords: 'beat pads', run: () => setUi({ view: 'drums' }) },
+    { id: 'v-mixer', group: 'View', icon: '🎚', label: 'Go to Mixer', hint: 'F9', keywords: 'channels faders fx', run: () => setUi({ view: 'mixer' }) },
+    { id: 'v-auto', group: 'View', icon: '∿', label: 'Go to Automation', hint: 'F10', keywords: 'envelope', run: () => setUi({ view: 'automation' }) },
+    { id: 'v-master', group: 'View', icon: '◆', label: 'Go to Mastering', hint: 'F11', keywords: 'loudness lufs finish', run: () => setUi({ view: 'mastering' }) },
+
+    { id: 'transport-play', group: 'Transport', icon: '▶', label: 'Play / Pause', hint: 'Space', keywords: 'start stop', run: () => togglePlay() },
+    { id: 'tool-record', group: 'Transport', icon: '🎙', label: 'Record audio (mic / line / turntable)…', keywords: 'input microphone', run: () => setRecOpen(true) },
+
+    { id: 'tool-ai', group: 'AI', icon: '✨', label: 'Open BTZ Brain (AI generator)…', keywords: 'generate beat idea', run: () => setAiOpen(true) },
+
+    { id: 'file-new', group: 'File', icon: '＋', label: 'New empty project', keywords: 'clear start', run: () => newProject(false) },
+    { id: 'file-demo', group: 'File', icon: '＋', label: 'Load demo project', keywords: 'example', run: () => newProject(true) },
+    { id: 'file-save', group: 'File', icon: '⤓', label: 'Save project', hint: 'Ctrl+S', run: () => saveFile() },
+    { id: 'file-wav', group: 'File', icon: '♫', label: 'Export full track — WAV', keywords: 'render bounce audio', run: () => exportAudio({ scope: 'song', format: 'wav' }) },
+    { id: 'file-mp3', group: 'File', icon: '♫', label: 'Export full track — MP3', keywords: 'render bounce audio', run: () => exportAudio({ scope: 'song', format: 'mp3', bitrate: 320 }) },
+    { id: 'file-stems', group: 'File', icon: '♫', label: 'Export stems (per channel) — WAV', keywords: 'multitrack', run: () => exportAudio({ scope: 'stems', format: 'wav' }) },
+    { id: 'file-midi', group: 'File', icon: '♫', label: 'Export MIDI', run: () => exportMidiFile() },
+
+    { id: 'edit-undo', group: 'Edit', icon: '↶', label: 'Undo', hint: 'Ctrl+Z', run: () => dispatch({ type: 'undo' }) },
+    { id: 'edit-redo', group: 'Edit', icon: '↷', label: 'Redo', hint: 'Ctrl+Y', run: () => dispatch({ type: 'redo' }) },
+    { id: 'edit-newpat', group: 'Edit', icon: '＋', label: 'New pattern', run: () => dispatch({ type: 'pattern.add' }) },
+
+    { id: 'pop', group: 'Window', icon: '⧉', label: `Pop out current view (${labelFor(ui.view)})`, keywords: 'detach second screen', run: () => (detached.includes(ui.view) ? attach(ui.view) : popOut(ui.view)) },
+    { id: 'theme', group: 'Window', icon: '◐', label: 'Toggle light / dark theme', run: () => toggleTheme() },
+
+    { id: 'settings', group: 'App', icon: '⚙', label: 'Open Settings…', keywords: 'preferences user program', run: () => setSettingsOpen(true) },
+    { id: 'guide', group: 'App', icon: '◎', label: 'Replay guided tour', run: () => setOnboard(true) },
+    { id: 'help', group: 'App', icon: '?', label: 'Keyboard shortcuts & help', hint: '?', run: () => setHelp(true) },
+  ];
+
   return (
     <div
       className={ui.touch ? `${s.app} ${s.touch}` : s.app}
@@ -250,6 +294,7 @@ function Workspace({ installPrompt, onInstalled }) {
           onReplayTour={() => { setSettingsOpen(false); setOnboard(true); }}
         />
       )}
+      {cmdOpen && <CommandPalette actions={commands} onClose={() => setCmdOpen(false)} />}
       {detached.map((id) => (
         <PopOut key={id} title={labelFor(id)} theme={ui.theme} onClose={() => attach(id)}>
           {viewFor(id)}
@@ -272,6 +317,7 @@ function Workspace({ installPrompt, onInstalled }) {
         onOpenRecord={() => setRecOpen(true)}
         onOpenAi={() => setAiOpen(true)}
         onOpenSettings={() => setSettingsOpen(true)}
+        onOpenCommand={() => setCmdOpen(true)}
       />
 
       <div className={s.body}>

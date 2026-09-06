@@ -989,6 +989,65 @@
 .tab { min-height: var(--ctl-sm); }
 .tbtn { min-height: var(--hit); }
 
+/* ------------------------------------------------------- command bar (⌘K) */
+.cmdPill {
+  display: inline-flex; align-items: center; gap: 8px; min-height: var(--ctl-sm);
+  padding: 0 12px; border-radius: var(--r-full); cursor: pointer;
+  background: var(--field); border: 1px solid var(--line-3); color: var(--text-3);
+  font-size: 13px; max-width: 260px;
+}
+.cmdPill:hover { background: var(--hover-strong); border-color: var(--accent); color: var(--text); }
+.cmdPillIcon { font-size: 15px; color: var(--accent); }
+.cmdPillText { flex: 1; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmdPillKbd {
+  flex: none; font-family: var(--font-mono); font-size: 11px; color: var(--text-3);
+  background: var(--card); border: 1px solid var(--line-3); border-radius: 5px; padding: 1px 6px;
+}
+.touch .cmdPill { display: none; }
+
+.cmdBack {
+  position: fixed; inset: 0; z-index: 90; display: flex; justify-content: center;
+  align-items: flex-start; padding-top: 12vh; background: rgba(8,10,13,0.55);
+  backdrop-filter: blur(3px);
+}
+.cmdBox {
+  width: min(640px, 94vw); max-height: 70vh; display: flex; flex-direction: column;
+  background: var(--panel); border: 1px solid var(--line-4); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-pop); overflow: hidden;
+}
+.cmdInputRow { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.cmdSearchIcon { font-size: 20px; color: var(--accent); }
+.cmdInput {
+  flex: 1; min-width: 0; background: transparent; border: 0; color: var(--text);
+  font-size: 17px; font-weight: 500;
+}
+.cmdInput:focus { outline: none; }
+.cmdInput::placeholder { color: var(--muted); font-weight: 400; }
+.cmdEsc {
+  flex: none; font-family: var(--font-mono); font-size: 11px; color: var(--text-3);
+  background: var(--card); border: 1px solid var(--line-3); border-radius: 5px; padding: 2px 7px;
+}
+.cmdList { overflow: auto; padding: 6px; }
+.cmdItem {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  background: transparent; border: 0; color: var(--text); cursor: pointer;
+  padding: 11px 12px; border-radius: var(--r-10); font-size: 14.5px;
+}
+.cmdItemSel { background: var(--accent); color: var(--accent-ink); }
+.cmdItemSel .cmdGroup, .cmdItemSel .cmdHint { color: var(--accent-ink); opacity: 0.75; }
+.cmdIcon { flex: none; width: 22px; text-align: center; font-size: 16px; }
+.cmdLabel { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.cmdGroup {
+  flex: none; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase;
+  color: var(--muted); font-weight: 600;
+}
+.cmdHint {
+  flex: none; font-family: var(--font-mono); font-size: 11px; color: var(--text-3);
+  background: var(--card); border: 1px solid var(--line-3); border-radius: 5px; padding: 1px 6px;
+}
+.cmdItemSel .cmdHint { background: transparent; border-color: transparent; }
+.cmdEmpty { padding: 24px; text-align: center; color: var(--muted); font-size: 14px; }
+
 /* ------------------------------------------------------ standalone mastering */
 .masteringWrap { flex: 1; min-height: 0; overflow: auto; padding: 14px; }
 .masteringWrap .masterBox2 { max-width: 820px; margin: 0 auto; }

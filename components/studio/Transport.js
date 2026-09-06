@@ -44,7 +44,7 @@ function Menu({ label, items, openId, setOpenId }) {
   );
 }
 
-export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings }) {
+export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOpenCommand }) {
   const {
     project, dispatch, engine, ui, setUi, play, stop, pause, setMode,
     newProject, saveFile, openFile, exportAudio, exportMidiFile, importMidiFile,
@@ -155,6 +155,17 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings }) {
           title="Settings — user &amp; program"
         >⚙ Settings</button>
       </div>
+
+      <button
+        type="button"
+        className={s.cmdPill}
+        onClick={() => onOpenCommand && onOpenCommand()}
+        title="Find and do anything"
+      >
+        <span className={s.cmdPillIcon} aria-hidden="true">⌕</span>
+        <span className={s.cmdPillText}>Search / do anything</span>
+        <kbd className={s.cmdPillKbd}>⌘K</kbd>
+      </button>
 
       <div className={s.sep} />
 
@@ -268,6 +279,11 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings }) {
           >⋯</button>
           {sheet && (
             <div className={s.sheet} onPointerDown={(e) => e.stopPropagation()}>
+              <div className={s.sheetGroup}>
+                <button type="button" className={`${s.sheetItem} ${s.on}`} onClick={() => { setSheet(false); if (onOpenCommand) onOpenCommand(); }}>
+                  ⌕ Search / do anything
+                </button>
+              </div>
               <div className={s.sheetGroup}>
                 <div className={s.sheetLabel}>FILE</div>
                 {fileItems.filter((i) => !i.sep).map((it) => (
