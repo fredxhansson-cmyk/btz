@@ -13,30 +13,38 @@ function Menu({ label, items, openId, setOpenId }) {
         className={open ? `${s.menuBtn} ${s.on}` : s.menuBtn}
         onClick={() => setOpenId(open ? null : label)}
         onMouseEnter={() => openId && setOpenId(label)}
+        aria-haspopup="true"
+        aria-expanded={open}
       >
-        {label}
+        {label}<span className={s.menuCaret} aria-hidden="true">▾</span>
       </button>
       {open && (
-        <div className={s.dropdown} onMouseLeave={() => setOpenId(null)}>
-          {items.map((it, i) => (it.sep ? <div key={`s${i}`} className={s.dropSep} /> : (
-            <button
-              key={it.label}
-              type="button"
-              className={s.dropItem}
-              disabled={it.disabled}
-              onClick={() => { setOpenId(null); it.onClick(); }}
-            >
-              <span>{it.label}</span>
-              {it.hint && <span className={s.dropHint}>{it.hint}</span>}
-            </button>
-          )))}
-        </div>
+        <>
+          {/* Full-screen catcher: one reliable way to dismiss the menu, so a
+              click anywhere outside always closes it. */}
+          <div className={s.menuBackdrop} onPointerDown={() => setOpenId(null)} />
+          <div className={s.dropdown} role="menu">
+            {items.map((it, i) => (it.sep ? <div key={`s${i}`} className={s.dropSep} /> : (
+              <button
+                key={it.label}
+                type="button"
+                className={s.dropItem}
+                role="menuitem"
+                disabled={it.disabled}
+                onClick={() => { setOpenId(null); it.onClick(); }}
+              >
+                <span>{it.label}</span>
+                {it.hint && <span className={s.dropHint}>{it.hint}</span>}
+              </button>
+            )))}
+          </div>
+        </>
       )}
     </div>
   );
 }
 
-export default function Transport({ onOpenRecord, onOpenAi }) {
+export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings }) {
   const {
     project, dispatch, engine, ui, setUi, play, stop, pause, setMode,
     newProject, saveFile, openFile, exportAudio, exportMidiFile, importMidiFile,
@@ -108,6 +116,21 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
     { label: 'Clear playlist', onClick: () => dispatch({ type: 'clip.clear' }) },
   ];
 
+  const viewItems = [
+    { label: 'Arrangement', hint: 'F5', onClick: () => setUi({ view: 'playlist' }) },
+    { label: 'Instruments', hint: 'F6', onClick: () => setUi({ view: 'rack' }) },
+    { label: 'Piano Roll', hint: 'F7', onClick: () => setUi({ view: 'piano' }) },
+    { label: 'Drum Machine', hint: 'F8', onClick: () => setUi({ view: 'drums' }) },
+    { label: 'Mixer', hint: 'F9', onClick: () => setUi({ view: 'mixer' }) },
+    { label: 'Automation', hint: 'F10', onClick: () => setUi({ view: 'automation' }) },
+    { label: 'Mastering', hint: 'F11', onClick: () => setUi({ view: 'mastering' }) },
+    { sep: true },
+    { label: 'Record audio (mic / line)…', onClick: () => onOpenRecord && onOpenRecord() },
+    { label: 'BTZ Brain (AI)…', onClick: () => onOpenAi && onOpenAi() },
+    { sep: true },
+    { label: 'Settings…', onClick: () => onOpenSettings && onOpenSettings() },
+  ];
+
   useEffect(() => {
     const close = () => { setOpenId(null); setSheet(false); };
     window.addEventListener('pointerdown', close);
@@ -124,6 +147,13 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
       <div className={s.menu}>
         <Menu label="File" items={fileItems} openId={openId} setOpenId={setOpenId} />
         <Menu label="Edit" items={editItems} openId={openId} setOpenId={setOpenId} />
+        <Menu label="View" items={viewItems} openId={openId} setOpenId={setOpenId} />
+        <button
+          type="button"
+          className={s.menuBtn}
+          onClick={() => onOpenSettings && onOpenSettings()}
+          title="Settings — user &amp; program"
+        >⚙ Settings</button>
       </div>
 
       <div className={s.sep} />
@@ -153,8 +183,11 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
           type="button"
           className={s.micBtn}
           onClick={() => onOpenRecord && onOpenRecord()}
-          title="Record from microphone or instrument"
-        >🎙</button>
+          title="Record from microphone, line-in, turntable or instrument"
+        >
+          <span className={s.micGlyph} aria-hidden="true">🎙</span>
+          <span className={s.micLbl}>MIC / LINE</span>
+        </button>
       </div>
 
       <div className={s.modeSw}>
@@ -259,6 +292,12 @@ export default function Transport({ onOpenRecord, onOpenAi }) {
                 </button>
                 <button type="button" className={s.sheetItem} onClick={() => { setSheet(false); if (onOpenAi) onOpenAi(); }}>
                   BTZ Brain (AI)…
+                </button>
+                <button type="button" className={s.sheetItem} onClick={() => { setSheet(false); if (onOpenSettings) onOpenSettings(); }}>
+                  Settings…
+                </button>
+                <button type="button" className={s.sheetItem} onClick={() => { setSheet(false); setUi({ view: 'mastering' }); }}>
+                  Mastering…
                 </button>
                 <div className={s.sheetRow}>
                   <button

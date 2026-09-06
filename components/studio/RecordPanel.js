@@ -131,8 +131,8 @@ export default function RecordPanel({ onClose }) {
     <div className={s.modalBack} onPointerDown={onClose}>
       <div className={s.modal} onPointerDown={(e) => e.stopPropagation()}>
         <div className={s.modalHead}>
-          <span className={s.pluginTitle}>Record audio</span>
-          <span className={s.dim}>microphone, guitar, keyboard — anything that goes into your audio interface</span>
+          <span className={s.pluginTitle}>Record audio — mic · line · turntable · instrument</span>
+          <span className={s.dim}>pick any input that goes into your audio interface, then Enable input</span>
           <div className={s.spacer} />
           <button type="button" className={s.xBtn} onClick={onClose}>×</button>
         </div>

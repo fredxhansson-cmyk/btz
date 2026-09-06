@@ -32,9 +32,10 @@ function SoundRow({ sound, onRemove }) {
       <button
         type="button"
         className={s.previewBtn}
-        title="Preview"
+        title={`Play ${sound.name}`}
+        aria-label={`Play ${sound.name}`}
         onPointerDown={(e) => { e.stopPropagation(); engine.previewSound(sound); }}
-      >▸</button>
+      >▶</button>
       <button
         type="button"
         className={s.soundName}

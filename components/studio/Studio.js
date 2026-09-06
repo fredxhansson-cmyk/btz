@@ -8,6 +8,8 @@ import PianoRoll from './PianoRoll';
 import Playlist from './Playlist';
 import Mixer from './Mixer';
 import MixerColumn from './MixerColumn';
+import MasteringView from './Mastering';
+import Settings from './Settings';
 import DrumMachine from './DrumMachine';
 import Automation from './Automation';
 import HelpOverlay from './HelpOverlay';
@@ -32,10 +34,10 @@ const KEYMAP = {
 
 // Distinct glyphs — but the text label under each is what carries the meaning.
 const NAV_ICONS = {
-  playlist: '▤', rack: '🎛', piano: '🎹', drums: '▦', mixer: '🎚', automation: '∿',
+  playlist: '▤', rack: '🎛', piano: '🎹', drums: '▦', mixer: '🎚', automation: '∿', mastering: '◆',
 };
 const NAV_SHORT = {
-  playlist: 'Arrange', rack: 'Instr', piano: 'Piano', drums: 'Beat', automation: 'Auto', mixer: 'Mixer',
+  playlist: 'Arrange', rack: 'Instr', piano: 'Piano', drums: 'Beat', automation: 'Auto', mixer: 'Mixer', mastering: 'Master',
 };
 
 const TABS = [
@@ -45,6 +47,7 @@ const TABS = [
   { id: 'drums', label: 'Drum Machine', hint: 'F8' },
   { id: 'automation', label: 'Automation', hint: 'F10' },
   { id: 'mixer', label: 'Mixer', hint: 'F9' },
+  { id: 'mastering', label: 'Mastering', hint: 'F11' },
 ];
 
 /** Letter key -> drum pad role, matching the pad grid layout. */
@@ -87,6 +90,7 @@ function Workspace({ installPrompt, onInstalled }) {
   const [recOpen, setRecOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
   const [onboard, setOnboard] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Show the welcome guide on the first visit; reopenable via the Guide tab.
   useEffect(() => {
@@ -132,6 +136,7 @@ function Workspace({ installPrompt, onInstalled }) {
       case 'drums': return <DrumMachine />;
       case 'automation': return <Automation />;
       case 'mixer': return <Mixer />;
+      case 'mastering': return <MasteringView />;
       default: return null;
     }
   };
@@ -160,6 +165,7 @@ function Workspace({ installPrompt, onInstalled }) {
       if (e.key === '?' || (e.key === '/' && e.shiftKey)) { e.preventDefault(); setHelp((v) => !v); return; }
       if (e.key === 'Escape') { setHelp(false); return; }
       if (e.key === 'F9') { e.preventDefault(); setUi({ view: 'mixer' }); return; }
+      if (e.key === 'F11') { e.preventDefault(); setUi({ view: 'mastering' }); return; }
       if ((e.ctrlKey || e.metaKey) && k === 's') { e.preventDefault(); saveFile(); return; }
       if ((e.ctrlKey || e.metaKey) && k === 'z') {
         e.preventDefault();
@@ -238,6 +244,12 @@ function Workspace({ installPrompt, onInstalled }) {
       {recOpen && <RecordPanel onClose={() => setRecOpen(false)} />}
       {aiOpen && <AiPanel onClose={() => setAiOpen(false)} />}
       {onboard && <Onboarding onClose={closeOnboard} />}
+      {settingsOpen && (
+        <Settings
+          onClose={() => setSettingsOpen(false)}
+          onReplayTour={() => { setSettingsOpen(false); setOnboard(true); }}
+        />
+      )}
       {detached.map((id) => (
         <PopOut key={id} title={labelFor(id)} theme={ui.theme} onClose={() => attach(id)}>
           {viewFor(id)}
@@ -256,7 +268,11 @@ function Workspace({ installPrompt, onInstalled }) {
           </div>
         </div>
       )}
-      <Transport onOpenRecord={() => setRecOpen(true)} onOpenAi={() => setAiOpen(true)} />
+      <Transport
+        onOpenRecord={() => setRecOpen(true)}
+        onOpenAi={() => setAiOpen(true)}
+        onOpenSettings={() => setSettingsOpen(true)}
+      />
 
       <div className={s.body}>
         {!ui.touch && (
@@ -299,6 +315,9 @@ function Workspace({ installPrompt, onInstalled }) {
             </button>
             <button type="button" title="Guided tour of the studio" className={s.railBtn} onClick={() => setOnboard(true)}>
               <span className={s.railIcon}>◎</span><span className={s.railLbl}>Guide</span>
+            </button>
+            <button type="button" title="Settings — user &amp; program" className={s.railBtn} onClick={() => setSettingsOpen(true)}>
+              <span className={s.railIcon}>⚙</span><span className={s.railLbl}>Settings</span>
             </button>
             <button type="button" title="Keyboard shortcuts &amp; help" className={s.railBtn} onClick={() => setHelp(true)}>
               <span className={s.railIcon}>?</span><span className={s.railLbl}>Help</span>
@@ -353,7 +372,7 @@ function Workspace({ installPrompt, onInstalled }) {
               onClick={() => setUi({ view: t.id, browserOpen: false })}
             >
               <span className={s.navIcon}>{NAV_ICONS[t.id]}</span>
-              {({ playlist: 'Arrange', rack: 'Instr', piano: 'Piano', drums: 'Drums', mixer: 'Mixer', automation: 'Auto' })[t.id]}
+              {({ playlist: 'Arrange', rack: 'Instr', piano: 'Piano', drums: 'Drums', mixer: 'Mixer', automation: 'Auto', mastering: 'Master' })[t.id]}
             </button>
           ))}
         </nav>
