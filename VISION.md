@@ -101,3 +101,23 @@ Vår kil är tydlig och unik i kombination:
 6. Levande låtar och semantisk tidslinje: paradigmskiftet fullt ut.
 
 Var etapp gör produkten mer säljbar och mer inlåsande än den förra.
+
+## Status (2026-09-06)
+
+Levererat och live på btz-app.vercel.app:
+- Friktionsfri kärna: kommandofält (⌘K), tydliga menyer, Settings.
+- AI-bandmedlem v1: prompt → redigerbart beat, lokalt gratis + LLM-läge live.
+- Mastring: genre-presets med säker limiter, analysdriven AI-mastring (spektral
+  matchning + referens), och nu en äkta 3-bands multiband-kompressor + Pro-preset.
+- Arrangemang i GarageBand-stil: clip-volym, fades, pennverktyg för volym-keyframes.
+- Live-ingångar routbara till egna mixerkanaler; mixern poppbar.
+- Videospår för filmsynk.
+- Anpassningsbar drag-and-drop-arbetsyta med presets.
+
+Kvar (nästa nivå, kräver mer än en enskild kodinsats):
+- Djupare DSP: dynamisk EQ och en true-peak-limiter med lookahead kräver en
+  AudioWorklet och noggrann ljudtestning (kan inte verifieras utan att lyssnas av).
+- Flera samtidiga live-ingångar: en motor-refaktor (flera inputs) som bör
+  ljudtestas så den inte rör den fungerande inspelningen.
+- Realtidssamarbete (multiplayer): kräver backend (CRDT + realtidsserver) och är
+  det största enskilda infrastruktursteget — störst hävstång för "Figma för ljud".
