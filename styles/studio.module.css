@@ -181,7 +181,8 @@
   padding: 8px 2px; transition: background .12s ease, color .12s ease, border-color .12s ease;
 }
 .railBtn:hover { background: var(--hover-strong); color: var(--text); }
-.railBtn.on { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+/* HUD: active view = neutral tint + 2px coral left-line, not a filled block. */
+.railBtn.on { background: var(--color-selected); color: var(--accent); border-color: transparent; box-shadow: inset 2px 0 0 0 var(--accent); }
 .railIcon { font-size: 19px; line-height: 1; }
 .railLbl { font-size: 10.5px; font-weight: 600; letter-spacing: .01em; }
 .railSpacer { flex: 1; min-height: 8px; }

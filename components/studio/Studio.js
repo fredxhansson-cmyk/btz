@@ -456,7 +456,7 @@ function Workspace({ installPrompt, onInstalled }) {
         {installPrompt && (
           <button
             type="button"
-            className={`${s.btn} ${s.on}`}
+            className={s.btn}
             onClick={async () => {
               installPrompt.prompt();
               await installPrompt.userChoice;
