@@ -261,7 +261,7 @@
 }
 .numBox {
   background: var(--card); border: 1px solid var(--line); border-radius: 4px;
-  padding: 3px 9px; font-family: ui-monospace, monospace; color: var(--accent); min-width: 26px; text-align: center;
+  padding: 3px 9px; font-family: var(--font-mono); color: var(--accent); min-width: 26px; text-align: center;
 }
 .patName { display: flex; border-left: 3px solid var(--accent); padding-left: 6px; }
 .patSelect {
@@ -277,7 +277,7 @@
 .ruler { position: relative; display: flex; height: 20px; }
 .rulerTick {
   flex: none; font-size: 10.5px; color: var(--muted); border-left: 1px solid var(--panel);
-  padding-left: 3px; line-height: 20px; font-family: ui-monospace, monospace;
+  padding-left: 3px; line-height: 20px; font-family: var(--font-mono);
 }
 .rulerBar { border-left-color: #4a5058; color: #98a0aa; }
 .stepPlayhead {
@@ -421,7 +421,7 @@
   font-size: 10px; color: #7d848e; text-align: center; width: 100%;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.knobVal { font-size: 10.5px; color: var(--text-2); font-family: ui-monospace, monospace; }
+.knobVal { font-size: 10.5px; color: var(--text-2); font-family: var(--font-mono); }
 .choice {
   width: 100%; background: var(--panel); border: 1px solid var(--line); color: var(--text);
   font-size: 11px; padding: 3px 2px; border-radius: 3px; cursor: pointer;
@@ -469,7 +469,7 @@
 }
 .padKey {
   position: absolute; top: 6px; left: 7px; font-size: 10.5px; color: var(--text-3);
-  font-family: ui-monospace, monospace; border: 1px solid #3d434b; border-radius: 3px;
+  font-family: var(--font-mono); border: 1px solid #3d434b; border-radius: 3px;
   padding: 0 3px; pointer-events: none;
 }
 .padChoke {
@@ -506,7 +506,7 @@
 .bigStepOn { border-color: rgba(0,0,0,0.65); }
 .bigStepNum {
   position: absolute; top: 3px; left: 0; right: 0; text-align: center;
-  font-size: 10px; color: #767d87; font-family: ui-monospace, monospace; pointer-events: none;
+  font-size: 10px; color: #767d87; font-family: var(--font-mono); pointer-events: none;
 }
 .bigStepOn .bigStepNum { color: rgba(0,0,0,0.65); }
 .rollDots {
@@ -541,7 +541,7 @@
 .ovOn { box-shadow: inset 0 0 0 1px rgba(0,0,0,0.4); }
 .numInput {
   width: 46px; background: var(--card); border: 1px solid var(--line); color: var(--accent);
-  border-radius: 4px; padding: 3px 5px; font-family: ui-monospace, monospace; font-size: 12.5px;
+  border-radius: 4px; padding: 3px 5px; font-family: var(--font-mono); font-size: 12.5px;
 }
 .dmTools {
   display: flex; align-items: center; gap: 7px; padding: 6px 12px;
@@ -625,7 +625,7 @@
 .helpRow { display: flex; gap: 8px; align-items: baseline; padding: 3px 0; font-size: 13px; color: var(--text-2); }
 .kbd {
   flex: none; background: var(--card); border: 1px solid #3a3f47; border-bottom-width: 2px;
-  border-radius: 4px; padding: 1px 5px; font-family: ui-monospace, monospace;
+  border-radius: 4px; padding: 1px 5px; font-family: var(--font-mono);
   font-size: 11.5px; color: var(--text); white-space: nowrap;
 }
 
@@ -879,7 +879,7 @@
 .presetRow { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; }
 .loudRow { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-top: 1px solid var(--panel); flex-wrap: wrap; }
 .loudRead {
-  font-family: ui-monospace, monospace; font-size: 13px; color: var(--accent);
+  font-family: var(--font-mono); font-size: 13px; color: var(--accent);
   background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: 5px 8px;
 }
 
@@ -909,7 +909,7 @@
   background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
   padding: 10px; display: flex; flex-direction: column; gap: 2px; align-items: center;
 }
-.statBox b { font-size: 20px; color: var(--accent); font-family: ui-monospace, monospace; }
+.statBox b { font-size: 20px; color: var(--accent); font-family: var(--font-mono); }
 .statBox span { font-size: 11.5px; color: #7d848e; }
 .aiTab {
   color: var(--accent-ink); background: var(--accent); border: 0; border-radius: var(--r-pill);
