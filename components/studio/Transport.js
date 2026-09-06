@@ -78,15 +78,28 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOp
   });
 
   const onTempoDown = useCallback((e) => {
+    if (editTempo !== null) return; // already typing — let the input handle it
     e.currentTarget.setPointerCapture(e.pointerId);
-    tempoDrag.current = { y: e.clientY, bpm: project.bpm };
-  }, [project.bpm]);
+    tempoDrag.current = { y: e.clientY, bpm: project.bpm, moved: false };
+  }, [project.bpm, editTempo]);
 
   const onTempoMove = useCallback((e) => {
-    if (!tempoDrag.current) return;
-    const delta = (tempoDrag.current.y - e.clientY) * (e.shiftKey ? 0.1 : 0.5);
-    dispatch({ type: 'patch', patch: { bpm: clamp(Math.round((tempoDrag.current.bpm + delta) * 10) / 10, 20, 300) }, live: true, id: 'bpm' });
+    const d = tempoDrag.current;
+    if (!d) return;
+    // Ignore a tiny wiggle so a plain click stays a click, not a nudge.
+    if (!d.moved && Math.abs(e.clientY - d.y) < 4) return;
+    d.moved = true;
+    const delta = (d.y - e.clientY) * (e.shiftKey ? 0.1 : 0.5);
+    dispatch({ type: 'patch', patch: { bpm: clamp(Math.round((d.bpm + delta) * 10) / 10, 20, 300) }, live: true, id: 'bpm' });
   }, [dispatch]);
+
+  const onTempoUp = useCallback((e) => {
+    const d = tempoDrag.current;
+    tempoDrag.current = null;
+    try { e.currentTarget.releasePointerCapture(e.pointerId); } catch (err) { /* noop */ }
+    // A click with no drag opens the number for typing.
+    if (d && !d.moved) setEditTempo(String(project.bpm));
+  }, [project.bpm]);
 
   const fileItems = [
     { label: 'New empty project', onClick: () => newProject(false) },
@@ -216,26 +229,34 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOp
 
       <div
         className={s.tempo}
-        onPointerDown={onTempoDown}
-        onPointerMove={onTempoMove}
-        onPointerUp={() => { tempoDrag.current = null; }}
-        onDoubleClick={() => setEditTempo(String(project.bpm))}
-        title="Drag to change tempo, double-click to type"
+        onPointerDown={editTempo === null ? onTempoDown : undefined}
+        onPointerMove={editTempo === null ? onTempoMove : undefined}
+        onPointerUp={editTempo === null ? onTempoUp : undefined}
+        title="Click to type a tempo · drag up/down to change (Shift = fine)"
       >
         {editTempo === null ? (
           <div className={s.tempoVal}>{project.bpm.toFixed(1)}</div>
         ) : (
           <input
             className={s.tempoInput}
+            type="number"
+            step="0.1"
+            min="20"
+            max="300"
             autoFocus
             value={editTempo}
+            onFocus={(e) => e.target.select()}
+            onPointerDown={(e) => e.stopPropagation()}
             onChange={(e) => setEditTempo(e.target.value)}
             onBlur={() => {
               const v = parseFloat(editTempo);
               if (!Number.isNaN(v)) dispatch({ type: 'patch', patch: { bpm: clamp(v, 20, 300) } });
               setEditTempo(null);
             }}
-            onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') e.currentTarget.blur();
+              else if (e.key === 'Escape') { setEditTempo(null); }
+            }}
           />
         )}
         <div className={s.timeLabel}>TEMPO</div>
