@@ -9,6 +9,7 @@ import Automation from './Automation';
 import Mixer from './Mixer';
 import MasteringView from './Mastering';
 import VideoPanel from './VideoPanel';
+import LiveInputsPanel from './LiveInputsPanel';
 import Browser from './Browser';
 
 // The blocks a workspace slot can show. 'workspace' itself is excluded to avoid
@@ -22,6 +23,7 @@ const BLOCKS = [
   { id: 'mixer', label: 'Mixer' },
   { id: 'mastering', label: 'Mastering' },
   { id: 'video', label: 'Video' },
+  { id: 'liveinputs', label: 'Live inputs' },
   { id: 'browser', label: 'Sounds' },
 ];
 const LABELS = BLOCKS.reduce((a, b) => { a[b.id] = b.label; return a; }, {});
@@ -36,6 +38,7 @@ function renderBlock(view) {
     case 'mixer': return <Mixer />;
     case 'mastering': return <MasteringView />;
     case 'video': return <VideoPanel />;
+    case 'liveinputs': return <LiveInputsPanel />;
     case 'browser': return <Browser />;
     default: return null;
   }

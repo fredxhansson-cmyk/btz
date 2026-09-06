@@ -10,6 +10,7 @@ import Mixer from './Mixer';
 import MixerColumn from './MixerColumn';
 import MasteringView from './Mastering';
 import VideoPanel from './VideoPanel';
+import LiveInputsPanel from './LiveInputsPanel';
 import WorkspacePanel from './WorkspacePanel';
 import Settings from './Settings';
 import CommandPalette from './CommandPalette';
@@ -37,10 +38,10 @@ const KEYMAP = {
 
 // Distinct glyphs — but the text label under each is what carries the meaning.
 const NAV_ICONS = {
-  playlist: '▤', rack: '🎛', piano: '🎹', drums: '▦', mixer: '🎚', automation: '∿', mastering: '◆', video: '🎬', workspace: '⊞',
+  playlist: '▤', rack: '🎛', piano: '🎹', drums: '▦', mixer: '🎚', automation: '∿', mastering: '◆', video: '🎬', liveinputs: '🎤', workspace: '⊞',
 };
 const NAV_SHORT = {
-  playlist: 'Arrange', rack: 'Instr', piano: 'Piano', drums: 'Beat', automation: 'Auto', mixer: 'Mixer', mastering: 'Master', video: 'Video', workspace: 'Custom',
+  playlist: 'Arrange', rack: 'Instr', piano: 'Piano', drums: 'Beat', automation: 'Auto', mixer: 'Mixer', mastering: 'Master', video: 'Video', liveinputs: 'Inputs', workspace: 'Custom',
 };
 
 const TABS = [
@@ -52,6 +53,7 @@ const TABS = [
   { id: 'mixer', label: 'Mixer', hint: 'F9' },
   { id: 'mastering', label: 'Mastering', hint: 'F11' },
   { id: 'video', label: 'Video', hint: '' },
+  { id: 'liveinputs', label: 'Live inputs', hint: '' },
   { id: 'workspace', label: 'Workspace', hint: '' },
 ];
 
@@ -145,6 +147,7 @@ function Workspace({ installPrompt, onInstalled }) {
       case 'mixer': return <Mixer />;
       case 'mastering': return <MasteringView />;
       case 'video': return <VideoPanel />;
+      case 'liveinputs': return <LiveInputsPanel />;
       case 'workspace': return <WorkspacePanel />;
       default: return null;
     }
@@ -258,6 +261,7 @@ function Workspace({ installPrompt, onInstalled }) {
     { id: 'v-auto', group: 'View', icon: '∿', label: 'Go to Automation', hint: 'F10', keywords: 'envelope', run: () => setUi({ view: 'automation' }) },
     { id: 'v-master', group: 'View', icon: '◆', label: 'Go to Mastering', hint: 'F11', keywords: 'loudness lufs finish', run: () => setUi({ view: 'mastering' }) },
     { id: 'v-video', group: 'View', icon: '🎬', label: 'Go to Video', keywords: 'film sync score picture', run: () => setUi({ view: 'video' }) },
+    { id: 'v-live', group: 'View', icon: '🎤', label: 'Go to Live inputs', keywords: 'mic turntable line record channel', run: () => setUi({ view: 'liveinputs' }) },
     { id: 'v-workspace', group: 'View', icon: '⊞', label: 'Go to Workspace (custom layout)', keywords: 'custom layout blocks drag adobe', run: () => setUi({ view: 'workspace' }) },
 
     { id: 'transport-play', group: 'Transport', icon: '▶', label: 'Play / Pause', hint: 'Space', keywords: 'start stop', run: () => togglePlay() },
@@ -426,7 +430,7 @@ function Workspace({ installPrompt, onInstalled }) {
               onClick={() => setUi({ view: t.id, browserOpen: false })}
             >
               <span className={s.navIcon}>{NAV_ICONS[t.id]}</span>
-              {({ playlist: 'Arrange', rack: 'Instr', piano: 'Piano', drums: 'Drums', mixer: 'Mixer', automation: 'Auto', mastering: 'Master', video: 'Video', workspace: 'Custom' })[t.id]}
+              {({ playlist: 'Arrange', rack: 'Instr', piano: 'Piano', drums: 'Drums', mixer: 'Mixer', automation: 'Auto', mastering: 'Master', video: 'Video', liveinputs: 'Inputs', workspace: 'Custom' })[t.id]}
             </button>
           ))}
         </nav>

@@ -125,6 +125,7 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOp
     { label: 'Automation', hint: 'F10', onClick: () => setUi({ view: 'automation' }) },
     { label: 'Mastering', hint: 'F11', onClick: () => setUi({ view: 'mastering' }) },
     { label: 'Video (film sync)', onClick: () => setUi({ view: 'video' }) },
+    { label: 'Live inputs (mic / turntable)', onClick: () => setUi({ view: 'liveinputs' }) },
     { label: 'Workspace (custom layout)', onClick: () => setUi({ view: 'workspace' }) },
     { sep: true },
     { label: 'Record audio (mic / line)…', onClick: () => onOpenRecord && onOpenRecord() },
