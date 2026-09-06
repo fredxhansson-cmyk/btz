@@ -29,6 +29,9 @@ export default function Playlist() {
   const loupe = useRef({ active: false, x: 0, y: 0, label: '' });
   const lastTap = useRef({ t: 0, x: 0, y: 0 });
   const [, bump] = useState(0);
+  const [tool, setTool] = useState('select');
+  const toolRef = useRef('select');
+  toolRef.current = tool;
   const gesture = useRef(null);
   const press = useRef(null);
   if (!press.current) press.current = longPress();
@@ -134,6 +137,50 @@ export default function Playlist() {
       ctx.clip();
       ctx.fillText(pat.name, Math.max(LABEL_W, x) + 5, y + 15);
       ctx.restore();
+
+      // Clip volume envelope: fades, gain line and hand-drawn keyframes.
+      const bx = Math.max(LABEL_W, x);
+      const br = x + cw;
+      const top = y + 2;
+      const bh = TRACK_H - 5;
+      const gain = clip.gain == null ? 1 : clip.gain;
+      const yForV = (val) => top + (1 - clamp(val / 1.5, 0, 1)) * bh;
+      const fiPx = (clip.fadeIn || 0) * v.pxPerTick;
+      const foPx = (clip.fadeOut || 0) * v.pxPerTick;
+      const pts = clip.gainPoints;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(bx, top, Math.max(0, Math.min(w, br) - bx), bh);
+      ctx.clip();
+      ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+      ctx.lineWidth = 1.2;
+      if (fiPx > 1) { ctx.beginPath(); ctx.moveTo(x, top + bh); ctx.lineTo(x + fiPx, top); ctx.stroke(); }
+      if (foPx > 1) { ctx.beginPath(); ctx.moveTo(br - foPx, top); ctx.lineTo(br, top + bh); ctx.stroke(); }
+      ctx.strokeStyle = accent();
+      ctx.lineWidth = 1.4;
+      if (pts && pts.length) {
+        ctx.beginPath();
+        pts.forEach((pt, i) => {
+          const px = x + pt.t * v.pxPerTick; const py = yForV(pt.v);
+          if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        });
+        ctx.stroke();
+        ctx.fillStyle = accent();
+        pts.forEach((pt) => {
+          const px = x + pt.t * v.pxPerTick; const py = yForV(pt.v);
+          ctx.beginPath(); ctx.arc(px, py, 2.6, 0, Math.PI * 2); ctx.fill();
+        });
+      } else if (Math.abs(gain - 1) > 0.001) {
+        const gy = yForV(gain);
+        ctx.beginPath(); ctx.moveTo(bx, gy); ctx.lineTo(Math.min(w, br), gy); ctx.stroke();
+      }
+      ctx.restore();
+      // Fade handles at the top edge.
+      if (v.pxPerTick > 0.03) {
+        ctx.fillStyle = 'rgba(255,255,255,0.92)';
+        const hxIn = x + fiPx; if (hxIn >= LABEL_W && hxIn <= w) ctx.fillRect(hxIn - 3, top - 1, 6, 5);
+        const hxOut = br - foPx; if (hxOut >= LABEL_W && hxOut <= w) ctx.fillRect(hxOut - 3, top - 1, 6, 5);
+      }
     }
 
     // header
@@ -338,10 +385,57 @@ export default function Playlist() {
       return;
     }
     if (hit) {
+      const clipX = LABEL_W + hit.start * v.pxPerTick - v.scrollX;
+      const clipR = LABEL_W + (hit.start + hit.length) * v.pxPerTick - v.scrollX;
+      const top = HEAD_H + hit.track * TRACK_H + 2;
+      const bh = TRACK_H - 5;
+      const relTick = clamp(p.tick - hit.start, 0, hit.length);
+      const vFromY = clamp((1 - (p.y - top) / bh) * 1.5, 0, 1.5);
+
+      // Pen tool: draw / move / remove volume keyframes on the clip.
+      if (toolRef.current === 'pen') {
+        const pts = [...(hit.gainPoints || [])];
+        if (e.button === 2 || e.shiftKey) {
+          if (pts.length) {
+            let bi = -1; let bd = 1e9;
+            pts.forEach((pt, i) => { const d = Math.abs((clipX + pt.t * v.pxPerTick) - p.x); if (d < bd) { bd = d; bi = i; } });
+            if (bi >= 0 && bd < 12) { pts.splice(bi, 1); dispatch({ type: 'clip.update', id: hit.id, patch: { gainPoints: pts } }); }
+          }
+          drag.current = { mode: 'none' }; bump((n) => n + 1); return;
+        }
+        let idx = pts.findIndex((pt) => Math.abs((clipX + pt.t * v.pxPerTick) - p.x) < 9);
+        if (idx < 0) {
+          const np = { t: Math.round(relTick), v: vFromY };
+          pts.push(np); pts.sort((a, b) => a.t - b.t);
+          idx = pts.indexOf(np);
+        }
+        dispatch({ type: 'clip.update', id: hit.id, patch: { gainPoints: pts } });
+        dispatch({ type: 'pattern.select', id: hit.patternId });
+        selClip.current = hit.id;
+        drag.current = { mode: 'pen', id: hit.id, idx };
+        bump((n) => n + 1); return;
+      }
+
       if (e.metaKey || e.ctrlKey) {
         const at = Math.round(p.tick / snap) * snap;
         dispatch({ type: 'clip.split', id: hit.id, at });
         drag.current = null; bump((n) => n + 1); return;
+      }
+      // Fade handles (mouse) at the top edge, and the volume line body drag.
+      if (!touch && p.y <= top + 11) {
+        const fiX = clipX + (hit.fadeIn || 0) * v.pxPerTick;
+        const foX = clipR - (hit.fadeOut || 0) * v.pxPerTick;
+        if (Math.abs(p.x - foX) < 7) { drag.current = { mode: 'fadeOut', id: hit.id }; selClip.current = hit.id; bump((n) => n + 1); return; }
+        if (Math.abs(p.x - fiX) < 7) { drag.current = { mode: 'fadeIn', id: hit.id }; selClip.current = hit.id; bump((n) => n + 1); return; }
+      }
+      if (!touch && !(hit.gainPoints && hit.gainPoints.length)) {
+        const g = hit.gain == null ? 1 : hit.gain;
+        const gy = top + (1 - clamp(g / 1.5, 0, 1)) * bh;
+        if (Math.abs(p.y - gy) < 6 && p.x > clipX + 12 && p.x < clipR - 12) {
+          drag.current = { mode: 'gain', id: hit.id, startY: p.y, startGain: g };
+          dispatch({ type: 'pattern.select', id: hit.patternId });
+          selClip.current = hit.id; bump((n) => n + 1); return;
+        }
       }
       if (e.altKey) {
         dispatch({ type: 'clip.add', patternId: hit.patternId, track: hit.track, start: hit.start + hit.length, length: hit.length });
@@ -402,6 +496,35 @@ export default function Playlist() {
     }
     const clip = dataRef.current.project.playlist.find((c) => c.id === dr.id);
     if (!clip) return;
+    if (dr.mode === 'gain') {
+      const delta = (dr.startY - p.y) / (TRACK_H - 5) * 1.5;
+      const gain = clamp(dr.startGain + delta, 0, 1.5);
+      dispatch({ type: 'clip.update', id: clip.id, patch: { gain }, live: true, key: 'gain' });
+      return;
+    }
+    if (dr.mode === 'fadeIn') {
+      const fadeIn = clamp(Math.round(p.tick - clip.start), 0, clip.length - (clip.fadeOut || 0));
+      dispatch({ type: 'clip.update', id: clip.id, patch: { fadeIn }, live: true, key: 'fadeIn' });
+      return;
+    }
+    if (dr.mode === 'fadeOut') {
+      const fadeOut = clamp(Math.round((clip.start + clip.length) - p.tick), 0, clip.length - (clip.fadeIn || 0));
+      dispatch({ type: 'clip.update', id: clip.id, patch: { fadeOut }, live: true, key: 'fadeOut' });
+      return;
+    }
+    if (dr.mode === 'pen') {
+      const pts = [...(clip.gainPoints || [])];
+      if (!pts[dr.idx]) return;
+      const top = HEAD_H + clip.track * TRACK_H + 2;
+      const bh = TRACK_H - 5;
+      const vv = clamp((1 - (p.y - top) / bh) * 1.5, 0, 1.5);
+      const tt = clamp(Math.round(p.tick - clip.start), 0, clip.length);
+      pts[dr.idx] = { t: tt, v: vv };
+      pts.sort((a, b) => a.t - b.t);
+      dr.idx = pts.findIndex((pp) => pp.t === tt && pp.v === vv);
+      dispatch({ type: 'clip.update', id: clip.id, patch: { gainPoints: pts }, live: true, key: 'pen' });
+      return;
+    }
     if (dr.mode === 'move') {
       const start = Math.max(0, Math.round((p.tick - dr.offset) / dr.snap) * dr.snap);
       const track = clamp(p.track, 0, (dataRef.current.tracks || DEFAULT_TRACKS) - 1);
@@ -510,6 +633,20 @@ export default function Playlist() {
           </select>
         </div>
         <div className={s.group}>
+          <button
+            type="button"
+            className={tool === 'select' ? `${s.btn} ${s.on}` : s.btn}
+            onClick={() => setTool('select')}
+            title="Select, move, resize and fade clips"
+          >▦ Select</button>
+          <button
+            type="button"
+            className={tool === 'pen' ? `${s.btn} ${s.on}` : s.btn}
+            onClick={() => setTool((t) => (t === 'pen' ? 'select' : 'pen'))}
+            title="Pen: click a clip to add volume keyframes, drag to move, shift/right-click to remove"
+          >✎ Volume</button>
+        </div>
+        <div className={s.group}>
           <span className={s.dim}>Zoom</span>
           <button type="button" className={s.btn} title="Zoom in" onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 1.25, 0.02, 1.2); draw(); }}>+</button>
           <button type="button" className={s.btn} title="Zoom out" onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 0.8, 0.02, 1.2); draw(); }}>−</button>
@@ -556,7 +693,12 @@ export default function Playlist() {
           >Clear loop</button>
         )}
         <div className={s.spacer} />
-        <span className={s.dim}>Ctrl+click = split · Alt+click = duplicate · double-click = edit · {project.playlist.length} clips · {bars} bars</span>
+        <span className={s.dim}>
+          {tool === 'pen'
+            ? 'Pen: click a clip to add volume points · drag to move · shift/right-click to remove'
+            : 'Drag top corners = fade in/out · drag the volume line = clip level · Ctrl+click = split · Alt+click = duplicate'}
+          {' · '}{project.playlist.length} clips · {bars} bars
+        </span>
       </div>
       <div className={s.canvasWrap} ref={wrapRef}>
         <canvas
