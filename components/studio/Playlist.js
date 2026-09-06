@@ -18,7 +18,7 @@ const M_X = LABEL_W - 2 * MSW - 7;
 const S_X = LABEL_W - MSW - 4;
 
 export default function Playlist() {
-  const { project, dispatch, engine, ui, setUi, play } = useStudio();
+  const { project, dispatch, engine, ui, setUi, play, setHint } = useStudio();
   const wrapRef = useRef(null);
   const canvasRef = useRef(null);
   const view = useRef({ scrollX: 0, pxPerTick: 0.11 });
@@ -159,16 +159,17 @@ export default function Playlist() {
       ctx.strokeStyle = accent();
       ctx.lineWidth = 1.4;
       if (pts && pts.length) {
+        // Flat segments to the clip edges so even a single keyframe shows a
+        // clear, full-width line you can see and grab.
         ctx.beginPath();
-        pts.forEach((pt, i) => {
-          const px = x + pt.t * v.pxPerTick; const py = yForV(pt.v);
-          if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-        });
+        ctx.moveTo(bx, yForV(pts[0].v));
+        pts.forEach((pt) => { ctx.lineTo(x + pt.t * v.pxPerTick, yForV(pt.v)); });
+        ctx.lineTo(Math.min(w, br), yForV(pts[pts.length - 1].v));
         ctx.stroke();
         ctx.fillStyle = accent();
         pts.forEach((pt) => {
           const px = x + pt.t * v.pxPerTick; const py = yForV(pt.v);
-          ctx.beginPath(); ctx.arc(px, py, 2.6, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(px, py, 3.2, 0, Math.PI * 2); ctx.fill();
         });
       } else {
         // Always show the volume line so it's discoverable as draggable.
@@ -420,6 +421,7 @@ export default function Playlist() {
         dispatch({ type: 'pattern.select', id: hit.patternId });
         selClip.current = hit.id;
         drag.current = { mode: 'pen', id: hit.id, idx };
+        setHint(`Volume keyframe ${pts.length} — drag it up/down, shift/right-click to remove.`);
         bump((n) => n + 1); return;
       }
 
@@ -463,6 +465,13 @@ export default function Playlist() {
       dispatch({ type: 'pattern.select', id: hit.patternId });
       selClip.current = hit.id;
       bump((n) => n + 1);
+      return;
+    }
+    // In pen (Volume) mode, an empty click should NOT create a clip — keyframes
+    // live on clips, so guide the user instead of dropping a stray clip.
+    if (toolRef.current === 'pen') {
+      setHint('Volume mode: click on a clip to add a volume keyframe.');
+      drag.current = { mode: 'none' };
       return;
     }
     const start = Math.max(0, Math.round(p.tick / barLen) * barLen);
