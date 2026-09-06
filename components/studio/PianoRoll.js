@@ -355,7 +355,13 @@ export default function PianoRoll() {
     const rest = notes.filter((n) => !ids.has(n.id));
     setNotes([...rest, ...changed]);
     sel.current = new Set(changed.map((n) => n.id));
-    if (label) setHint(label);
+    // Clear confirmation so it never looks like nothing happened — includes the
+    // scope, and flags tools that need pitch variety / chords to do anything.
+    const scope = chosen.length ? `${list.length} selected notes` : `all ${list.length} notes on ${channel.name}`;
+    const pitches = new Set(list.map((n) => n.k)).size;
+    const needsPitches = /strum|arp|invert/i.test(label || '');
+    const note = needsPitches && pitches < 2 ? ' — tip: this needs stacked/varied notes (a chord) to hear a difference' : '';
+    setHint(`${label || 'Applied'} (${scope})${note}.`);
     bump((n) => n + 1);
   };
 
