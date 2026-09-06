@@ -7,8 +7,8 @@ import { patternTicks, songLength } from '../../lib/studio/sequencer';
 import { longPress, pinchZoom } from '../../lib/studio/touch';
 
 const LABEL_W = 96;
-const HEAD_H = 22;
-const TRACK_H = 34;
+const HEAD_H = 24;
+const TRACK_H = 56;
 const DEFAULT_TRACKS = 10;
 const MAX_TRACKS = 32;
 const MIN_TRACKS = 1;
@@ -170,16 +170,23 @@ export default function Playlist() {
           const px = x + pt.t * v.pxPerTick; const py = yForV(pt.v);
           ctx.beginPath(); ctx.arc(px, py, 2.6, 0, Math.PI * 2); ctx.fill();
         });
-      } else if (Math.abs(gain - 1) > 0.001) {
+      } else {
+        // Always show the volume line so it's discoverable as draggable.
         const gy = yForV(gain);
+        ctx.globalAlpha = Math.abs(gain - 1) > 0.001 ? 1 : 0.5;
         ctx.beginPath(); ctx.moveTo(bx, gy); ctx.lineTo(Math.min(w, br), gy); ctx.stroke();
+        ctx.globalAlpha = 1;
+        // A small grab dot in the middle of the line.
+        const midX = clamp((bx + Math.min(w, br)) / 2, bx, Math.min(w, br));
+        ctx.fillStyle = accent();
+        ctx.beginPath(); ctx.arc(midX, gy, 3, 0, Math.PI * 2); ctx.fill();
       }
       ctx.restore();
-      // Fade handles at the top edge.
+      // Fade handles at the top corners (bigger for easy grabbing).
       if (v.pxPerTick > 0.03) {
-        ctx.fillStyle = 'rgba(255,255,255,0.92)';
-        const hxIn = x + fiPx; if (hxIn >= LABEL_W && hxIn <= w) ctx.fillRect(hxIn - 3, top - 1, 6, 5);
-        const hxOut = br - foPx; if (hxOut >= LABEL_W && hxOut <= w) ctx.fillRect(hxOut - 3, top - 1, 6, 5);
+        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        const hxIn = x + fiPx; if (hxIn >= LABEL_W && hxIn <= w) { ctx.beginPath(); ctx.arc(hxIn, top + 1, 4, 0, Math.PI * 2); ctx.fill(); }
+        const hxOut = br - foPx; if (hxOut >= LABEL_W && hxOut <= w) { ctx.beginPath(); ctx.arc(hxOut, top + 1, 4, 0, Math.PI * 2); ctx.fill(); }
       }
     }
 
@@ -543,13 +550,35 @@ export default function Playlist() {
     }
   }, [dispatch]);
 
+  // When a clip is moved/resized onto a neighbour on the same track, set
+  // complementary fades across the overlap = an automatic crossfade, GarageBand
+  // style. Only fills in fades that are not already longer.
+  const applyCrossfades = (movedId) => {
+    const pl = dataRef.current.project.playlist;
+    const moved = pl.find((c) => c.id === movedId);
+    if (!moved) return;
+    pl.forEach((other) => {
+      if (other.id === movedId || other.track !== moved.track) return;
+      const a = moved.start <= other.start ? moved : other;
+      const b = moved.start <= other.start ? other : moved;
+      const overlap = (a.start + a.length) - b.start;
+      if (overlap > 12 && overlap < Math.min(a.length, b.length)) {
+        const fade = Math.round(overlap);
+        if ((a.fadeOut || 0) < fade) dispatch({ type: 'clip.update', id: a.id, patch: { fadeOut: fade } });
+        if ((b.fadeIn || 0) < fade) dispatch({ type: 'clip.update', id: b.id, patch: { fadeIn: fade } });
+      }
+    });
+  };
+
   const onPointerUp = useCallback((e) => {
     if (gesture.current) gesture.current.up(e);
     press.current.cancel();
+    const dr = drag.current;
     drag.current = null;
     loupe.current.active = false;
+    if (dr && (dr.mode === 'move' || dr.mode === 'resize') && dr.id) applyCrossfades(dr.id);
     bump((n) => n + 1);
-  }, []);
+  }, [dispatch]);
 
   const onDoubleClick = useCallback((e) => {
     const p = posFromEvent(e);
@@ -696,7 +725,7 @@ export default function Playlist() {
         <span className={s.dim}>
           {tool === 'pen'
             ? 'Pen: click a clip to add volume points · drag to move · shift/right-click to remove'
-            : 'Drag top corners = fade in/out · drag the volume line = clip level · Ctrl+click = split · Alt+click = duplicate'}
+            : 'Drag top corners = fade in/out · drag the volume line = clip level · overlap clips on a track = auto crossfade · Ctrl+click = split · Alt+click = duplicate'}
           {' · '}{project.playlist.length} clips · {bars} bars
         </span>
       </div>
