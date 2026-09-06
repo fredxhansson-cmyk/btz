@@ -124,6 +124,7 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOp
     { label: 'Mixer', hint: 'F9', onClick: () => setUi({ view: 'mixer' }) },
     { label: 'Automation', hint: 'F10', onClick: () => setUi({ view: 'automation' }) },
     { label: 'Mastering', hint: 'F11', onClick: () => setUi({ view: 'mastering' }) },
+    { label: 'Video (film sync)', onClick: () => setUi({ view: 'video' }) },
     { sep: true },
     { label: 'Record audio (mic / line)…', onClick: () => onOpenRecord && onOpenRecord() },
     { label: 'BTZ Brain (AI)…', onClick: () => onOpenAi && onOpenAi() },

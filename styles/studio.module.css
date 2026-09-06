@@ -1060,6 +1060,13 @@
 .promptRow { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .promptGo { font-size: 15px; padding: 0 20px; min-height: var(--ctl); font-weight: 700; }
 
+/* ----------------------------------------------------------------- video */
+.videoWrap {
+  flex: 1; min-height: 0; display: grid; place-items: center;
+  background: #000; padding: 10px; overflow: hidden;
+}
+.videoEl { max-width: 100%; max-height: 100%; border-radius: var(--r-8); background: #000; }
+
 /* ------------------------------------------------------------ AI mastering */
 .aiMasterBox {
   margin: 8px; padding: 12px; border-radius: var(--r-md);
