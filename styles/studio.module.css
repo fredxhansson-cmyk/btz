@@ -1060,6 +1060,25 @@
 .promptRow { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .promptGo { font-size: 15px; padding: 0 20px; min-height: var(--ctl); font-weight: 700; }
 
+/* ------------------------------------------------------- custom workspace */
+.wsGrid {
+  flex: 1; min-height: 0; display: grid; gap: 8px; padding: 8px;
+  grid-auto-rows: minmax(300px, 1fr); overflow: auto; background: var(--stage);
+}
+.wsCard {
+  display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+  border: 1px solid var(--line-3); border-radius: var(--r-md); background: var(--panel);
+}
+.wsCardOver { border-color: var(--accent); box-shadow: var(--glow-accent); }
+.wsCardHead {
+  display: flex; align-items: center; gap: 8px; padding: 5px 8px;
+  background: var(--surface); border-bottom: 1px solid var(--line); cursor: grab;
+}
+.wsCardHead:active { cursor: grabbing; }
+.wsGrip { color: var(--text-4); font-size: 15px; letter-spacing: -2px; }
+.wsCardBody { flex: 1; min-height: 0; display: flex; overflow: hidden; }
+.wsCardBody > * { flex: 1; min-width: 0; min-height: 0; }
+
 /* ----------------------------------------------------------------- video */
 .videoWrap {
   flex: 1; min-height: 0; display: grid; place-items: center;
