@@ -13,6 +13,7 @@ import VideoPanel from './VideoPanel';
 import LiveInputsPanel from './LiveInputsPanel';
 import WorkspacePanel from './WorkspacePanel';
 import Settings from './Settings';
+import ProjectsModal from './ProjectsModal';
 import CommandPalette from './CommandPalette';
 import DrumMachine from './DrumMachine';
 import Automation from './Automation';
@@ -100,6 +101,7 @@ function Workspace({ installPrompt, onInstalled }) {
   const [onboard, setOnboard] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [cmdOpen, setCmdOpen] = useState(false);
+  const [projectsOpen, setProjectsOpen] = useState(false);
 
   // Show the welcome guide on the first visit; reopenable via the Guide tab.
   useEffect(() => {
@@ -289,6 +291,7 @@ function Workspace({ installPrompt, onInstalled }) {
     { id: 'pop', group: 'Window', icon: '⧉', label: `Pop out current view (${labelFor(ui.view)})`, keywords: 'detach second screen', run: () => (detached.includes(ui.view) ? attach(ui.view) : popOut(ui.view)) },
     { id: 'theme', group: 'Window', icon: '◐', label: 'Toggle light / dark theme', run: () => toggleTheme() },
 
+    { id: 'projects', group: 'App', icon: '🗂', label: 'My projects (library)…', keywords: 'library save load open catalogue', run: () => setProjectsOpen(true) },
     { id: 'settings', group: 'App', icon: '⚙', label: 'Open Settings…', keywords: 'preferences user program', run: () => setSettingsOpen(true) },
     { id: 'guide', group: 'App', icon: '◎', label: 'Replay guided tour', run: () => setOnboard(true) },
     { id: 'help', group: 'App', icon: '?', label: 'Keyboard shortcuts & help', hint: '?', run: () => setHelp(true) },
@@ -312,6 +315,7 @@ function Workspace({ installPrompt, onInstalled }) {
         />
       )}
       {cmdOpen && <CommandPalette actions={commands} onClose={() => setCmdOpen(false)} />}
+      {projectsOpen && <ProjectsModal onClose={() => setProjectsOpen(false)} />}
       {detached.map((id) => (
         <PopOut key={id} title={labelFor(id)} theme={ui.theme} onClose={() => attach(id)}>
           {viewFor(id)}
@@ -335,6 +339,7 @@ function Workspace({ installPrompt, onInstalled }) {
         onOpenAi={() => setAiOpen(true)}
         onOpenSettings={() => setSettingsOpen(true)}
         onOpenCommand={() => setCmdOpen(true)}
+        onOpenProjects={() => setProjectsOpen(true)}
       />
 
       <div className={s.body}>
@@ -378,6 +383,9 @@ function Workspace({ installPrompt, onInstalled }) {
             </button>
             <button type="button" title="Guided tour of the studio" className={s.railBtn} onClick={() => setOnboard(true)}>
               <span className={s.railIcon}>◎</span><span className={s.railLbl}>Guide</span>
+            </button>
+            <button type="button" title="My projects — your saved library" className={s.railBtn} onClick={() => setProjectsOpen(true)}>
+              <span className={s.railIcon}>🗂</span><span className={s.railLbl}>Projects</span>
             </button>
             <button type="button" title="Settings — user &amp; program" className={s.railBtn} onClick={() => setSettingsOpen(true)}>
               <span className={s.railIcon}>⚙</span><span className={s.railLbl}>Settings</span>

@@ -44,7 +44,7 @@ function Menu({ label, items, openId, setOpenId }) {
   );
 }
 
-export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOpenCommand }) {
+export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOpenCommand, onOpenProjects }) {
   const {
     project, dispatch, engine, ui, setUi, play, stop, pause, setMode,
     newProject, saveFile, openFile, exportAudio, exportMidiFile, importMidiFile,
@@ -102,6 +102,8 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOp
   }, [project.bpm]);
 
   const fileItems = [
+    { label: 'My projects (library)…', onClick: () => onOpenProjects && onOpenProjects() },
+    { sep: true },
     { label: 'New empty project', onClick: () => newProject(false) },
     { label: 'Load demo project', onClick: () => newProject(true) },
     { sep: true },
