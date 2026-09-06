@@ -1048,6 +1048,18 @@
 .cmdItemSel .cmdHint { background: transparent; border-color: transparent; }
 .cmdEmpty { padding: 24px; text-align: center; color: var(--muted); font-size: 14px; }
 
+/* --------------------------------------------------------- prompt → beat */
+.promptWrap { display: flex; flex-direction: column; gap: 12px; padding: 4px 2px; }
+.promptInput {
+  width: 100%; min-height: 96px; resize: vertical; box-sizing: border-box;
+  background: var(--field); border: 1.5px solid var(--line-strong); color: var(--text);
+  border-radius: var(--r-md); padding: 14px 16px; font-size: 16px; line-height: 1.45;
+  font-family: var(--font); }
+.promptInput:focus { outline: none; border-color: var(--accent); box-shadow: var(--glow-accent); }
+.promptInput::placeholder { color: var(--muted); }
+.promptRow { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.promptGo { font-size: 15px; padding: 0 20px; min-height: var(--ctl); font-weight: 700; }
+
 /* ------------------------------------------------------ standalone mastering */
 .masteringWrap { flex: 1; min-height: 0; overflow: auto; padding: 14px; }
 .masteringWrap .masterBox2 { max-width: 820px; margin: 0 auto; }

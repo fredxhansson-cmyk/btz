@@ -8,16 +8,28 @@ import {
 import { padChannels, stepsToNotes, ROLES } from '../../lib/studio/drums';
 import { patternSteps } from '../../lib/studio/sequencer';
 import { soundColor } from '../../lib/studio/library';
+import { parsePrompt, sanitizeSpec, buildBeat, describeSpec } from '../../lib/studio/promptbeat';
+
+const PROMPT_EXAMPLES = [
+  'dark trap 140 in F minor with hard 808s and piano',
+  'lofi chill 82 bpm, jazzy chords',
+  'house 124 with a driving bassline',
+  'boom bap 90, dusty and simple',
+  'aggressive drill 142, G# harmonic minor',
+];
 
 export default function AiPanel({ onClose }) {
   const { project, dispatch, engine, setHint, setUi } = useStudio();
   const [brain, setBrain] = useState(() => loadBrain());
-  const [tab, setTab] = useState('sounds');
+  const [tab, setTab] = useState('prompt');
   const [cat, setCat] = useState('Kick');
   const [temp, setTemp] = useState(1);
   const [amount, setAmount] = useState(1);
   const [batch, setBatch] = useState([]);
   const [aiCount, setAiCount] = useState(() => aiSoundCount());
+  const [promptText, setPromptText] = useState('');
+  const [useModel, setUseModel] = useState(false);
+  const [working, setWorking] = useState(false);
 
   const summary = useMemo(() => brainSummary(brain), [brain]);
 
@@ -96,6 +108,42 @@ export default function AiPanel({ onClose }) {
     setHint('The model has learned from this project.');
   };
 
+  const generateFromPrompt = async () => {
+    const text = promptText.trim();
+    if (!text) { setHint('Skriv vad du vill ha — t.ex. "dark trap 140 F minor with piano".'); return; }
+    setWorking(true);
+    try {
+      let spec = parsePrompt(text);
+      // Optional LLM refinement — only if the user opts in AND a key is set on
+      // the server. Falls back to the local, free parse on any failure.
+      if (useModel) {
+        try {
+          const res = await fetch('/api/ai/beat', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: text }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.spec) spec = sanitizeSpec(data.spec, spec);
+            else if (data && data.enabled === false) setHint('AI-modell ej aktiverad på servern — körde lokalt (gratis).');
+          }
+        } catch (e) { /* keep local spec */ }
+      }
+      const next = buildBeat(project, brain, spec);
+      dispatch({ type: 'set', project: next });
+      // Learn from what we just made so the model drifts toward the user.
+      const b = { ...brain };
+      learnFromProject(b, next, 0.5);
+      saveBrain(b);
+      setBrain(b);
+      setHint(`Genererade: ${describeSpec(spec)} — allt är redigerbart i Drum Machine / Piano Roll.`);
+      setUi({ view: 'drums' });
+      onClose();
+    } finally {
+      setWorking(false);
+    }
+  };
+
   return (
     <div className={s.modalBack} onPointerDown={onClose}>
       <div className={s.modal} onPointerDown={(e) => e.stopPropagation()}>
@@ -107,7 +155,7 @@ export default function AiPanel({ onClose }) {
         </div>
 
         <div className={s.aiTabs}>
-          {[['sounds', 'Sounds'], ['beat', 'Beat'], ['brain', `Learned (${Math.round(summary.stats.kept)})`]].map(([id, label]) => (
+          {[['prompt', '✨ Prompt'], ['sounds', 'Sounds'], ['beat', 'Beat'], ['brain', `Learned (${Math.round(summary.stats.kept)})`]].map(([id, label]) => (
             <button
               key={id}
               type="button"
@@ -116,6 +164,44 @@ export default function AiPanel({ onClose }) {
             >{label}</button>
           ))}
         </div>
+
+        {tab === 'prompt' && (
+          <div className={s.aiBody}>
+            <div className={s.promptWrap}>
+              <textarea
+                className={s.promptInput}
+                value={promptText}
+                autoFocus
+                placeholder={'Beskriv beatet du vill ha…\nt.ex. "dark trap 140 in F minor with hard 808s and piano"'}
+                onChange={(e) => setPromptText(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); generateFromPrompt(); } }}
+              />
+              <div className={s.chipRow}>
+                {PROMPT_EXAMPLES.map((ex) => (
+                  <button key={ex} type="button" className={s.chip} onClick={() => setPromptText(ex)}>{ex}</button>
+                ))}
+              </div>
+              <div className={s.promptRow}>
+                <button
+                  type="button"
+                  className={`${s.btn} ${s.on} ${s.promptGo}`}
+                  disabled={working}
+                  onClick={generateFromPrompt}
+                >{working ? 'Genererar…' : '✨ Generera beat'}</button>
+                <label className={s.checkRow} title="Använd en språkmodell om en API-nyckel är satt på servern. Annars körs den lokala motorn.">
+                  <input type="checkbox" checked={useModel} onChange={(e) => setUseModel(e.target.checked)} />
+                  AI-modell (om nyckel finns)
+                </label>
+                <span className={s.dim}>⌘/Ctrl + Enter</span>
+              </div>
+              <div className={s.helpBox}>
+                Skriver riktiga trumkanaler, groove, baslinje och (på begäran) ackord till
+                aktuellt mönster — <b>allt går att redigera efteråt</b> i Drum Machine och Piano Roll.
+                Den lokala motorn körs i din webbläsare och <b>kostar ingenting</b>.
+              </div>
+            </div>
+          </div>
+        )}
 
         {tab === 'sounds' && (
           <div className={s.aiBody}>
