@@ -15,6 +15,7 @@ export default function RecordPanel({ onClose }) {
   const [take, setTake] = useState(null);          // {buffer, peaks, name}
   const [monitor, setMonitor] = useState(false);
   const [gain, setGain] = useState(1);
+  const [routeId, setRouteId] = useState((engine.input && engine.input.route) || 'master');
   const [withTransport, setWithTransport] = useState(true);
   const [trim, setTrim] = useState(true);
   const [normalize, setNormalize] = useState(true);
@@ -39,7 +40,7 @@ export default function RecordPanel({ onClose }) {
   const enable = useCallback(async () => {
     try {
       setError('');
-      await engine.openInput(deviceId || undefined);
+      await engine.openInput(deviceId || undefined, routeId === 'master' ? undefined : routeId);
       engine.setInputGain(gain);
       engine.setMonitor(monitor);
       setArmed(true);
@@ -48,7 +49,7 @@ export default function RecordPanel({ onClose }) {
       setError(e.message || 'Could not open the input.');
       setArmed(false);
     }
-  }, [deviceId, engine, gain, monitor]);
+  }, [deviceId, engine, gain, monitor, routeId]);
 
   const drawWave = useCallback((pk) => {
     const canvas = waveRef.current;
@@ -142,6 +143,15 @@ export default function RecordPanel({ onClose }) {
             <select className={s.selectWide} value={deviceId} onChange={(e) => setDeviceId(e.target.value)}>
               <option value="">Default input</option>
               {devices.map((d) => <option key={d.id} value={d.id}>{d.label}</option>)}
+            </select>
+            <select
+              className={s.select}
+              value={routeId}
+              title="Route this live input to a mixer channel (its own fader + FX) or straight to master"
+              onChange={(e) => { setRouteId(e.target.value); if (engine.input) engine.setInputRoute(e.target.value === 'master' ? undefined : e.target.value); }}
+            >
+              <option value="master">→ Master</option>
+              {project.inserts.map((i) => <option key={i.id} value={i.id}>→ {i.name}</option>)}
             </select>
             <button type="button" className={armed ? `${s.btn} ${s.on}` : s.btn} onClick={enable}>
               {armed ? 'Input active' : 'Enable input'}
