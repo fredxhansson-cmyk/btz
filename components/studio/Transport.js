@@ -158,8 +158,12 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOp
   return (
     <header className={s.header} onPointerDown={(e) => e.stopPropagation()}>
       <div className={s.brand}>
-        <span className={s.brandMark}>B</span>
-        <span className={s.brandName}>B<b>TZ</b></span>
+        <span className={s.brandBars} aria-hidden="true">
+          <i style={{ background: 'var(--color-coral)', height: '60%' }} />
+          <i style={{ background: 'var(--color-lime)', height: '100%' }} />
+          <i style={{ background: 'var(--color-blue)', height: '40%' }} />
+        </span>
+        <span className={s.brandName}>BTZ</span>
       </div>
 
       <div className={s.menu}>

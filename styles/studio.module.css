@@ -27,14 +27,15 @@
   min-height: 56px;
 }
 
-.brand { display: flex; align-items: center; gap: 7px; padding-right: 6px; }
+.brand { display: flex; align-items: center; gap: 9px; padding-right: 6px; }
+.brandBars { display: inline-flex; align-items: flex-end; gap: 3px; height: 22px; }
+.brandBars i { width: 5px; border-radius: 2px; display: block; }
 .brandMark {
   width: 26px; height: 26px; border-radius: var(--r-8);
   background: var(--accent); color: var(--accent-ink);
   display: grid; place-items: center; font-size: 14px; font-weight: 700;
 }
-.brandName { font-size: 14px; letter-spacing: 1.4px; color: var(--text); }
-.brandName b { color: var(--accent); font-weight: 700; }
+.brandName { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); font-family: var(--font); }
 
 .menu { display: flex; gap: 2px; }
 .menuWrap { position: relative; }

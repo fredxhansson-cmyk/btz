@@ -1,41 +1,89 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 /* ============================================================================
-   BTZ Design System — tokens (single source of truth)
-   Adopted from the Claude Design "BTZ" project (styles.css), plus an alias
-   layer so the app's existing CSS keeps working. Dark = :root, light =
-   [data-theme="light"]. A redesign = edit these values.
+   BTZ Design System — tokens (rebrand).
+   New brand palette from the design handoff (coral primary, lime = content,
+   blue = monitoring), mapped onto the app's existing variable names so every
+   component restyles at once. Spec token names (--color- and canvas --pr / --tl
+   families) are also exposed for components to adopt directly. Dark = :root,
+   light = [data-theme="light"].
    ========================================================================== */
-:root {
-  --font: 'Instrument Sans', system-ui, sans-serif;
+:root,
+[data-theme="dark"] {
+  /* ---- brand spec tokens (source of truth) ---- */
+  --color-bg: #080b12;
+  --color-chrome: #0b1017;
+  --color-panel: #0f141d;
+  --color-panel-nested: #1a2029;
+  --color-panel-deep: #03060b;
+  --color-field: #151b24;
+  --color-hover: #1a2029;
+  --color-selected: #232a35;
+  --color-pressed: #05070c;
+  --color-border-subtle: rgba(255,255,255,0.06);
+  --color-border-default: rgba(255,255,255,0.10);
+  --color-border-strong: rgba(255,255,255,0.18);
+  --color-text-primary: #eef2f9;
+  --color-text-secondary: #b0b8c5;
+  --color-text-muted: #6b727e;
+  --color-coral: #ff746e; --color-coral-hover: #ff857d; --color-coral-pressed: #f75d59; --color-coral-ink: #1c0202;
+  --color-lime: #85c425; --color-lime-ink: #050f00;
+  --color-blue: #36b2ff; --color-blue-ink: #000b1f;
+  --color-record: #f1383e; --color-success: #3fc168; --color-warning: #edb417;
+  --color-focus-ring: var(--color-blue);
+  /* canvas */
+  --pr-note-fill: var(--color-lime); --pr-note-selected: var(--color-coral); --pr-note-ghost: rgba(238,242,249,0.18);
+  --pr-grid-bar: rgba(255,255,255,0.14); --pr-grid-beat: rgba(255,255,255,0.08); --pr-grid-sub: rgba(255,255,255,0.04);
+  --tl-clip-border: var(--color-coral); --tl-fade-line: rgba(238,242,249,0.6); --tl-volume-line: var(--color-text-primary);
+  --tl-playhead: var(--color-text-primary); --tl-marker: var(--color-warning);
+  --meter-low: var(--color-lime); --meter-mid: var(--color-warning); --meter-peak: var(--color-record);
+  --spectrum-bar: var(--color-blue); --spectrum-reference-line: rgba(238,242,249,0.4);
+  --lufs-under: var(--color-blue); --lufs-on-target: var(--color-lime); --lufs-over: var(--color-record);
+  --eq-curve-line: var(--color-coral);
+  --waveform-fill: var(--color-blue); --waveform-selected: var(--color-coral);
 
+  /* ---- fonts ---- */
+  --font: 'Manrope', system-ui, sans-serif;
+  --font-body: 'Sora', system-ui, sans-serif;
+  --font-ui: var(--font);
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* ---- legacy names mapped to the new palette (keeps existing CSS working) ---- */
   /* surfaces */
-  --bg:#0C0C0B; --chrome:#0E0E0D; --panel:#0F0F0E; --stage:#111110; --gridsurface:#0D0D0C; --card:#131311;
-  --field:#161613; --field-2:#171714; --hover:#181814; --selected:#191915; --hover-strong:#1F1F1A;
-  --step-off:#151513; --step-bar:#1C1C18; --meter-track:#1E1E19; --fader-track:#232320;
-  --pad-lit:#1D1D18; --avatar-bg:#2A2A22; --avatar-ink:#C9C6BE; --rec-hover:#241715; --meter-hot:#FFB000;
+  --bg: var(--color-bg); --chrome: var(--color-chrome); --panel: var(--color-panel);
+  --stage: var(--color-chrome); --gridsurface: var(--color-panel-deep); --card: var(--color-panel);
+  --field: var(--color-field); --field-2: var(--color-field); --hover: var(--color-hover);
+  --selected: var(--color-selected); --hover-strong: var(--color-panel-nested);
+  --step-off: var(--color-panel-nested); --step-bar: #232a35; --meter-track: #151b24; --fader-track: var(--color-border-default);
+  --pad-lit: var(--color-panel-nested); --avatar-bg: #232a35; --avatar-ink: var(--color-text-secondary);
+  --rec-hover: #2a1416; --meter-hot: var(--color-record);
 
   /* lines */
-  --line:#22221C; --line-weak:#202019; --line-strong:#26261F; --line-2:#2A2A23; --line-3:#2C2C24; --line-4:#33332B; --line-5:#35352B;
+  --line: var(--color-border-default); --line-weak: var(--color-border-subtle); --line-strong: var(--color-border-strong);
+  --line-2: var(--color-border-default); --line-3: rgba(255,255,255,0.12); --line-4: var(--color-border-strong); --line-5: var(--color-border-strong);
 
   /* text */
-  --text:#EDEBE6; --text-2:#B9B6AE; --text-3:#A8A59E; --text-4:#8C8A83; --muted:#706E67; --muted-2:#6C6A63; --muted-3:#55534E; --muted-4:#3D3C37;
+  --text: var(--color-text-primary); --text-2: var(--color-text-secondary); --text-3: var(--color-text-secondary);
+  --text-4: var(--color-text-muted); --muted: var(--color-text-muted); --muted-2: var(--color-text-muted);
+  --muted-3: #4a5058; --muted-4: #343b45;
 
-  /* accent + semantic — lime/chartreuse per the FLOW Studio redesign */
-  --accent:#D6FF3F; --accent-ink:#0C0C0B;
-  --rec:#FF5C36; --rec-bg:#1C1412; --rec-line:#3A2420;
-  --fader-knob:#C9C6BE; --meter-grad:linear-gradient(90deg,#D6FF3F,#FFB000);
+  /* accent + semantic */
+  --accent: var(--color-coral); --accent-ink: var(--color-coral-ink);
+  --rec: var(--color-record); --rec-bg: #2a1416; --rec-line: #4a2226;
+  --fader-knob: var(--color-text-primary); --meter-grad: linear-gradient(90deg, var(--color-lime), var(--color-warning), var(--color-record));
 
-  /* piano roll */
-  --key-white:#1A1A16; --key-white-ink:#8C8A83; --key-black:#131311; --key-black-ink:#55534E; --key-line:#191916; --grid-line:#1B1B17;
+  /* piano roll (row shading kept dark; note colors via --pr-* on adoption) */
+  --key-white: #131a24; --key-white-ink: var(--color-text-muted); --key-black: #0d1219; --key-black-ink: #4a5058;
+  --key-line: var(--color-panel-nested); --grid-line: var(--pr-grid-beat);
 
-  /* track / channel colors */
-  --track-1:#D6FF3F; --track-2:#FF5C36; --track-3:#4DE1C1; --track-4:#B490FF; --track-5:#FFB000; --track-6:#7FB2FF;
+  /* track / clip colors — the 3 brand accents + tints, cycled */
+  --track-1: var(--color-coral); --track-2: var(--color-lime); --track-3: var(--color-blue);
+  --track-4: var(--color-coral-hover); --track-5: var(--color-warning); --track-6: #7fc9ff;
 
-  /* radius — 4-step scale from the design system (+ back-compat aliases) */
-  --r-xs:4px; --r-sm:8px; --r-md:12px; --r-lg:16px; --r-full:999px;
+  /* radius */
+  --r-xs:4px; --r-sm:8px; --r-md:12px; --r-lg:20px; --r-full:999px;
   --r-2:2px; --r-3:4px; --r-4:4px; --r-7:8px; --r-8:8px; --r-9:8px; --r-10:10px; --r-11:12px; --r-12:12px; --r-13:12px;
 
-  /* control heights + minimum touch target (from the design system) */
+  /* control heights + touch target */
   --ctl:48px; --ctl-sm:40px; --ctl-lg:56px; --hit:44px;
 
   /* spacing */
@@ -45,54 +93,58 @@
   /* glow */
   --glow-step:0 0 18px -6px; --glow-pad:0 0 26px -8px;
 
-  /* ---- alias layer: names the app's existing CSS/canvas already uses ---- */
+  /* ---- alias layer ---- */
   --panel2: var(--gridsurface);
-  --surface: var(--field);
+  --surface: var(--color-field);
   --line2: var(--line-2);
   --dim: var(--text-2);
   --text-mute: var(--muted);
-  --accent-strong: #E8FF8A;
-  --accent-soft: rgba(214,255,63,0.14);
-  --accent-glow: rgba(214,255,63,0.40);
-  --green: var(--track-1);
-  --blue: var(--track-6);
-  --red: var(--rec);
-  --warn: var(--track-5);
+  --accent-strong: var(--color-coral-hover);
+  --accent-soft: rgba(255,116,110,0.14);
+  --accent-glow: rgba(255,116,110,0.40);
+  --green: var(--color-lime);
+  --blue: var(--color-blue);
+  --red: var(--color-record);
+  --warn: var(--color-warning);
   --r-pill: var(--r-full);
   --r-cell: var(--r-xs);
   --shadow-pop: 0 14px 40px rgba(0,0,0,0.62);
   --glow-accent: 0 0 16px -2px var(--accent-glow);
-  --font-ui: var(--font);
-  --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
 [data-theme="light"] {
-  /* surfaces */
-  --bg:#F4F3EE; --chrome:#FBFAF6; --panel:#F7F6F1; --stage:#F1F0EA; --gridsurface:#FCFBF7; --card:#FFFFFF;
-  --field:#F0EFE8; --field-2:#EDECE4; --hover:#E9E8E0; --selected:#E6E5DC; --hover-strong:#E2E1D7;
-  --step-off:#E8E7DE; --step-bar:#DEDDD1; --meter-track:#E2E1D6; --fader-track:#D8D7CB;
-  --pad-lit:#E4E2D7; --avatar-bg:#E2E1D7; --avatar-ink:#3A3934; --rec-hover:#F3D9CE; --meter-hot:#B87A00;
+  --color-bg: #eef2f9;
+  --color-chrome: #e5e8ec;
+  --color-panel: #ffffff;
+  --color-panel-nested: #f3f4f6;
+  --color-panel-deep: #dcdee1;
+  --color-field: #ffffff;
+  --color-hover: #eceef1;
+  --color-selected: #e3e6ea;
+  --color-pressed: #d7dae0;
+  --color-border-subtle: rgba(8,11,18,0.06);
+  --color-border-default: rgba(8,11,18,0.12);
+  --color-border-strong: rgba(8,11,18,0.24);
+  --color-text-primary: #080b12;
+  --color-text-secondary: #343b45;
+  --color-text-muted: #5d646f;
+  --color-coral: #ff5851; --color-coral-hover: #ff6b64; --color-coral-pressed: #e6423c; --color-coral-ink: #ffffff;
+  --color-lime: #5f9a12; --color-lime-ink: #ffffff;
+  --color-blue: #0f8fe0; --color-blue-ink: #ffffff;
+  --color-record: #d4232a; --color-success: #23984a; --color-warning: #b3860a;
+  --color-focus-ring: var(--color-blue);
+  --pr-note-ghost: rgba(8,11,18,0.16);
+  --pr-grid-bar: rgba(8,11,18,0.16); --pr-grid-beat: rgba(8,11,18,0.09); --pr-grid-sub: rgba(8,11,18,0.05);
+  --tl-fade-line: rgba(8,11,18,0.5);
+  --spectrum-reference-line: rgba(8,11,18,0.35);
 
-  /* lines */
-  --line:#DAD8CC; --line-weak:#E2E1D6; --line-strong:#CFCDBF; --line-2:#C6C4B5; --line-3:#C0BEAF; --line-4:#B6B4A4; --line-5:#ADAB9A;
-
-  /* text */
-  --text:#1A1A16; --text-2:#3A3934; --text-3:#4B4A43; --text-4:#5E5C54; --muted:#6B6960; --muted-2:#7A786E; --muted-3:#9B998E; --muted-4:#BEBCAF;
-
-  /* accent + semantic */
-  --accent:#5F7D00; --accent-ink:#FFFFFF;
-  --rec:#B8380B; --rec-bg:#FAE7E0; --rec-line:#E7BDAB;
-  --fader-knob:#3A3934; --meter-grad:linear-gradient(90deg,#6F8C00,#B87A00);
-
-  /* piano roll */
-  --key-white:#FFFFFF; --key-white-ink:#5E5C54; --key-black:#2C2C25; --key-black-ink:#CFCDC2; --key-line:#DAD8CC; --grid-line:#E4E2D7;
-
-  /* track / channel colors */
-  --track-1:#6F8C00; --track-2:#C6410F; --track-3:#0D8C74; --track-4:#5E3BB8; --track-5:#A96A00; --track-6:#2560B5;
-
-  /* alias literals that need light-mode variants */
-  --accent-strong: #7A9E00;
-  --accent-soft: rgba(95,125,0,0.14);
-  --accent-glow: rgba(95,125,0,0.30);
-  --shadow-pop: 0 14px 40px rgba(60,57,52,0.22);
+  /* legacy overrides for light */
+  --step-bar: #e3e6ea; --meter-track: #dcdee1; --avatar-bg: #e3e6ea; --rec-hover: #f7dcdc;
+  --key-white: #ffffff; --key-white-ink: var(--color-text-muted); --key-black: #dcdee1; --key-black-ink: #9aa1ac;
+  --key-line: #e3e6ea;
+  --muted-3: #8a919b; --muted-4: #b6bcc4;
+  --rec-bg: #f7dcdc; --rec-line: #eebfc0;
+  --accent-soft: rgba(255,88,81,0.14);
+  --accent-glow: rgba(255,88,81,0.30);
+  --shadow-pop: 0 14px 40px rgba(8,11,18,0.20);
 }
