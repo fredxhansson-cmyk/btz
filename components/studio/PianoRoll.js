@@ -346,7 +346,10 @@ export default function PianoRoll() {
   const applyToSelection = (fn, label) => {
     const chosen = selected();
     const list = chosen.length ? chosen : notes;
-    if (!list.length) return;
+    if (!list.length) {
+      setHint(`Inga noter på "${channel.name}". Rita noter med Draw, eller välj ett annat instrument uppe till vänster.`);
+      return;
+    }
     const changed = fn(list);
     const ids = new Set(list.map((n) => n.id));
     const rest = notes.filter((n) => !ids.has(n.id));
@@ -712,9 +715,17 @@ export default function PianoRoll() {
     <div className={s.panel}>
       <div className={s.panelHead}>
         <span className={s.panelTitle}>Piano Roll</span>
-        <select className={s.select} value={channel.id} onChange={(e) => dispatch({ type: 'select.channel', id: e.target.value })}>
-          {project.channels.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-        </select>
+        <div className={s.group}>
+          <span className={s.dim}>Instrument</span>
+          <select
+            className={s.selectWide}
+            value={channel.id}
+            title="Choose which instrument these notes play"
+            onChange={(e) => dispatch({ type: 'select.channel', id: e.target.value })}
+          >
+            {project.channels.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        </div>
         <select className={s.select} value={pattern.id} onChange={(e) => dispatch({ type: 'pattern.select', id: e.target.value })}>
           {project.patterns.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
