@@ -386,6 +386,15 @@
 }
 .rowAct:hover { color: var(--text); border-color: var(--text-3); background: var(--hover); }
 .rowActDel:hover { color: var(--red); border-color: var(--red); background: rgba(255,90,90,0.12); }
+/* Compact vertical up/down stepper — saves width vs two side-by-side buttons. */
+.chanReorder { display: flex; flex-direction: column; gap: 1px; flex: none; }
+.reorderBtn {
+  width: 20px; height: 13px; flex: none; cursor: pointer; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--surface); border: 1px solid var(--line-3); color: var(--text-2);
+  font-size: 8px; line-height: 1; border-radius: 3px;
+}
+.reorderBtn:hover { color: var(--text); border-color: var(--text-3); background: var(--hover); }
 .chanColor { width: 4px; height: 30px; border-radius: var(--r-xs); flex: none; }
 .led { background: transparent; border: 0; padding: 0 2px; cursor: pointer; }
 .ledDot {

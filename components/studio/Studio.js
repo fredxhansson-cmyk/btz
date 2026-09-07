@@ -370,7 +370,16 @@ function Workspace({ installPrompt, onInstalled }) {
   return (
     <div
       className={ui.touch ? `${s.app} ${s.touch}` : s.app}
-      onDragOver={(e) => { e.preventDefault(); setDropping(true); }}
+      onDragOver={(e) => {
+        // Only react to real file drags — internal drags (e.g. reordering a
+        // track) must not trigger the "drop audio files" overlay or get their
+        // drop swallowed here.
+        const types = e.dataTransfer && e.dataTransfer.types;
+        const hasFiles = types && (types.includes ? types.includes('Files') : Array.from(types).indexOf('Files') >= 0);
+        if (!hasFiles) return;
+        e.preventDefault();
+        setDropping(true);
+      }}
       onDragLeave={(e) => { if (e.currentTarget === e.target) setDropping(false); }}
       onDrop={onDrop}
     >

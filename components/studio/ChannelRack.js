@@ -45,6 +45,16 @@ function ChannelRow({ channel, pattern, steps, selected, dnd }) {
           onDragStart={dnd ? dnd.onDragStart : undefined}
           aria-label="Drag to reorder"
         >⠿</span>
+        <span className={s.chanReorder}>
+          <button type="button" className={s.reorderBtn} title="Move track up" onClick={() => dispatch({ type: 'channel.move', id: channel.id, dir: -1 })}>▲</button>
+          <button type="button" className={s.reorderBtn} title="Move track down" onClick={() => dispatch({ type: 'channel.move', id: channel.id, dir: 1 })}>▼</button>
+        </span>
+        <button
+          type="button"
+          className={`${s.rowAct} ${s.rowActDel}`}
+          title="Delete track"
+          onClick={() => dispatch({ type: 'channel.remove', id: channel.id })}
+        >✕</button>
         <span className={s.chanColor} style={{ background: channel.color }} />
         <button
           type="button"
@@ -106,24 +116,6 @@ function ChannelRow({ channel, pattern, steps, selected, dnd }) {
         >
           {insert ? insert.name.replace('Insert ', 'INS ') : 'MASTER'}
         </button>
-        <button
-          type="button"
-          className={s.rowAct}
-          title="Move track up"
-          onClick={() => dispatch({ type: 'channel.move', id: channel.id, dir: -1 })}
-        >▲</button>
-        <button
-          type="button"
-          className={s.rowAct}
-          title="Move track down"
-          onClick={() => dispatch({ type: 'channel.move', id: channel.id, dir: 1 })}
-        >▼</button>
-        <button
-          type="button"
-          className={`${s.rowAct} ${s.rowActDel}`}
-          title="Delete track"
-          onClick={() => dispatch({ type: 'channel.remove', id: channel.id })}
-        >✕</button>
       </div>
 
       <div
