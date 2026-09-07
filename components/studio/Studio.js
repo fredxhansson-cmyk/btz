@@ -342,59 +342,34 @@ function Workspace({ installPrompt, onInstalled }) {
         onOpenProjects={() => setProjectsOpen(true)}
       />
 
+      {!ui.touch && (
+        <nav className={s.tabNav}>
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              className={ui.view === t.id ? `${s.tabNavBtn} ${s.on}` : s.tabNavBtn}
+              onClick={() => setUi({ view: t.id })}
+            >
+              {t.label}
+              {t.hint && <span className={s.tabNavHint}>{t.hint}</span>}
+            </button>
+          ))}
+          <div className={s.tabNavRight}>
+            <button type="button" className={`${s.tabTool} ${s.tabToolAccent}`} onClick={() => setAiOpen(true)}>✨ Fuse Brain</button>
+            <button type="button" className={s.tabTool} onClick={() => setRecOpen(true)}>Record</button>
+            <button type="button" className={s.tabTool} onClick={() => setUi({ pluginOpen: !ui.pluginOpen })}>Instrument</button>
+            <button type="button" className={s.tabTool} onClick={detach}>Pop out</button>
+            <button type="button" className={s.tabTool} onClick={() => setProjectsOpen(true)}>Projects</button>
+            <button type="button" className={s.tabTool} onClick={() => setOnboard(true)}>Guide</button>
+            <button type="button" className={s.tabTool} title="Settings" onClick={() => setSettingsOpen(true)}>⚙</button>
+            <button type="button" className={s.tabTool} title="Keyboard shortcuts" onClick={() => setHelp(true)}>?</button>
+          </div>
+        </nav>
+      )}
+
       <div className={s.body}>
-        {!ui.touch && (
-          <nav className={s.iconRail}>
-            <span className={s.railGroupLbl}>Views</span>
-            {TABS.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                title={t.hint ? `${t.label} · ${t.hint}` : t.label}
-                className={ui.view === t.id ? `${s.railBtn} ${s.on}` : s.railBtn}
-                onClick={() => setUi({ view: t.id })}
-              >
-                <span className={s.railIcon}>{NAV_ICONS[t.id]}</span>
-                <span className={s.railLbl}>{NAV_SHORT[t.id]}</span>
-              </button>
-            ))}
-            <span className={s.railGroupLbl}>Tools</span>
-            <button type="button" title="Fuse Brain — AI beat generator" className={`${s.railBtn} ${s.aiRail}`} onClick={() => setAiOpen(true)}>
-              <span className={s.railIcon}>✨</span><span className={s.railLbl}>AI</span>
-            </button>
-            <button type="button" title="Record from mic or instrument" className={s.railBtn} onClick={() => setRecOpen(true)}>
-              <span className={s.railIcon}>◉</span><span className={s.railLbl}>Record</span>
-            </button>
-            <button
-              type="button"
-              title="Instrument / plugin panel"
-              className={ui.pluginOpen ? `${s.railBtn} ${s.on}` : s.railBtn}
-              onClick={() => setUi({ pluginOpen: !ui.pluginOpen })}
-            >
-              <span className={s.railIcon}>▣</span><span className={s.railLbl}>Plugin</span>
-            </button>
-            <button
-              type="button"
-              title="Pop this panel out into its own window (second screen)"
-              className={detached.includes(ui.view) ? `${s.railBtn} ${s.on}` : s.railBtn}
-              onClick={detach}
-            >
-              <span className={s.railIcon}>⧉</span><span className={s.railLbl}>Pop&nbsp;out</span>
-            </button>
-            <button type="button" title="Guided tour of the studio" className={s.railBtn} onClick={() => setOnboard(true)}>
-              <span className={s.railIcon}>◎</span><span className={s.railLbl}>Guide</span>
-            </button>
-            <button type="button" title="My projects — your saved library" className={s.railBtn} onClick={() => setProjectsOpen(true)}>
-              <span className={s.railIcon}>🗂</span><span className={s.railLbl}>Projects</span>
-            </button>
-            <button type="button" title="Settings — user &amp; program" className={s.railBtn} onClick={() => setSettingsOpen(true)}>
-              <span className={s.railIcon}>⚙</span><span className={s.railLbl}>Settings</span>
-            </button>
-            <button type="button" title="Keyboard shortcuts &amp; help" className={s.railBtn} onClick={() => setHelp(true)}>
-              <span className={s.railIcon}>?</span><span className={s.railLbl}>Help</span>
-            </button>
-          </nav>
-        )}
+        {false && null}
         {ui.touch && ui.browserOpen && (
           <div className={s.sideBackdrop} onPointerDown={() => setUi({ browserOpen: false })} />
         )}

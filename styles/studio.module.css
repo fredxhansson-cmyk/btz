@@ -201,6 +201,32 @@
 .railSpacer { flex: 1; min-height: 8px; }
 .aiRail .railIcon { color: var(--accent); }
 
+/* --- horizontal tab nav (Fuse design: tabs under the header, not a left rail) --- */
+.tabNav {
+  display: flex; align-items: center; gap: 6px; flex: none;
+  padding: 10px clamp(12px, 1.5vw, 20px); background: var(--chrome);
+  border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none;
+}
+.tabNav::-webkit-scrollbar { height: 0; }
+.tabNavBtn {
+  height: 44px; padding: 0 16px; flex: none; border-radius: var(--r-md);
+  border: 1px solid transparent; background: transparent; color: var(--text-4);
+  font-family: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.tabNavBtn:hover { color: var(--text); }
+.tabNavBtn.on { background: var(--line); color: var(--accent); border-color: var(--line-4); font-weight: 600; }
+.tabNavHint { font-size: 11px; color: var(--muted-3); }
+.tabNavBtn.on .tabNavHint { color: var(--muted); }
+.tabNavRight { margin-left: auto; display: flex; gap: 6px; flex: none; }
+.tabTool {
+  height: 44px; padding: 0 14px; border-radius: var(--r-md);
+  border: 1px solid var(--line-strong); background: transparent; color: var(--text-4);
+  font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap;
+}
+.tabTool:hover { color: var(--text); border-color: var(--text-4); }
+.tabToolAccent { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+
 /* --- always-on desktop mixer + mastering column (redesign right panel) --- */
 @keyframes flowPulse { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
 .mixCol {
