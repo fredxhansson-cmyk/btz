@@ -17,7 +17,7 @@ const hexA = (hex, a) => {
 };
 
 export default function ArrangeView() {
-  const { project, dispatch, ui, setUi, engine, play } = useStudio();
+  const { project, dispatch, ui, setUi, engine, play, collab, setPresence } = useStudio();
   const [pxPerBar, setPxPerBar] = useState(64);
   const [rowH, setRowH] = useState(64);
   const [tool, setTool] = useState('select'); // 'select' | 'volume'
@@ -143,6 +143,11 @@ export default function ArrangeView() {
     setSel(clip.id);
     arm({ mode: side, id: clip.id, length: clip.length, fadeIn: clip.fadeIn || 0, fadeOut: clip.fadeOut || 0, clipLeft: rect.left, clipRight: rect.right });
   }, [arm]);
+
+  // Share which clip you have selected so peers see your cursor in the room.
+  useEffect(() => { if (setPresence) setPresence({ view: 'playlist', sel }); }, [sel, setPresence]);
+  const peerSel = {};
+  ((collab && collab.peers) || []).forEach((p) => { if (!p.self && p.sel && p.view === 'playlist') peerSel[p.sel] = p; });
 
   useEffect(() => {
     const onKey = (e) => {
@@ -294,7 +299,7 @@ export default function ArrangeView() {
                             key={clip.id}
                             onPointerDown={(e) => onClipDown(e, clip, e.currentTarget.getBoundingClientRect())}
                             onDoubleClick={(e) => { e.stopPropagation(); dispatch({ type: 'pattern.select', id: clip.patternId }); setUi({ view: 'piano' }); }}
-                            style={{ position: 'absolute', left, top: 8, height: rowH - 16, width, borderRadius: 'var(--r-sm)', background: hexA(ch, 0.9), boxShadow: selected ? '0 0 0 2px var(--text)' : 'none', overflow: 'hidden', cursor: tool === 'volume' ? 'crosshair' : 'grab', color: 'var(--accent-ink)' }}
+                            style={{ position: 'absolute', left, top: 8, height: rowH - 16, width, borderRadius: 'var(--r-sm)', background: hexA(ch, 0.9), boxShadow: selected ? '0 0 0 2px var(--text)' : (peerSel[clip.id] ? `0 0 0 2px ${peerSel[clip.id].color}` : 'none'), overflow: 'hidden', cursor: tool === 'volume' ? 'crosshair' : 'grab', color: 'var(--accent-ink)' }}
                           >
                             <span style={{ position: 'absolute', left: 8, top: 4, fontSize: 11, fontWeight: 700, pointerEvents: 'none', textShadow: '0 1px 2px rgba(0,0,0,.4)' }}>{patName(clip.patternId)}</span>
                             <svg width={width} height={ih} style={{ position: 'absolute', left: 0, top: 0, pointerEvents: 'none' }} viewBox={`0 0 ${width} ${ih}`} preserveAspectRatio="none">

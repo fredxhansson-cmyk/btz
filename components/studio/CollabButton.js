@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useStudio } from '../../lib/studio/StudioContext';
 
+const VIEW_LABEL = { playlist: 'Arrangement', rack: 'Instruments', piano: 'Piano Roll', drums: 'Drum Machine', mixer: 'Mixer', automation: 'Automation', mastering: 'Mastering', video: 'Video', liveinputs: 'Live inputs', workspace: 'Workspace' };
+
 // Compact real-time collaboration control: start/join a session by code and see
 // who's in the room (presence). Opt-in — solo until you join.
 export default function CollabButton() {
@@ -38,6 +40,7 @@ export default function CollabButton() {
                   {peers.map((p, i) => (
                     <div key={p.id || i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-2)' }}>
                       {dot(p, 0)}<span>{p.name || 'Guest'}{p.self ? ' (you)' : ''}</span>
+                      {p.view && <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--muted)' }}>{VIEW_LABEL[p.view] || p.view}</span>}
                     </div>
                   ))}
                 </div>
