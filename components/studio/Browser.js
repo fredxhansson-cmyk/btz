@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import s from '../../styles/studio.module.css';
 import { useStudio } from '../../lib/studio/StudioContext';
 import { INSTRUMENT_LIST, defaultParams } from '../../lib/studio/audio/instruments';
@@ -71,6 +71,7 @@ function SoundRow({ sound, onRemove, index = 0 }) {
       <button
         type="button"
         className={s.soundName}
+        data-soundid={sound.id}
         onClick={add}
         title={`Add ${sound.name}${sound.tags && sound.tags.length ? ` · ${sound.tags.join(', ')}` : ''}`}
       >
@@ -85,7 +86,7 @@ function SoundRow({ sound, onRemove, index = 0 }) {
 }
 
 export default function Browser() {
-  const { project, dispatch, setUi, setHint, ui, midiInputs, loadTemplate } = useStudio();
+  const { project, dispatch, engine, setUi, setHint, ui, midiInputs, loadTemplate } = useStudio();
   const [query, setQuery] = useState('');
   const [userSounds, setUserSounds] = useState(() => loadUserSounds());
   useEffect(() => { setUserSounds(loadUserSounds()); }, [ui.soundsVersion]);
@@ -95,8 +96,40 @@ export default function Browser() {
 
   const dropUser = (id) => { setUserSounds(removeUserSound(id)); };
 
+  // Keyboard browsing: ↑/↓ move a highlight through the currently-shown sound
+  // rows (auditioning each), Enter adds the highlighted sound. Operates on the
+  // rows in the DOM, so it follows whatever categories are expanded / searched.
+  const asideRef = useRef(null);
+  const focusRef = useRef(null);
+  const soundById = useMemo(() => {
+    const m = new Map();
+    for (const sd of [...SAMPLE_SOUNDS, ...DRUM_SOUNDS, ...INST_SOUNDS, ...userSounds]) m.set(sd.id, sd);
+    return m;
+  }, [userSounds]);
+  const onKeyNav = useCallback((e) => {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Enter') return;
+    const root = asideRef.current;
+    if (!root) return;
+    const els = Array.from(root.querySelectorAll('[data-soundid]'));
+    if (!els.length) return;
+    const ids = els.map((el) => el.getAttribute('data-soundid'));
+    let idx = focusRef.current ? ids.indexOf(focusRef.current) : -1;
+    if (e.key === 'Enter') { if (idx >= 0) { e.preventDefault(); els[idx].click(); } return; }
+    e.preventDefault();
+    idx = e.key === 'ArrowDown' ? Math.min(ids.length - 1, idx + 1) : Math.max(0, idx < 0 ? 0 : idx - 1);
+    els.forEach((el) => el.classList.remove(s.soundNameOn));
+    const el = els[idx];
+    el.classList.add(s.soundNameOn);
+    el.scrollIntoView({ block: 'nearest' });
+    focusRef.current = ids[idx];
+    const sd = soundById.get(ids[idx]);
+    if (sd && engine) { if (sd.kind === 'sample') engine.previewSampleUrl(sd.url); else engine.previewSound(sd); }
+  }, [engine, soundById]);
+
+  useEffect(() => { if (asideRef.current) asideRef.current.focus({ preventScroll: true }); }, []);
+
   return (
-    <aside className={s.side}>
+    <aside className={s.side} ref={asideRef} tabIndex={0} onKeyDown={onKeyNav}>
       <div className={s.sideTop}>
         <input
           className={s.search}

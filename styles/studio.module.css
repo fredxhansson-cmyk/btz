@@ -795,6 +795,8 @@
   border-bottom: 1px solid var(--line); margin-bottom: 2px;
 }
 .soundRow { display: flex; align-items: center; gap: 6px; border-radius: var(--r-8); padding: 1px 2px; }
+.side:focus { outline: none; }
+.soundNameOn { background: var(--hover-strong); box-shadow: inset 0 0 0 1px var(--accent); border-radius: var(--r-8); }
 .soundRow:hover { background: var(--hover-strong); }
 .previewBtn {
   width: 26px; height: 26px; flex: none; border-radius: var(--r-sm); cursor: pointer;
