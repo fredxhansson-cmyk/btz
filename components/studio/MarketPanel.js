@@ -16,6 +16,30 @@ export default function MarketPanel({ onClose }) {
     setUi({ soundsVersion: (ui.soundsVersion || 0) + 1 });
     setHint(`Added "${pack.name}" — ${(pack.sounds || []).length} sounds are now in your library (My sounds).`);
   };
+
+  // After a successful purchase Stripe returns to /?bought=<packId> — grant it.
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const bought = params.get('bought');
+      if (bought) {
+        marketGet(bought).then((pack) => { if (pack) importPack(pack); });
+        params.delete('bought');
+        window.history.replaceState({}, '', `${window.location.pathname}${params.toString() ? `?${params}` : ''}`);
+      }
+    } catch (e) { /* noop */ }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const buyPack = async (meta) => {
+    setBusy(true);
+    try {
+      const r = await fetch('/api/market/buy', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ packId: meta.id, name: meta.name, price: meta.price }) });
+      if (r.status === 401) { setHint('Sign in to buy this pack.'); return; }
+      const d = await r.json();
+      if (d && d.url) { window.location.href = d.url; return; }
+      setHint(d && d.error ? `Purchase: ${d.error}` : 'Buying needs billing configured (docs/ACTIVATION.md).');
+    } finally { setBusy(false); }
+  };
   const addFeatured = (pack) => importPack(pack);
   const addCommunity = async (id) => { setBusy(true); try { const pack = await marketGet(id); if (pack) importPack(pack); else setHint('Could not fetch that pack.'); } finally { setBusy(false); } };
   const preview = (snd) => { try { if (engine.previewSound) engine.previewSound(snd); } catch (e) { /* noop */ } };
@@ -25,8 +49,9 @@ export default function MarketPanel({ onClose }) {
     if (!mine.length) { setHint('Save some custom sounds first (Instrument panel → “Save sound”), then publish a pack.'); return; }
     const name = window.prompt(`Pack name (publishing ${mine.length} of your sounds)`, 'My pack');
     if (!name) return;
+    const price = Math.max(0, parseFloat(window.prompt('Price in USD (0 = free)', '0')) || 0);
     setBusy(true);
-    const r = await marketPublish({ name, desc: '', author: (me && me.name) || 'Anon', sounds: mine });
+    const r = await marketPublish({ name, desc: '', price, author: (me && me.name) || 'Anon', sounds: mine });
     setBusy(false);
     if (r && r.id) { setHint(`Published "${name}" to the marketplace!`); marketStatus().then(setCommunity); }
     else if (r && r.error === 'signin') setHint('Sign in to publish a pack.');
@@ -37,7 +62,7 @@ export default function MarketPanel({ onClose }) {
     <div className={s.projRow} style={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
       <div className={s.projMain} style={{ cursor: 'default' }}>
         <span className={s.projName}>{pack.name} {isCommunity ? '' : <span className={s.dim} style={{ fontWeight: 400 }}>· featured</span>}</span>
-        <span className={s.projMeta}>{pack.desc || ''}{pack.author ? ` · by ${pack.author}` : ''}{pack.count ? ` · ${pack.count} sounds` : (pack.sounds ? ` · ${pack.sounds.length} sounds` : '')}</span>
+        <span className={s.projMeta}>{pack.desc || ''}{pack.author ? ` · by ${pack.author}` : ''}{pack.count ? ` · ${pack.count} sounds` : (pack.sounds ? ` · ${pack.sounds.length} sounds` : '')}{pack.price > 0 ? ` · $${pack.price}` : (isCommunity ? ' · free' : '')}</span>
         {pack.sounds && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 6 }}>
             {pack.sounds.slice(0, 8).map((snd) => (
@@ -47,7 +72,7 @@ export default function MarketPanel({ onClose }) {
         )}
       </div>
       <div className={s.projActions}>
-        <button type="button" className={`${s.btn} ${s.on}`} disabled={busy} onClick={onAdd}>＋ Add pack</button>
+        <button type="button" className={`${s.btn} ${s.on}`} disabled={busy} onClick={onAdd}>{isCommunity && pack.price > 0 ? `Buy $${pack.price}` : '＋ Add pack'}</button>
       </div>
     </div>
   );
@@ -77,7 +102,7 @@ export default function MarketPanel({ onClose }) {
           )}
           {community.enabled && community.index.length > 0 && (
             <div className={s.projList}>
-              {community.index.map((meta) => <PackRow key={meta.id} pack={meta} community onAdd={() => addCommunity(meta.id)} />)}
+              {community.index.map((meta) => <PackRow key={meta.id} pack={meta} community onAdd={() => (meta.price > 0 ? buyPack(meta) : addCommunity(meta.id))} />)}
             </div>
           )}
         </div>

@@ -42,14 +42,15 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
       const { userId } = (getAuth(req) || {});
       if (!userId) { res.status(401).json({ error: 'Sign in to publish a pack.' }); return; }
-      const { name, desc, sounds, author } = req.body || {};
+      const { name, desc, sounds, author, price } = req.body || {};
       if (!name || !Array.isArray(sounds) || !sounds.length) { res.status(400).json({ error: 'name + sounds required' }); return; }
       const id = `usr-${Math.random().toString(36).slice(2, 9)}`;
       const now = Date.now();
-      const pack = { id, name: String(name).slice(0, 60), desc: String(desc || '').slice(0, 200), author: String(author || 'Anon').slice(0, 40), ownerId: userId, sounds: sounds.slice(0, 64), updatedAt: now };
+      const priceNum = Math.max(0, Math.min(999, Number(price) || 0));
+      const pack = { id, name: String(name).slice(0, 60), desc: String(desc || '').slice(0, 200), author: String(author || 'Anon').slice(0, 40), price: priceNum, ownerId: userId, sounds: sounds.slice(0, 64), updatedAt: now };
       await writeJson(PACK(id), token, pack);
       const idx = (await readJson(IDX, token)) || [];
-      const meta = { id, name: pack.name, author: pack.author, desc: pack.desc, count: pack.sounds.length, updatedAt: now };
+      const meta = { id, name: pack.name, author: pack.author, desc: pack.desc, price: priceNum, count: pack.sounds.length, updatedAt: now };
       await writeJson(IDX, token, [meta, ...idx.filter((x) => x.id !== id)].slice(0, 500));
       res.status(200).json({ enabled: true, id });
       return;
