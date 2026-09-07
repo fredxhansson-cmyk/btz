@@ -47,7 +47,7 @@ function Menu({ label, items, openId, setOpenId }) {
 export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOpenCommand, onOpenProjects }) {
   const {
     project, dispatch, engine, ui, setUi, play, stop, pause, setMode,
-    newProject, saveFile, openFile, exportAudio, exportMidiFile, importMidiFile,
+    newProject, saveFile, openFile, exportAudio, exportMidiFile, importMidiFile, separateStemsFile,
     canUndo, canRedo, playing, paused, busy,
   } = useStudio();
   const [openId, setOpenId] = useState(null);
@@ -57,6 +57,7 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOp
   const meterL = useRef(null);
   const fileRef = useRef(null);
   const midiRef = useRef(null);
+  const stemRef = useRef(null);
   const tempoDrag = useRef(null);
 
   useRaf(() => {
@@ -118,6 +119,8 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOp
     { sep: true },
     { label: 'Export MIDI', onClick: () => exportMidiFile() },
     { label: 'Import MIDI...', onClick: () => midiRef.current && midiRef.current.click() },
+    { sep: true },
+    { label: 'Separate audio into stems…', onClick: () => stemRef.current && stemRef.current.click() },
   ];
 
   const editItems = [
@@ -405,6 +408,13 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOp
         accept=".mid,.midi,audio/midi"
         className={s.hiddenFile}
         onChange={(e) => { const f = e.target.files && e.target.files[0]; if (f) importMidiFile(f); e.target.value = ''; }}
+      />
+      <input
+        ref={stemRef}
+        type="file"
+        accept="audio/*"
+        className={s.hiddenFile}
+        onChange={(e) => { const f = e.target.files && e.target.files[0]; if (f) separateStemsFile(f); e.target.value = ''; }}
       />
       <input
         ref={fileRef}
