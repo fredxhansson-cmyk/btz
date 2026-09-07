@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import s from '../../styles/studio.module.css';
 import { useStudio, useRaf } from '../../lib/studio/StudioContext';
 import { STEP_TICKS, BAR_TICKS, clamp, keyName } from '../../lib/studio/constants';
@@ -8,7 +8,7 @@ import Knob from './Knob';
 
 const STEP_W = 34;
 
-function ChannelRow({ channel, pattern, steps, selected }) {
+function ChannelRow({ channel, pattern, steps, selected, dnd }) {
   const { dispatch, engine, setUi, project, recordAuto } = useStudio();
   const paint = useRef(null);
   const drag = useRef(null);
@@ -31,9 +31,20 @@ function ChannelRow({ channel, pattern, steps, selected }) {
   const insert = project.inserts.find((i) => i.id === channel.insert);
 
   return (
-    <div className={selected ? `${s.chanRow} ${s.chanSel}` : s.chanRow}>
+    <div
+      className={[s.chanRow, selected ? s.chanSel : '', dnd && dnd.isOver ? s.chanDrop : ''].filter(Boolean).join(' ')}
+      onDragOver={dnd ? dnd.onDragOver : undefined}
+      onDrop={dnd ? dnd.onDrop : undefined}
+      onDragEnd={dnd ? dnd.onDragEnd : undefined}
+    >
       <div className={s.chanLeft}>
-        <span className={s.chanColor} style={{ background: channel.color }} />
+        <span
+          className={s.chanColor}
+          style={{ background: channel.color, cursor: 'grab' }}
+          draggable
+          title="Drag to reorder"
+          onDragStart={dnd ? dnd.onDragStart : undefined}
+        />
         <button
           type="button"
           className={s.led}
@@ -185,6 +196,19 @@ function ChannelRow({ channel, pattern, steps, selected }) {
 
 export default function ChannelRack() {
   const { project, dispatch, engine, ui, setUi, addToArrangement, popOut } = useStudio();
+  const dragId = useRef(null);
+  const [dropId, setDropId] = useState(null);
+  const dndFor = (id) => ({
+    isOver: dropId === id,
+    onDragStart: (e) => { dragId.current = id; e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', id); } catch (err) { /* noop */ } },
+    onDragOver: (e) => { e.preventDefault(); if (dragId.current && dropId !== id) setDropId(id); },
+    onDrop: (e) => {
+      e.preventDefault();
+      if (dragId.current && dragId.current !== id) dispatch({ type: 'channel.reorder', id: dragId.current, beforeId: id });
+      dragId.current = null; setDropId(null);
+    },
+    onDragEnd: () => { dragId.current = null; setDropId(null); },
+  });
   const pattern = project.patterns.find((p) => p.id === project.activePattern) || project.patterns[0];
   const steps = patternSteps(pattern);
   const headRef = useRef(null);
@@ -291,14 +315,17 @@ export default function ChannelRack() {
               pattern={pattern}
               steps={steps}
               selected={ch.id === project.selectedChannel}
+              dnd={dndFor(ch.id)}
             />
           ))}
 
           <button
             type="button"
-            className={s.addChanRow}
+            className={dropId === '__end__' ? `${s.addChanRow} ${s.chanDrop}` : s.addChanRow}
             onClick={() => dispatch({ type: 'channel.add', inst: 'osc3', name: 'Channel' })}
-            title="Add a new track"
+            title="Add a new track — or drop a track here to move it to the bottom"
+            onDragOver={(e) => { e.preventDefault(); if (dragId.current && dropId !== '__end__') setDropId('__end__'); }}
+            onDrop={(e) => { e.preventDefault(); if (dragId.current) dispatch({ type: 'channel.reorder', id: dragId.current, beforeId: null }); dragId.current = null; setDropId(null); }}
           >＋ Add track</button>
         </div>
       </div>
