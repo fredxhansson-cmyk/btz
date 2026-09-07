@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import s from '../../styles/studio.module.css';
 import { useStudio } from '../../lib/studio/StudioContext';
 import {
   listProjects, loadProject, saveProject, renameProject, deleteProject, duplicateProject,
 } from '../../lib/studio/projects-store';
+import { cloudStatus, cloudLoad, cloudSave } from '../../lib/studio/cloud';
 
 const CLERK = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
@@ -62,6 +63,33 @@ export default function ProjectsModal({ onClose }) {
 
   const duplicate = (item) => { duplicateProject(item.id); refresh(); setHint('Project duplicated.'); };
 
+  // Cloud sync (only shown when signed in and a blob store is configured).
+  const [cloud, setCloud] = useState({ enabled: false, signedIn: false, index: [] });
+  const [syncing, setSyncing] = useState(false);
+  const refreshCloud = () => cloudStatus().then(setCloud).catch(() => {});
+  useEffect(() => { refreshCloud(); }, []);
+
+  const backupAll = async () => {
+    setSyncing(true);
+    try {
+      const all = listProjects();
+      for (const it of all) { const data = loadProject(it.id); if (data) { /* eslint-disable-next-line no-await-in-loop */ await cloudSave(it.id, data); } }
+      await refreshCloud();
+      setHint(`Backed up ${all.length} project${all.length === 1 ? '' : 's'} to your account.`);
+    } finally { setSyncing(false); }
+  };
+
+  const openCloud = async (id) => {
+    const data = await cloudLoad(id);
+    if (!data) { setHint('Could not fetch that cloud project.'); return; }
+    saveProject(data, id); // mirror into the local library
+    dispatch({ type: 'set', project: data });
+    setUi({ libId: id });
+    refresh();
+    setHint(`Opened "${data.name || 'Untitled'}" from the cloud.`);
+    onClose();
+  };
+
   return (
     <div className={s.modalBack} onPointerDown={onClose}>
       <div className={`${s.modal} ${s.settingsModal}`} onPointerDown={(e) => e.stopPropagation()}>
@@ -100,10 +128,35 @@ export default function ProjectsModal({ onClose }) {
             ))}
           </div>
 
+          {cloud.enabled && cloud.signedIn && (
+            <div className={s.projList} style={{ marginTop: 8 }}>
+              <div className={s.projToolbar}>
+                <span className={s.dim}>☁ Cloud — synced to your account</span>
+                <div className={s.spacer} />
+                <button type="button" className={s.btn} disabled={syncing} onClick={backupAll}>{syncing ? 'Backing up…' : 'Back up all → cloud'}</button>
+              </div>
+              {!cloud.index.length && (
+                <div className={s.helpBox}>No cloud projects yet. Press <b>Back up all → cloud</b> to sync your library across devices.</div>
+              )}
+              {cloud.index.slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)).map((it) => (
+                <div key={it.id} className={s.projRow}>
+                  <button type="button" className={s.projMain} onClick={() => openCloud(it.id)} title="Open this project from the cloud">
+                    <span className={s.projName}>☁ {it.name}</span>
+                    <span className={s.projMeta}>{when(it.updatedAt)}</span>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className={s.helpBox}>
-            {CLERK
-              ? 'These projects live in this browser. Account sync across devices is coming next.'
-              : 'These projects live in this browser (per device). Cloud sync tied to your account — so your whole library follows you across devices — is the next step and needs sign-in enabled.'}
+            {cloud.enabled
+              ? (cloud.signedIn
+                ? 'Local projects live in this browser; the cloud list follows your account across devices. Back up to sync.'
+                : 'Cloud sync is available — sign in to sync your library across devices.')
+              : (CLERK
+                ? 'These projects live in this browser. Cloud sync activates once a storage token is configured.'
+                : 'These projects live in this browser (per device). Cloud sync tied to your account is available once sign-in + storage are enabled.')}
             {' '}You can also use <b>File → Save project</b> to keep a project as a portable <b>.flow.json</b> file.
           </div>
         </div>
