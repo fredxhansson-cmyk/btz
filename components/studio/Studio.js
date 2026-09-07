@@ -66,6 +66,44 @@ const TABS = [
   { id: 'liveinputs', label: 'Live inputs', hint: '' },
   { id: 'workspace', label: 'Workspace', hint: '' },
 ];
+// Keep the row short: only the core editors are always-visible tabs; the rest
+// live in a "More" dropdown.
+const PRIMARY_TABS = ['playlist', 'rack', 'piano', 'drums', 'mixer', 'mastering'];
+
+// Compact dropdown for the tab bar (view overflow + tools), closes on outside click.
+function NavMenu({ label, active, items, align = 'left' }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!open) return undefined;
+    const onDown = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('pointerdown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => { document.removeEventListener('pointerdown', onDown); document.removeEventListener('keydown', onKey); };
+  }, [open]);
+  return (
+    <div className={s.menuWrap} ref={ref}>
+      <button
+        type="button"
+        className={active || open ? `${s.tabTool} ${s.on}` : s.tabTool}
+        onClick={() => setOpen((o) => !o)}
+      >
+        {label}<span className={s.menuCaret} aria-hidden="true"> ▾</span>
+      </button>
+      {open && (
+        <div className={s.dropdown} role="menu" style={align === 'right' ? { left: 'auto', right: 0 } : undefined}>
+          {items.map((it) => (
+            <button key={it.label} type="button" className={it.active ? `${s.dropItem} ${s.on}` : s.dropItem} role="menuitem" onClick={() => { setOpen(false); it.onClick(); }}>
+              <span>{it.label}</span>
+              {it.hint && <span className={s.menuHint}>{it.hint}</span>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 /** Letter key -> drum pad role, matching the pad grid layout. */
 const PAD_KEYS = ROLES.reduce((acc, r) => { acc[r.key] = r.id; return acc; }, {});
@@ -380,7 +418,7 @@ function Workspace({ installPrompt, onInstalled }) {
 
       {!ui.touch && (
         <nav className={s.tabNav}>
-          {TABS.map((t) => (
+          {TABS.filter((t) => PRIMARY_TABS.includes(t.id)).map((t) => (
             <button
               key={t.id}
               type="button"
@@ -391,20 +429,37 @@ function Workspace({ installPrompt, onInstalled }) {
               {t.hint && <span className={s.tabNavHint}>{t.hint}</span>}
             </button>
           ))}
+          {(() => {
+            const more = TABS.filter((t) => !PRIMARY_TABS.includes(t.id));
+            const activeMore = more.find((t) => t.id === ui.view);
+            return (
+              <NavMenu
+                label={activeMore ? activeMore.label : 'More'}
+                active={!!activeMore}
+                items={more.map((t) => ({ label: t.label, hint: t.hint, active: ui.view === t.id, onClick: () => setUi({ view: t.id }) }))}
+              />
+            );
+          })()}
           <div className={s.tabNavRight}>
             <CollabButton />
             <button type="button" className={`${s.tabTool} ${s.tabToolAccent}`} onClick={() => setAiOpen(true)}>✨ Fuse Brain</button>
             <button type="button" className={s.tabTool} onClick={() => setRecOpen(true)}>Record</button>
-            <button type="button" className={s.tabTool} onClick={() => setUi({ pluginOpen: !ui.pluginOpen })}>Instrument</button>
-            <button type="button" className={s.tabTool} onClick={() => setWamOpen(true)}>Plugins</button>
-            <button type="button" className={s.tabTool} onClick={() => setMarketOpen(true)}>Market</button>
-            <button type="button" className={s.tabTool} onClick={() => setSampleOpen(true)}>Sample</button>
             <button type="button" className={s.tabTool} onClick={() => setReleaseOpen(true)}>Release</button>
-            <button type="button" className={s.tabTool} onClick={detach}>Pop out</button>
-            <button type="button" className={s.tabTool} onClick={() => setProjectsOpen(true)}>Projects</button>
-            <button type="button" className={s.tabTool} onClick={() => setOnboard(true)}>Guide</button>
-            <button type="button" className={s.tabTool} title="Settings" onClick={() => setSettingsOpen(true)}>⚙</button>
-            <button type="button" className={s.tabTool} title="Keyboard shortcuts" onClick={() => setHelp(true)}>?</button>
+            <NavMenu
+              label="⋯ Tools"
+              align="right"
+              items={[
+                { label: 'Instrument panel', onClick: () => setUi({ pluginOpen: !ui.pluginOpen }) },
+                { label: 'Plugins (WAM)', onClick: () => setWamOpen(true) },
+                { label: 'Marketplace', onClick: () => setMarketOpen(true) },
+                { label: 'Sample from URL', onClick: () => setSampleOpen(true) },
+                { label: 'Pop out window', onClick: detach },
+                { label: 'My projects', onClick: () => setProjectsOpen(true) },
+                { label: 'Guide', onClick: () => setOnboard(true) },
+                { label: 'Settings', onClick: () => setSettingsOpen(true) },
+                { label: 'Keyboard shortcuts', onClick: () => setHelp(true) },
+              ]}
+            />
           </div>
         </nav>
       )}
