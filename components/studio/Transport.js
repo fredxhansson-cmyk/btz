@@ -355,6 +355,12 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOp
                   Mastering…
                 </button>
                 <div className={s.sheetRow}>
+                  <span className={s.dim} style={{ minWidth: 52 }}>Tempo</span>
+                  <button type="button" className={s.btn} onClick={() => dispatch({ type: 'patch', patch: { bpm: clamp(Math.round(project.bpm) - 1, 20, 300) } })}>−</button>
+                  <span className={s.numBox} style={{ minWidth: 58 }}>{project.bpm.toFixed(1)}</span>
+                  <button type="button" className={s.btn} onClick={() => dispatch({ type: 'patch', patch: { bpm: clamp(Math.round(project.bpm) + 1, 20, 300) } })}>+</button>
+                </div>
+                <div className={s.sheetRow}>
                   <button
                     type="button"
                     className={ui.metronome ? `${s.btn} ${s.on}` : s.btn}

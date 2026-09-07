@@ -7,8 +7,6 @@ import { BAR_TICKS, clamp, uid } from '../../lib/studio/constants';
 // DOM Arrangement view — a faithful port of the Fuse `ViewArrange` template with
 // pro editing: place/move/resize clips, per-clip volume keyframes + fades, a
 // note-content preview inside each clip, and adjustable track height.
-const LABEL_W = 190;
-
 const hexA = (hex, a) => {
   if (!hex || hex[0] !== '#') return hex;
   const h = hex.slice(1);
@@ -18,6 +16,7 @@ const hexA = (hex, a) => {
 
 export default function ArrangeView() {
   const { project, dispatch, ui, setUi, engine, play, collab, setPresence } = useStudio();
+  const LABEL_W = ui.touch ? 112 : 190; // narrower track column on phones = more lane visible
   const [pxPerBar, setPxPerBar] = useState(64);
   const [rowH, setRowH] = useState(64);
   const [tool, setTool] = useState('select'); // 'select' | 'volume'
@@ -239,8 +238,8 @@ export default function ArrangeView() {
 
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 16, fontFamily: 'var(--font-ui)', height: '100%', width: '100%', minWidth: 0, boxSizing: 'border-box', padding: '16px 20px 10px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-        <h2 style={{ margin: 0, fontSize: 19, fontWeight: 700, letterSpacing: '-.015em', color: 'var(--text)' }}>Arrangement</h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: ui.touch ? 6 : 10, flexWrap: 'wrap' }}>
+        <h2 style={{ margin: 0, fontSize: ui.touch ? 16 : 19, fontWeight: 700, letterSpacing: '-.015em', color: 'var(--text)', flex: 'none' }}>Arrangement</h2>
         <span style={{ fontSize: 12, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--muted)' }}>Placing</span>
         <select value={project.activePattern} onChange={(e) => dispatch({ type: 'pattern.select', id: e.target.value })} style={{ ...btn, height: 'var(--ctl-sm)', color: 'var(--text)' }}>
           {project.patterns.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
