@@ -11,17 +11,40 @@ import {
   soundColor, loadUserSounds, removeUserSound,
 } from '../../lib/studio/library';
 
-function Section({ title, children, defaultOpen = false, count }) {
+function Section({ title, children, defaultOpen = false, count, sub }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className={s.sideSec}>
-      <button type="button" className={s.sideHead} onClick={() => setOpen((o) => !o)}>
+      <button
+        type="button"
+        className={s.sideHead}
+        onClick={() => setOpen((o) => !o)}
+        style={sub ? { paddingLeft: 20, fontSize: 11.5, letterSpacing: '.06em', opacity: 0.9, textTransform: 'none' } : undefined}
+      >
         <span className={s.caret}>{open ? '▾' : '▸'}</span>
         {title}
         {count != null && <span className={s.sideCount}>{count}</span>}
       </button>
       {open && <div className={s.sideList}>{children}</div>}
     </div>
+  );
+}
+
+// A group whose categories are each a collapsed subsection, so a big library
+// becomes a compact category tree instead of one long scroll.
+function CategoryGroup({ title, sounds, cats, defaultOpen = false, extraTop = null }) {
+  return (
+    <Section title={title} defaultOpen={defaultOpen} count={sounds.length}>
+      {extraTop}
+      {cats.filter((cat) => sounds.some((sd) => sd.cat === cat)).map((cat) => {
+        const items = sounds.filter((sd) => sd.cat === cat);
+        return (
+          <Section key={cat} title={cat} count={items.length} sub>
+            {items.map((sd, i) => <SoundRow key={sd.id} sound={sd} index={i} />)}
+          </Section>
+        );
+      })}
+    </Section>
   );
 }
 
@@ -100,33 +123,17 @@ export default function Browser() {
         </div>
       ) : (
         <>
-          <Section title="Real kits — samples (CC0)" defaultOpen count={SAMPLE_SOUNDS.length}>
-            <div className={s.helpBox}>Real recorded instruments — the pro-sounding, non-synth sounds. Free to use commercially (CC0).</div>
-            {[...DRUM_CATS, ...INST_CATS].filter((cat) => SAMPLE_SOUNDS.some((sd) => sd.cat === cat)).map((cat) => (
-              <div key={cat} className={s.catBlock}>
-                <div className={s.catLabel}>{cat}</div>
-                {SAMPLE_SOUNDS.filter((sd) => sd.cat === cat).map((sd, i) => <SoundRow key={sd.id} sound={sd} index={i} />)}
-              </div>
-            ))}
-          </Section>
+          <CategoryGroup
+            title="Real kits — samples (CC0)"
+            sounds={SAMPLE_SOUNDS}
+            cats={[...DRUM_CATS, ...INST_CATS]}
+            defaultOpen
+            extraTop={<div className={s.helpBox}>Real recorded instruments — the pro-sounding, non-synth sounds. Free to use commercially (CC0).</div>}
+          />
 
-          <Section title="Drums — synth" count={DRUM_SOUNDS.length}>
-            {DRUM_CATS.map((cat) => (
-              <div key={cat} className={s.catBlock}>
-                <div className={s.catLabel}>{cat}</div>
-                {DRUM_SOUNDS.filter((sd) => sd.cat === cat).map((sd, i) => <SoundRow key={sd.id} sound={sd} index={i} />)}
-              </div>
-            ))}
-          </Section>
+          <CategoryGroup title="Drums — synth" sounds={DRUM_SOUNDS} cats={DRUM_CATS} />
 
-          <Section title="Instrument" count={INST_SOUNDS.length}>
-            {INST_CATS.map((cat) => (
-              <div key={cat} className={s.catBlock}>
-                <div className={s.catLabel}>{cat}</div>
-                {INST_SOUNDS.filter((sd) => sd.cat === cat).map((sd, i) => <SoundRow key={sd.id} sound={sd} index={i} />)}
-              </div>
-            ))}
-          </Section>
+          <CategoryGroup title="Instrument" sounds={INST_SOUNDS} cats={INST_CATS} />
 
           <Section title="AI sounds" count={aiSounds.length}>
             {aiSounds.map((sd, i) => <SoundRow key={sd.id} sound={sd} index={i} onRemove={dropUser} />)}

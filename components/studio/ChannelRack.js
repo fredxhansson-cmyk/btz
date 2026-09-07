@@ -96,8 +96,20 @@ function ChannelRow({ channel, pattern, steps, selected }) {
         </button>
         <button
           type="button"
+          className={s.tinyBtn}
+          title="Move track up"
+          onClick={() => dispatch({ type: 'channel.move', id: channel.id, dir: -1 })}
+        >▲</button>
+        <button
+          type="button"
+          className={s.tinyBtn}
+          title="Move track down"
+          onClick={() => dispatch({ type: 'channel.move', id: channel.id, dir: 1 })}
+        >▼</button>
+        <button
+          type="button"
           className={s.xBtn}
-          title="Remove channel"
+          title="Delete track"
           onClick={() => dispatch({ type: 'channel.remove', id: channel.id })}
         >×</button>
       </div>
