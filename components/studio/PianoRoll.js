@@ -22,7 +22,7 @@ const KEYS = MAX_KEY - MIN_KEY + 1;
 let clipboard = [];   // survives view switches
 
 export default function PianoRoll() {
-  const { project, dispatch, engine, ui, setUi, setHint, play, addToArrangement, popOut } = useStudio();
+  const { project, dispatch, engine, ui, setUi, setHint, play, addToArrangement, popOut, collab, setPresence } = useStudio();
   const wrapRef = useRef(null);
   const canvasRef = useRef(null);
   const vThumbRef = useRef(null);
@@ -31,6 +31,8 @@ export default function PianoRoll() {
   const loupe = useRef({ active: false, x: 0, y: 0, label: '' });
   const lastTap = useRef({ t: 0, x: 0, y: 0 });
   const view = useRef({ scrollX: 0, scrollY: 0, pxPerTick: 0.5, rowH: 13, inited: false });
+  const collabRef = useRef(collab); collabRef.current = collab;
+  const lastBroadcast = useRef(0);
   const drag = useRef(null);
   const marquee = useRef(null);
   const sel = useRef(new Set());
@@ -249,6 +251,27 @@ export default function PianoRoll() {
       }
     }
 
+    // remote collaborators' live cursors in this pattern/channel
+    const cs = collabRef.current;
+    if (cs && cs.peers) {
+      for (const pr of cs.peers) {
+        if (pr.self || pr.view !== 'piano' || pr.ch !== d.channel.id || pr.ct == null || pr.ck == null) continue;
+        const cx = KEY_W + pr.ct * v.pxPerTick - v.scrollX;
+        const cy = HEAD_H + (MAX_KEY - pr.ck) * v.rowH - v.scrollY;
+        if (cx < KEY_W || cx > w || cy < HEAD_H || cy > HEAD_H + gridH) continue;
+        const col = pr.color || '#ffffff';
+        ctx.fillStyle = col;
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + 11, cy + 4); ctx.lineTo(cx + 4, cy + 11); ctx.closePath(); ctx.fill();
+        const label = pr.name || 'Guest';
+        ctx.font = '600 10px ui-sans-serif, system-ui, sans-serif';
+        const tw = ctx.measureText(label).width + 8;
+        ctx.fillStyle = col;
+        ctx.fillRect(cx + 11, cy + 9, tw, 14);
+        ctx.fillStyle = '#0b0b0b';
+        ctx.fillText(label, cx + 15, cy + 19);
+      }
+    }
+
     // keep the touch scrollbar thumb in sync (also tracks pinch/octave scrolls)
     if (vThumbRef.current) {
       const total = KEYS * v.rowH;
@@ -280,7 +303,7 @@ export default function PianoRoll() {
   }, [engine]);
 
   useRaf(draw);
-  useEffect(() => { draw(); }, [draw, project, ui]);
+  useEffect(() => { draw(); }, [draw, project, ui, collab]);
 
   /* -------------------------------------------------------- interactions */
 
@@ -505,6 +528,15 @@ export default function PianoRoll() {
   const onPointerMove = useCallback((e) => {
     if (gesture.current && gesture.current.move(e)) { loupe.current.active = false; return; }
     press.current.move(e);
+    // Broadcast this pointer to the room as a live cursor (throttled).
+    if (setPresence) {
+      const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+      if (now - lastBroadcast.current > 55) {
+        lastBroadcast.current = now;
+        const pp = posFromEvent(e);
+        setPresence({ view: 'piano', ch: (dataRef.current.channel || {}).id, ct: Math.max(0, Math.round(pp.tick)), ck: clamp(pp.key, MIN_KEY, MAX_KEY) });
+      }
+    }
     const dr = drag.current;
     if (!dr) return;
     const p = posFromEvent(e);
