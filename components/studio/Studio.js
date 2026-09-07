@@ -5,7 +5,7 @@ import Transport from './Transport';
 import Browser from './Browser';
 import ChannelRack from './ChannelRack';
 import PianoRoll from './PianoRoll';
-import Playlist from './Playlist';
+import ArrangeView from './ArrangeView';
 import Mixer from './Mixer';
 import MixerColumn from './MixerColumn';
 import MasteringView from './Mastering';
@@ -141,7 +141,7 @@ function Workspace({ installPrompt, onInstalled }) {
   // Detach a view into its own window (second screen).
   const viewFor = (id) => {
     switch (id) {
-      case 'playlist': return <Playlist />;
+      case 'playlist': return <ArrangeView />;
       case 'rack': return <ChannelRack />;
       case 'piano': return <PianoRoll />;
       case 'drums': return <DrumMachine />;
