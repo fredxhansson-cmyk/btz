@@ -8,9 +8,9 @@ const Studio = dynamic(() => import('../components/studio/Studio'), {
   loading: () => (
     <div style={{
       height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: '#16181c', color: '#8b929c', fontFamily: 'system-ui, sans-serif',
+      background: '#080b12', color: '#b0b8c5', fontFamily: "'Manrope', system-ui, sans-serif", letterSpacing: '-0.01em',
     }}>
-      Loading Fuse…
+      Loading <span style={{ color: '#ff746e', fontWeight: 700, marginLeft: 6 }}>Fuse</span>…
     </div>
   ),
 });
