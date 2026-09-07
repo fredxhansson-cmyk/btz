@@ -101,8 +101,13 @@ export default function Browser() {
       ) : (
         <>
           <Section title="Real kits — samples (CC0)" defaultOpen count={SAMPLE_SOUNDS.length}>
-            <div className={s.helpBox}>Real recorded one-shots — the pro-sounding, non-synth drums. Free to use (CC0).</div>
-            {SAMPLE_SOUNDS.map((sd, i) => <SoundRow key={sd.id} sound={sd} index={i} />)}
+            <div className={s.helpBox}>Real recorded instruments — the pro-sounding, non-synth sounds. Free to use commercially (CC0).</div>
+            {[...DRUM_CATS, ...INST_CATS].filter((cat) => SAMPLE_SOUNDS.some((sd) => sd.cat === cat)).map((cat) => (
+              <div key={cat} className={s.catBlock}>
+                <div className={s.catLabel}>{cat}</div>
+                {SAMPLE_SOUNDS.filter((sd) => sd.cat === cat).map((sd, i) => <SoundRow key={sd.id} sound={sd} index={i} />)}
+              </div>
+            ))}
           </Section>
 
           <Section title="Drums — synth" count={DRUM_SOUNDS.length}>
