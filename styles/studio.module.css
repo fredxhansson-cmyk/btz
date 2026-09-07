@@ -48,7 +48,7 @@
   padding: 7px 12px; border-radius: var(--r-8); cursor: pointer; font-size: 13.5px; font-weight: 500;
 }
 .menuBtn:hover { background: var(--hover-strong); border-color: var(--line-3); }
-.menuBtn.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.menuBtn.on { background: var(--hover-strong); color: var(--text); border-color: var(--line-3); font-weight: 600; }
 .menuCaret { font-size: 9px; opacity: 0.7; margin-left: 1px; }
 /* Invisible catcher that guarantees a click outside always closes the menu. */
 .menuBackdrop { position: fixed; inset: 0; z-index: 39; }
