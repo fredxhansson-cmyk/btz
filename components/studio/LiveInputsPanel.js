@@ -32,7 +32,7 @@ export default function LiveInputsPanel() {
       if (!el) return;
       const lvl = engine.liveInputLevel(r.id);
       el.style.width = `${Math.min(100, lvl * 100)}%`;
-      el.style.background = lvl > 0.97 ? '#ff4d4d' : lvl > 0.8 ? '#ffd43b' : '#7ee787';
+      el.style.background = lvl > 0.97 ? '#f1383e' : lvl > 0.8 ? '#edb417' : '#85c425';
     });
   });
 
@@ -116,7 +116,7 @@ export default function LiveInputsPanel() {
               {project.inserts.map((i) => <option key={i.id} value={i.id}>→ {i.name}</option>)}
             </select>
             <Knob
-              size={30} label="Gain" color="#7ee787"
+              size={30} label="Gain" color="#85c425"
               spec={{ min: 0, max: 4, def: 1 }}
               value={r.gain}
               onChange={(v) => changeGain(r, v)}

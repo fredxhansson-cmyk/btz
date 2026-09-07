@@ -73,7 +73,7 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOp
     if (meterL.current) {
       const lvl = engine.masterLevel();
       meterL.current.style.transform = `scaleX(${Math.min(1, lvl)})`;
-      meterL.current.style.background = lvl > 0.96 ? '#ff4d4d' : lvl > 0.75 ? '#ffd43b' : '#7ee787';
+      meterL.current.style.background = lvl > 0.96 ? '#f1383e' : lvl > 0.75 ? '#edb417' : '#85c425';
     }
   });
 

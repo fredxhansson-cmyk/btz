@@ -388,7 +388,7 @@ export default function DrumMachine() {
           {channel && (
             <div className={s.dmKnobs}>
               <Knob
-                label="Level" color="#7ee787"
+                label="Level" color="#85c425"
                 spec={{ min: 0, max: 1.2, def: 0.8 }}
                 value={channel.vol}
                 onChange={(v, live) => dispatch({ type: 'channel.update', id: channel.id, patch: { vol: v }, live, key: 'vol' })}

@@ -805,7 +805,7 @@ export default function PianoRoll() {
       <div className={s.dmTools}>
         <span className={s.toolLabel}>Tools</span>
         <div className={s.group}>
-          <button type="button" className={s.btn} onClick={() => applyToSelection((l) => quantizeNotes(l, snapTicks(ui.snap), qStrength), 'Quantized.')}>Quantize</button>
+          <button type="button" className={s.btn} disabled={!notes.length} onClick={() => applyToSelection((l) => quantizeNotes(l, snapTicks(ui.snap), qStrength), 'Quantized.')}>Quantize</button>
           <input
             className={s.numInput} type="number" min={0} max={100} step={5}
             value={Math.round(qStrength * 100)}
@@ -813,16 +813,16 @@ export default function PianoRoll() {
           />
           <span className={s.dim}>%</span>
         </div>
-        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => strumNotes(l, Math.round(snapTicks(ui.snap) / 2)), 'Strummed.')}>Strum</button>
-        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => arpeggiateNotes(l, snapTicks(ui.snap), 'up', 1), 'Arpeggiated.')}>Arpeggiate</button>
-        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => humanizeVelocity(l), 'Humanized.')}>Humanize</button>
-        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => randomizeVelocity(l), 'Randomized velocity.')}>Randomize vel</button>
-        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => legatoNotes(l, notes), 'Legato.')}>Legato</button>
-        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => invertNotes(l), 'Inverted.')}>Invert</button>
-        <button type="button" className={s.btn} onClick={() => applyToSelection((l) => reverseNotes(l), 'Reversed.')}>Reverse</button>
+        <button type="button" className={s.btn} disabled={!notes.length} onClick={() => applyToSelection((l) => strumNotes(l, Math.round(snapTicks(ui.snap) / 2)), 'Strummed.')}>Strum</button>
+        <button type="button" className={s.btn} disabled={!notes.length} onClick={() => applyToSelection((l) => arpeggiateNotes(l, snapTicks(ui.snap), 'up', 1), 'Arpeggiated.')}>Arpeggiate</button>
+        <button type="button" className={s.btn} disabled={!notes.length} onClick={() => applyToSelection((l) => humanizeVelocity(l), 'Humanized.')}>Humanize</button>
+        <button type="button" className={s.btn} disabled={!notes.length} onClick={() => applyToSelection((l) => randomizeVelocity(l), 'Randomized velocity.')}>Randomize vel</button>
+        <button type="button" className={s.btn} disabled={!notes.length} onClick={() => applyToSelection((l) => legatoNotes(l, notes), 'Legato.')}>Legato</button>
+        <button type="button" className={s.btn} disabled={!notes.length} onClick={() => applyToSelection((l) => invertNotes(l), 'Inverted.')}>Invert</button>
+        <button type="button" className={s.btn} disabled={!notes.length} onClick={() => applyToSelection((l) => reverseNotes(l), 'Reversed.')}>Reverse</button>
         <div className={s.group}>
-          <button type="button" className={s.btn} onClick={() => applyToSelection((l) => transposeNotes(l, 12))}>Oct +</button>
-          <button type="button" className={s.btn} onClick={() => applyToSelection((l) => transposeNotes(l, -12))}>Oct −</button>
+          <button type="button" className={s.btn} disabled={!notes.length} onClick={() => applyToSelection((l) => transposeNotes(l, 12))}>Oct +</button>
+          <button type="button" className={s.btn} disabled={!notes.length} onClick={() => applyToSelection((l) => transposeNotes(l, -12))}>Oct −</button>
         </div>
         <div className={s.spacer} />
         <div className={s.group}>

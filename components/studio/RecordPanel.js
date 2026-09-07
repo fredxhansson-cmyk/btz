@@ -32,7 +32,7 @@ export default function RecordPanel({ onClose }) {
     if (meterRef.current) {
       const lvl = engine.inputLevel();
       meterRef.current.style.width = `${Math.min(100, lvl * 100)}%`;
-      meterRef.current.style.background = lvl > 0.97 ? '#ff4d4d' : lvl > 0.8 ? '#ffd43b' : '#7ee787';
+      meterRef.current.style.background = lvl > 0.97 ? '#f1383e' : lvl > 0.8 ? '#edb417' : '#85c425';
     }
     if (rec) setElapsed((performance.now() - startedAt.current) / 1000);
   });
@@ -63,7 +63,7 @@ export default function RecordPanel({ onClose }) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.fillStyle = '#15171b';
     ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = '#7ee787';
+    ctx.fillStyle = '#85c425';
     for (let i = 0; i < pk.length; i++) {
       const x = (i / pk.length) * w;
       const bh = pk[i] * (h / 2 - 3);
@@ -163,7 +163,7 @@ export default function RecordPanel({ onClose }) {
               title="Monitor the input while you play (use headphones)"
             >Monitoring</button>
             <Knob
-              size={30} label="Gain" color="#7ee787"
+              size={30} label="Gain" color="#85c425"
               spec={{ min: 0, max: 4, def: 1 }}
               value={gain}
               onChange={(v) => { setGain(v); engine.setInputGain(v); }}

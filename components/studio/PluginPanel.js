@@ -53,7 +53,7 @@ function Waveform({ channel }) {
     }
     [start, end].forEach((m, i) => {
       const x = clamp(m, 0, 1) * w;
-      ctx.fillStyle = i === 0 ? '#7ee787' : '#ff5a5a';
+      ctx.fillStyle = i === 0 ? '#85c425' : '#f1383e';
       ctx.fillRect(x - 1, 0, 2, h);
     });
     ctx.fillStyle = '#8d949e';
@@ -189,7 +189,7 @@ export default function PluginPanel() {
       <div className={s.pluginBody}>
         <div className={s.pluginMix}>
           <Knob
-            label="Volume" color="#7ee787"
+            label="Volume" color="#85c425"
             spec={{ min: 0, max: 1.2, def: 0.8 }}
             value={channel.vol}
             onChange={(v, live) => dispatch({ type: 'channel.update', id: channel.id, patch: { vol: v }, live, key: 'vol' })}

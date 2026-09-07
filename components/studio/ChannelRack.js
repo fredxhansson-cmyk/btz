@@ -80,7 +80,7 @@ function ChannelRow({ channel, pattern, steps, selected }) {
             onChange={(v, live) => { dispatch({ type: 'channel.update', id: channel.id, patch: { pan: v }, live, key: 'pan' }); if (live && recordAuto) recordAuto(`mix|channel|${channel.id}|pan`, { min: -1, max: 1, def: 0 }, v); }}
           />
           <Knob
-            size={22} label={null} color="#7ee787"
+            size={22} label={null} color="#85c425"
             spec={{ min: 0, max: 1.2, def: 0.8, label: 'Volume' }}
             value={channel.vol}
             onChange={(v, live) => { dispatch({ type: 'channel.update', id: channel.id, patch: { vol: v }, live, key: 'vol' }); if (live && recordAuto) recordAuto(`mix|channel|${channel.id}|vol`, { min: 0, max: 1.2, def: 0.8 }, v); }}

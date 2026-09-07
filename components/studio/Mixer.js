@@ -48,7 +48,7 @@ function Strip({ insert, master }) {
     if (!meterRef.current) return;
     const lvl = master ? engine.masterLevel() : engine.insertLevel(insert.id);
     meterRef.current.style.height = `${Math.min(100, lvl * 100)}%`;
-    meterRef.current.style.background = lvl > 0.96 ? '#ff4d4d' : lvl > 0.75 ? '#ffd43b' : '#7ee787';
+    meterRef.current.style.background = lvl > 0.96 ? '#f1383e' : lvl > 0.75 ? '#edb417' : '#85c425';
   });
 
   const vol = master ? project.master.vol : insert.vol;
@@ -141,7 +141,7 @@ function Spectrum() {
       const bh = (peak / 255) * (h - 6);
       const x = (i / bars) * w;
       const bw = w / bars - 1.5;
-      const grad = peak > 220 ? '#ff5a5a' : peak > 160 ? '#ffd43b' : '#4dabf7';
+      const grad = peak > 220 ? '#f1383e' : peak > 160 ? '#edb417' : '#36b2ff';
       ctx.fillStyle = grad;
       ctx.fillRect(x, h - bh - 2, bw, bh);
     }
@@ -189,7 +189,7 @@ function Sends({ insert }) {
             key={i.id}
             size={28}
             label={i.name.replace('Insert ', 'INS ')}
-            color="#b197fc"
+            color="#36b2ff"
             spec={{ min: 0, max: 1, def: 0 }}
             value={amountFor(i.id)}
             onChange={(v, live) => dispatch({
@@ -283,7 +283,7 @@ export default function Mixer() {
                   <ParamGrid
                     params={def.params}
                     values={mergedFxParams(slot)}
-                    color="#4dabf7"
+                    color="#36b2ff"
                     onChange={(key, value, live) => dispatch({
                       type: 'fx.param', insertId: insert.id, fxId: slot.id, key, value, live,
                     })}

@@ -93,7 +93,7 @@ export default function Automation() {
 
     if (d.lane) {
       const pts = sortPoints(d.lane.points || []);
-      const color = d.lane.color || '#4dabf7';
+      const color = d.lane.color || '#36b2ff';
       // filled curve
       ctx.beginPath();
       ctx.moveTo(px(0), py(valueAt(pts, 0)));

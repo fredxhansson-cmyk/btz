@@ -231,7 +231,7 @@ export default function Browser() {
           <Section title="MIDI" count={midiInputs ? midiInputs.length : 0}>
             {midiInputs && midiInputs.length ? midiInputs.map((m) => (
               <div key={m.id} className={s.sideItem}>
-                <span className={s.swatch} style={{ background: '#7ee787' }} />
+                <span className={s.swatch} style={{ background: '#85c425' }} />
                 <span className={s.laneText}>{m.name}</span>
               </div>
             )) : (
