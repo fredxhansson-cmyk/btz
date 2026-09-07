@@ -11,6 +11,7 @@ function Menu({ label, items, openId, setOpenId }) {
       <button
         type="button"
         className={open ? `${s.menuBtn} ${s.on}` : s.menuBtn}
+        // Hover opens; moving across the bar switches menus. Click toggles.
         onClick={() => setOpenId(open ? null : label)}
         onMouseEnter={() => setOpenId(label)}
         aria-haspopup="true"
@@ -19,26 +20,21 @@ function Menu({ label, items, openId, setOpenId }) {
         {label}<span className={s.menuCaret} aria-hidden="true">▾</span>
       </button>
       {open && (
-        <>
-          {/* Full-screen catcher: one reliable way to dismiss the menu, so a
-              click anywhere outside always closes it. */}
-          <div className={s.menuBackdrop} onPointerDown={() => setOpenId(null)} />
-          <div className={s.dropdown} role="menu">
-            {items.map((it, i) => (it.sep ? <div key={`s${i}`} className={s.dropSep} /> : (
-              <button
-                key={it.label}
-                type="button"
-                className={s.dropItem}
-                role="menuitem"
-                disabled={it.disabled}
-                onClick={() => { setOpenId(null); it.onClick(); }}
-              >
-                <span>{it.label}</span>
-                {it.hint && <span className={s.menuHint}>{it.hint}</span>}
-              </button>
-            )))}
-          </div>
-        </>
+        <div className={s.dropdown} role="menu">
+          {items.map((it, i) => (it.sep ? <div key={`s${i}`} className={s.dropSep} /> : (
+            <button
+              key={it.label}
+              type="button"
+              className={s.dropItem}
+              role="menuitem"
+              disabled={it.disabled}
+              onClick={() => { setOpenId(null); it.onClick(); }}
+            >
+              <span>{it.label}</span>
+              {it.hint && <span className={s.menuHint}>{it.hint}</span>}
+            </button>
+          )))}
+        </div>
       )}
     </div>
   );
@@ -51,6 +47,17 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOp
     canUndo, canRedo, playing, paused, busy,
   } = useStudio();
   const [openId, setOpenId] = useState(null);
+  const menuBarRef = useRef(null);
+  // Close any open menu on outside click or Escape (replaces the old
+  // full-screen backdrop that used to block hover-switching between menus).
+  useEffect(() => {
+    if (!openId) return undefined;
+    const onDown = (e) => { if (menuBarRef.current && !menuBarRef.current.contains(e.target)) setOpenId(null); };
+    const onKey = (e) => { if (e.key === 'Escape') setOpenId(null); };
+    document.addEventListener('pointerdown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => { document.removeEventListener('pointerdown', onDown); document.removeEventListener('keydown', onKey); };
+  }, [openId]);
   const [sheet, setSheet] = useState(false);
   const [editTempo, setEditTempo] = useState(null);
   const timeRef = useRef(null);
@@ -169,7 +176,7 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOp
         <span className={s.brandName}>Fuse</span>
       </div>
 
-      <div className={s.menu}>
+      <div className={s.menu} ref={menuBarRef} onMouseLeave={() => setOpenId(null)}>
         <Menu label="File" items={fileItems} openId={openId} setOpenId={setOpenId} />
         <Menu label="Edit" items={editItems} openId={openId} setOpenId={setOpenId} />
         <Menu label="View" items={viewItems} openId={openId} setOpenId={setOpenId} />

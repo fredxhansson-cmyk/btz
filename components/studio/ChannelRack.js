@@ -241,8 +241,14 @@ export default function ChannelRack() {
         <button
           type="button"
           className={s.btn}
-          onClick={() => { if (window.confirm('Clear all notes in this pattern?')) dispatch({ type: 'pattern.clearAll', patternId: pattern.id }); }}
-          title="Remove every note/step in this pattern"
+          onClick={() => dispatch({ type: 'channel.add', inst: 'osc3', name: 'Channel' })}
+          title="Add a new empty track"
+        >＋ Track</button>
+        <button
+          type="button"
+          className={s.btn}
+          onClick={() => { if (window.confirm('Clear all tracks? This removes every channel and note, leaving 4 empty tracks.')) dispatch({ type: 'channels.reset' }); }}
+          title="Remove every track and start over with 4 empty ones"
         >Clear all</button>
         <button
           type="button"
@@ -275,6 +281,13 @@ export default function ChannelRack() {
               selected={ch.id === project.selectedChannel}
             />
           ))}
+
+          <button
+            type="button"
+            className={s.addChanRow}
+            onClick={() => dispatch({ type: 'channel.add', inst: 'osc3', name: 'Channel' })}
+            title="Add a new track"
+          >＋ Add track</button>
         </div>
       </div>
 
