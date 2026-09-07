@@ -891,13 +891,13 @@
 .undoFab:disabled { opacity: 0.35; }
 .undoFab:active:not(:disabled) { background: var(--hover-strong); }
 
-/* compact touch header + overflow sheet */
-.touch .timeBox, .touch .masterBox, .touch .sep, .touch .deskOnly { display: none; }
-/* Keep the File/Edit menu bar reachable in the compact layout — the dropdowns
-   work with a tap and are the only way to reach export, open and save. */
-.touch .menu { display: flex; }
-.touch .menuBtn { padding: 7px 10px; font-size: 14px; }
-.touch .header { min-height: 52px; gap: 8px; flex-wrap: nowrap; overflow: visible; }
+/* compact touch header — everything non-essential moves into the ⋯ sheet and
+   the bottom nav, leaving logo · transport · ⋯ so the header never overflows. */
+.touch .timeBox, .touch .readoutGroup, .touch .metGroup, .touch .modeSw,
+.touch .nowPlaying, .touch .cmdPill, .touch .masterBox, .touch .sep,
+.touch .deskOnly, .touch .menu, .touch .micBtn { display: none; }
+.touch .header { min-height: 52px; gap: 8px; flex-wrap: nowrap; overflow: visible; padding: 4px 8px; }
+.touch .brandName { font-size: 16px; }
 .touch .tempoVal, .touch .tempoInput { font-size: 15px; min-width: 62px; }
 .deskOnly { display: inherit; }
 .moreBtn {
