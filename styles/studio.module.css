@@ -84,6 +84,9 @@
 .tbtn:focus { outline: none; }
 .tbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .playOn { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+/* Fuse BtzStudio: play is a wide accent button (both play and pause states). */
+.playMain { width: 72px; background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.playMain:hover { background: var(--accent-strong); }
 .pauseOn { background: #ffd43b22; border-color: #ffd43b; color: #ffd43b; }
 /* Pause icon drawn as two solid bars so it matches the flat ▶ / ■ glyphs
    instead of rendering as a coloured emoji. Uses currentColor to inherit
@@ -111,6 +114,14 @@
 /* Segmented control (DEVELOPER_SPEC §4): active = text-primary fill + bg-colour
    text (chrome-level nav exception to "coral = active"). Matches the concept. */
 .seg.on { background: var(--color-text-primary); color: var(--color-bg); font-weight: 700; }
+
+/* Grouped readout cells (Fuse BtzStudio): joined --card cells, label above,
+   big mono value below. */
+.readoutGroup { display: flex; gap: 1px; background: var(--line); border-radius: var(--r-md); overflow: hidden; flex: none; }
+.roCell { padding: 8px 14px; background: var(--card); min-width: 76px; }
+.roLabel { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.roVal { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 16px; font-weight: 600; color: var(--text); margin-top: 2px; }
+.roAccent { color: var(--color-coral); }
 
 .timeBox, .tempo { display: flex; flex-direction: column; align-items: center; }
 .timeDisp, .tempoVal {

@@ -194,7 +194,7 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOp
       <div className={s.transport}>
         <button
           type="button"
-          className={playing ? `${s.tbtn} ${s.playOn}` : (paused ? `${s.tbtn} ${s.pauseOn}` : s.tbtn)}
+          className={`${s.tbtn} ${s.playMain}`}
           onClick={() => (playing ? pause() : play())}
           aria-pressed={playing}
           title={playing ? 'Pause (space)' : (paused ? 'Resume (space)' : 'Play (space)')}
@@ -234,44 +234,46 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOp
         aria-hidden="true"
       ><i /><i /><i /></span>
 
-      <div className={s.timeBox}>
-        <div className={s.timeDisp} ref={timeRef}>001:1:00</div>
-        <div className={s.timeLabel}>BAR:BEAT:TICK</div>
-      </div>
-
-      <div
-        className={s.tempo}
-        onPointerDown={editTempo === null ? onTempoDown : undefined}
-        onPointerMove={editTempo === null ? onTempoMove : undefined}
-        onPointerUp={editTempo === null ? onTempoUp : undefined}
-        title="Click to type a tempo · drag up/down to change (Shift = fine)"
-      >
-        {editTempo === null ? (
-          <div className={s.tempoVal}>{project.bpm.toFixed(1)}</div>
-        ) : (
-          <input
-            className={s.tempoInput}
-            type="number"
-            step="0.1"
-            min="20"
-            max="300"
-            autoFocus
-            value={editTempo}
-            onFocus={(e) => e.target.select()}
-            onPointerDown={(e) => e.stopPropagation()}
-            onChange={(e) => setEditTempo(e.target.value)}
-            onBlur={() => {
-              const v = parseFloat(editTempo);
-              if (!Number.isNaN(v)) dispatch({ type: 'patch', patch: { bpm: clamp(v, 20, 300) } });
-              setEditTempo(null);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') e.currentTarget.blur();
-              else if (e.key === 'Escape') { setEditTempo(null); }
-            }}
-          />
-        )}
-        <div className={s.timeLabel}>TEMPO</div>
+      <div className={s.readoutGroup}>
+        <div className={s.roCell}>
+          <div className={s.roLabel}>Bar : Beat : Tick</div>
+          <div className={s.roVal} ref={timeRef}>001:1:00</div>
+        </div>
+        <div
+          className={s.roCell}
+          onPointerDown={editTempo === null ? onTempoDown : undefined}
+          onPointerMove={editTempo === null ? onTempoMove : undefined}
+          onPointerUp={editTempo === null ? onTempoUp : undefined}
+          title="Click to type a tempo · drag up/down to change (Shift = fine)"
+          style={{ cursor: 'ns-resize' }}
+        >
+          <div className={s.roLabel}>Tempo</div>
+          {editTempo === null ? (
+            <div className={`${s.roVal} ${s.roAccent}`}>{project.bpm.toFixed(1)}</div>
+          ) : (
+            <input
+              className={s.tempoInput}
+              type="number"
+              step="0.1"
+              min="20"
+              max="300"
+              autoFocus
+              value={editTempo}
+              onFocus={(e) => e.target.select()}
+              onPointerDown={(e) => e.stopPropagation()}
+              onChange={(e) => setEditTempo(e.target.value)}
+              onBlur={() => {
+                const v = parseFloat(editTempo);
+                if (!Number.isNaN(v)) dispatch({ type: 'patch', patch: { bpm: clamp(v, 20, 300) } });
+                setEditTempo(null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') e.currentTarget.blur();
+                else if (e.key === 'Escape') { setEditTempo(null); }
+              }}
+            />
+          )}
+        </div>
       </div>
 
       <div className={`${s.metGroup} ${s.deskOnly}`}>
