@@ -42,19 +42,21 @@ function renderBlock(view) {
   }
 }
 
-// Ready-made layouts for common jobs — a starting point you can customise.
+const DEF_W = 440;
+const DEF_H = 320;
+
+// Ready-made layouts — a starting point you can drag/resize however you like.
 const PRESETS = {
-  Prod: { cols: 3, panels: ['browser', 'rack', 'piano', 'drums', 'mixer', 'mastering'] },
-  Beatmaking: { cols: 2, panels: ['browser', 'rack', 'drums', 'mixer'] },
-  Melody: { cols: 2, panels: ['piano', 'rack', 'mixer', 'automation'] },
-  Mix: { cols: 2, panels: ['mixer', 'automation'] },
-  Master: { cols: 2, panels: ['mastering', 'mixer'] },
-  Film: { cols: 2, panels: ['video', 'piano', 'playlist', 'mixer'] },
-  Live: { cols: 2, panels: ['liveinputs', 'mixer', 'rack'] },
+  Prod: ['browser', 'rack', 'piano', 'drums', 'mixer', 'mastering'],
+  Beatmaking: ['browser', 'rack', 'drums', 'mixer'],
+  Melody: ['piano', 'rack', 'mixer', 'automation'],
+  Mix: ['mixer', 'automation'],
+  Master: ['mastering', 'mixer'],
+  Film: ['video', 'piano', 'playlist', 'mixer'],
+  Live: ['liveinputs', 'mixer', 'rack'],
 };
 
-const DEF_H = 360;
-const KEY = 'btz.workspace.v2';
+const KEY = 'btz.workspace.v3';
 const TKEY = 'btz.workspace.templates';
 
 function load() { if (typeof window === 'undefined') return null; try { return JSON.parse(window.localStorage.getItem(KEY)); } catch (e) { return null; } }
@@ -62,60 +64,69 @@ function save(data) { if (typeof window === 'undefined') return; try { window.lo
 function loadTemplates() { if (typeof window === 'undefined') return []; try { return JSON.parse(window.localStorage.getItem(TKEY)) || []; } catch (e) { return []; } }
 function saveTemplates(list) { if (typeof window === 'undefined') return; try { window.localStorage.setItem(TKEY, JSON.stringify(list)); } catch (e) { /* noop */ } }
 
-const toPanels = (arr) => arr.map((p) => (typeof p === 'string'
-  ? { key: uid('ws'), view: p, span: 1, h: DEF_H }
-  : { key: uid('ws'), view: p.view, span: p.span || 1, h: p.h || DEF_H }));
+// Turn a list (of view-ids or full {view,x,y,w,h} objects) into positioned blocks.
+const toPanels = (arr) => (arr || []).map((p, i) => {
+  const obj = typeof p === 'string' ? { view: p } : p;
+  const col = i % 2;
+  const row = Math.floor(i / 2);
+  return {
+    key: uid('ws'),
+    view: obj.view,
+    x: obj.x != null ? obj.x : 24 + col * (DEF_W + 20),
+    y: obj.y != null ? obj.y : 16 + row * (DEF_H + 20),
+    w: obj.w || DEF_W,
+    h: obj.h || DEF_H,
+    z: obj.z || 1,
+  };
+});
 
 export default function WorkspacePanel() {
   const stored = load();
-  const [panels, setPanels] = useState(() => (stored && stored.panels
-    ? toPanels(stored.panels)
-    : toPanels(['rack', 'piano', 'mixer'])));
-  const [cols, setCols] = useState((stored && stored.cols) || 2);
+  const [panels, setPanels] = useState(() => toPanels(stored && stored.panels ? stored.panels : ['rack', 'piano', 'mixer']));
   const [templates, setTemplates] = useState(() => loadTemplates());
-  const drag = useRef(null);
-  const [over, setOver] = useState(-1);
+  const zTop = useRef(10);
 
   useEffect(() => {
-    save({ cols, panels: panels.map((p) => ({ view: p.view, span: p.span, h: p.h })) });
-  }, [panels, cols]);
+    save({ panels: panels.map((p) => ({ view: p.view, x: p.x, y: p.y, w: p.w, h: p.h })) });
+  }, [panels]);
 
-  const patch = (i, p) => setPanels((list) => list.map((x, idx) => (idx === i ? { ...x, ...p } : x)));
-  const remove = (i) => setPanels((list) => list.filter((_, idx) => idx !== i));
-  const add = () => setPanels((list) => [...list, { key: uid('ws'), view: 'mixer', span: 1, h: DEF_H }]);
-
-  const applyLayout = (cfg) => { setCols(cfg.cols); setPanels(toPanels(cfg.panels)); };
+  const patch = (key, p) => setPanels((list) => list.map((x) => (x.key === key ? { ...x, ...p } : x)));
+  const remove = (key) => setPanels((list) => list.filter((x) => x.key !== key));
+  const add = () => setPanels((list) => [...list, { key: uid('ws'), view: 'mixer', x: 48, y: 32, w: DEF_W, h: DEF_H, z: (zTop.current += 1) }]);
+  const applyLayout = (arr) => setPanels(toPanels(arr));
+  const bringFront = (key) => { zTop.current += 1; patch(key, { z: zTop.current }); };
 
   const saveAsTemplate = () => {
-    const name = window.prompt('Name this layout template');
+    const name = window.prompt('Name this layout');
     if (!name) return;
-    const cfg = { name, cols, panels: panels.map((p) => ({ view: p.view, span: p.span, h: p.h })) };
+    const cfg = { name, panels: panels.map((p) => ({ view: p.view, x: p.x, y: p.y, w: p.w, h: p.h })) };
     const next = [...templates.filter((t) => t.name !== name), cfg];
     setTemplates(next); saveTemplates(next);
   };
-  const deleteTemplate = (name) => {
-    const next = templates.filter((t) => t.name !== name);
-    setTemplates(next); saveTemplates(next);
+
+  // Pointer-based move — drag the header to place a block anywhere.
+  const startMove = (key, e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    bringFront(key);
+    const pnl = panels.find((p) => p.key === key);
+    const sx = e.clientX; const sy = e.clientY; const ox = pnl.x; const oy = pnl.y;
+    const move = (ev) => patch(key, { x: Math.max(0, ox + (ev.clientX - sx)), y: Math.max(0, oy + (ev.clientY - sy)) });
+    const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
   };
 
-  const onDrop = (i) => {
-    const from = drag.current; drag.current = null; setOver(-1);
-    if (from == null || from === i) return;
-    setPanels((list) => { const a = [...list]; const [m] = a.splice(from, 1); a.splice(i, 0, m); return a; });
-  };
-
-  // Drag the block's edges/corner to resize — right = width (columns),
-  // bottom = height, corner = both.
-  const gridRef = useRef(null);
-  const startResize = (i, mode, e) => {
+  // Pointer-based resize — drag right edge (width), bottom edge (height) or corner (both).
+  const startResize = (key, mode, e) => {
     e.preventDefault(); e.stopPropagation();
-    const gw = gridRef.current ? gridRef.current.clientWidth : 0;
-    const colW = gw ? (gw - (cols - 1) * 12) / cols : 0;
-    const startX = e.clientX; const startY = e.clientY;
-    const startH = panels[i].h; const startSpan = panels[i].span;
+    const pnl = panels.find((p) => p.key === key);
+    const sx = e.clientX; const sy = e.clientY; const ow = pnl.w; const oh = pnl.h;
     const move = (ev) => {
-      if (mode.indexOf('h') >= 0) patch(i, { h: clamp(Math.round(startH + (ev.clientY - startY)), 200, 1200) });
-      if (mode.indexOf('w') >= 0 && colW) patch(i, { span: clamp(startSpan + Math.round((ev.clientX - startX) / colW), 1, cols) });
+      const p = {};
+      if (mode.indexOf('w') >= 0) p.w = clamp(ow + (ev.clientX - sx), 260, 1600);
+      if (mode.indexOf('h') >= 0) p.h = clamp(oh + (ev.clientY - sy), 180, 1400);
+      patch(key, p);
     };
     const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
     window.addEventListener('pointermove', move);
@@ -126,81 +137,50 @@ export default function WorkspacePanel() {
     <div className={s.panel}>
       <div className={s.panelHead}>
         <span className={s.panelTitle}>Workspace</span>
-        <div className={s.group}>
-          <span className={s.dim}>Presets</span>
-          {Object.keys(PRESETS).map((name) => (
-            <button key={name} type="button" className={s.btn} onClick={() => applyLayout(PRESETS[name])}>{name}</button>
-          ))}
-        </div>
-        <div className={s.group}>
-          <span className={s.dim}>Templates</span>
-          <select
-            className={s.select}
-            value=""
-            onChange={(e) => { const t = templates.find((x) => x.name === e.target.value); if (t) applyLayout(t); e.target.value = ''; }}
-          >
-            <option value="">{templates.length ? 'Load…' : 'None saved'}</option>
+        <span className={s.dim}>Presets</span>
+        {Object.keys(PRESETS).map((name) => (
+          <button key={name} type="button" className={s.btn} onClick={() => applyLayout(PRESETS[name])}>{name}</button>
+        ))}
+        <div className={s.spacer} />
+        {templates.length > 0 && (
+          <select className={s.select} value="" onChange={(e) => { const t = templates.find((x) => x.name === e.target.value); if (t) applyLayout(t.panels); e.target.value = ''; }}>
+            <option value="">Load layout…</option>
             {templates.map((t) => <option key={t.name} value={t.name}>{t.name}</option>)}
           </select>
-          <button type="button" className={s.btn} onClick={saveAsTemplate}>Save layout…</button>
-          {templates.length > 0 && (
-            <select className={s.select} value="" onChange={(e) => { if (e.target.value) deleteTemplate(e.target.value); e.target.value = ''; }}>
-              <option value="">Delete…</option>
-              {templates.map((t) => <option key={t.name} value={t.name}>{t.name}</option>)}
-            </select>
-          )}
-        </div>
-        <div className={s.group}>
-          <span className={s.dim}>Columns</span>
-          {[1, 2, 3].map((n) => (
-            <button key={n} type="button" className={cols === n ? `${s.btn} ${s.on}` : s.btn} onClick={() => setCols(n)}>{n}</button>
-          ))}
-        </div>
-        <div className={s.spacer} />
+        )}
+        <button type="button" className={s.btn} onClick={saveAsTemplate}>Save layout…</button>
         <button type="button" className={`${s.btn} ${s.on}`} onClick={add}>＋ Block</button>
       </div>
 
-      <div className={s.wsGrid} ref={gridRef} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
-        {panels.map((p, i) => (
+      <div className={s.wsCanvas}>
+        {panels.map((p) => (
           <div
             key={p.key}
-            className={over === i ? `${s.wsCard} ${s.wsCardOver}` : s.wsCard}
-            style={{ gridColumn: `span ${Math.min(p.span, cols)}`, height: `${p.h}px` }}
-            onDragOver={(e) => { e.preventDefault(); if (over !== i) setOver(i); }}
-            onDrop={() => onDrop(i)}
+            className={s.wsFloat}
+            style={{ left: p.x, top: p.y, width: p.w, height: p.h, zIndex: p.z || 1 }}
+            onPointerDown={() => bringFront(p.key)}
           >
-            <div
-              className={s.wsCardHead}
-              draggable
-              onDragStart={() => { drag.current = i; }}
-              onDragEnd={() => { drag.current = null; setOver(-1); }}
-              title="Drag to move this block"
-            >
+            <div className={s.wsCardHead} onPointerDown={(e) => startMove(p.key, e)} title="Drag to move this block">
               <span className={s.wsGrip} aria-hidden="true">⠿</span>
-              <select className={s.select} value={p.view} onChange={(e) => patch(i, { view: e.target.value })} onDragStart={(e) => e.preventDefault()}>
+              <select
+                className={s.select}
+                value={p.view}
+                onChange={(e) => patch(p.key, { view: e.target.value })}
+                onPointerDown={(e) => e.stopPropagation()}
+              >
                 {BLOCKS.map((b) => <option key={b.id} value={b.id}>{b.label}</option>)}
               </select>
               <div className={s.spacer} />
-              <span className={s.wsCtl} title="Width (columns)">
-                <button type="button" className={s.wsMini} onClick={() => patch(i, { span: clamp(p.span - 1, 1, 3) })}>◄</button>
-                <span className={s.wsCtlVal}>{Math.min(p.span, cols)}w</span>
-                <button type="button" className={s.wsMini} onClick={() => patch(i, { span: clamp(p.span + 1, 1, 3) })}>►</button>
-              </span>
-              <span className={s.wsCtl} title="Height">
-                <button type="button" className={s.wsMini} onClick={() => patch(i, { h: clamp(p.h - 80, 200, 900) })}>−</button>
-                <span className={s.wsCtlVal}>{p.h}</span>
-                <button type="button" className={s.wsMini} onClick={() => patch(i, { h: clamp(p.h + 80, 200, 900) })}>+</button>
-              </span>
-              <button type="button" className={s.xBtn} title="Remove block" onClick={() => remove(i)}>×</button>
+              <button type="button" className={s.xBtn} title="Remove block" onClick={() => remove(p.key)} onPointerDown={(e) => e.stopPropagation()}>×</button>
             </div>
             <div className={s.wsCardBody}>{renderBlock(p.view)}</div>
-            <span className={s.wsResizeR} onPointerDown={(e) => startResize(i, 'w', e)} title="Drag to resize width" />
-            <span className={s.wsResizeB} onPointerDown={(e) => startResize(i, 'h', e)} title="Drag to resize height" />
-            <span className={s.wsResizeBR} onPointerDown={(e) => startResize(i, 'wh', e)} title="Drag to resize" />
+            <span className={s.wsResizeR} onPointerDown={(e) => startResize(p.key, 'w', e)} title="Drag to resize width" />
+            <span className={s.wsResizeB} onPointerDown={(e) => startResize(p.key, 'h', e)} title="Drag to resize height" />
+            <span className={s.wsResizeBR} onPointerDown={(e) => startResize(p.key, 'wh', e)} title="Drag to resize" />
           </div>
         ))}
         {!panels.length && (
-          <div className={s.helpBox}>No blocks. Press ＋ Block or pick a preset above.</div>
+          <div className={s.helpBox} style={{ margin: 24 }}>No blocks. Press ＋ Block or pick a preset above — then drag headers to move and drag edges to resize.</div>
         )}
       </div>
     </div>
