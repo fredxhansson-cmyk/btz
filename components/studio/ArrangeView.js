@@ -4,17 +4,25 @@ import { BRAND_CYCLE } from '../../lib/studio/library';
 import { patternTicks } from '../../lib/studio/sequencer';
 import { BAR_TICKS, clamp, uid } from '../../lib/studio/constants';
 
-// DOM Arrangement view — a faithful port of the Fuse `ViewArrange` template:
-// a bordered card with a 190px track-label column (colour tick + name + M/S),
-// a bar ruler, and clip lanes. Clips are the owning track's brand accent.
+// DOM Arrangement view — a faithful port of the Fuse `ViewArrange` template with
+// pro editing: place/move/resize clips, per-clip volume keyframes + fades, a
+// note-content preview inside each clip, and adjustable track height.
 const LABEL_W = 190;
-const ROW_H = 56;
+
+const hexA = (hex, a) => {
+  if (!hex || hex[0] !== '#') return hex;
+  const h = hex.slice(1);
+  const n = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+  return `rgba(${parseInt(n.slice(0, 2), 16)},${parseInt(n.slice(2, 4), 16)},${parseInt(n.slice(4, 6), 16)},${a})`;
+};
 
 export default function ArrangeView() {
   const { project, dispatch, ui, setUi, engine, play } = useStudio();
   const [pxPerBar, setPxPerBar] = useState(64);
+  const [rowH, setRowH] = useState(64);
+  const [tool, setTool] = useState('select'); // 'select' | 'volume'
   const [sel, setSel] = useState(null);
-  const scrollRef = useRef(null);
+  const [, bump] = useState(0);
   const rowsRef = useRef(null);
   const playheadRef = useRef(null);
   const drag = useRef(null);
@@ -22,8 +30,9 @@ export default function ArrangeView() {
   const barTicks = project.barTicks || BAR_TICKS;
   const trackCount = clamp(project.arrangeTracks || 10, 1, 32);
   const tracks = Array.from({ length: trackCount }, (_, i) => i);
-  const patName = (id) => { const p = project.patterns.find((x) => x.id === id); return p ? p.name : '?'; };
-  const activePat = project.patterns.find((p) => p.id === project.activePattern) || project.patterns[0];
+  const patOf = (id) => project.patterns.find((x) => x.id === id);
+  const patName = (id) => { const p = patOf(id); return p ? p.name : '?'; };
+  const activePat = patOf(project.activePattern) || project.patterns[0];
   const trackColor = (t) => BRAND_CYCLE[t % BRAND_CYCLE.length];
   const trackName = (t) => (project.trackNames && project.trackNames[t]) || `Track ${t + 1}`;
   const isMuted = (t) => !!(project.trackMute && project.trackMute[t]);
@@ -33,49 +42,59 @@ export default function ArrangeView() {
   const maxEndTick = project.playlist.reduce((m, c) => Math.max(m, c.start + c.length), 0);
   const bars = Math.max(32, Math.ceil(maxEndTick / barTicks) + 8);
   const laneW = bars * pxPerBar;
+  const px = (ticks) => (ticks / barTicks) * pxPerBar;
   const clipsOf = (t) => project.playlist.filter((c) => c.track === t);
 
   useRaf(() => {
     if (!playheadRef.current) return;
     const on = engine.playing || engine.pausedTick;
     const tick = on ? engine.currentPosition() : 0;
-    playheadRef.current.style.transform = `translateX(${(tick / barTicks) * pxPerBar}px)`;
+    playheadRef.current.style.transform = `translateX(${px(tick)}px)`;
     playheadRef.current.style.opacity = on ? '1' : '0';
   });
+
+  const onMove = useCallback((e) => {
+    const d = drag.current;
+    if (!d) return;
+    if (d.mode === 'resize') {
+      const length = Math.max(barTicks, d.origLength + Math.round((e.clientX - d.startX) / pxPerBar) * barTicks);
+      dispatch({ type: 'clip.update', id: d.id, patch: { length }, live: true, key: `len:${d.id}` });
+    } else if (d.mode === 'move') {
+      const start = Math.max(0, d.origStart + Math.round((e.clientX - d.startX) / pxPerBar) * barTicks);
+      let track = d.track;
+      if (d.rowsTop != null) track = clamp(Math.floor((e.clientY - d.rowsTop) / rowH), 0, trackCount - 1);
+      dispatch({ type: 'clip.update', id: d.id, patch: { start, track }, live: true, key: `mv:${d.id}` });
+    } else if (d.mode === 'fadeIn') {
+      const fadeIn = clamp(Math.round((e.clientX - d.clipLeft) / pxPerBar * barTicks), 0, d.length - (d.fadeOut || 0));
+      dispatch({ type: 'clip.update', id: d.id, patch: { fadeIn }, live: true, key: `fi:${d.id}` });
+    } else if (d.mode === 'fadeOut') {
+      const fadeOut = clamp(Math.round((d.clipRight - e.clientX) / pxPerBar * barTicks), 0, d.length - (d.fadeIn || 0));
+      dispatch({ type: 'clip.update', id: d.id, patch: { fadeOut }, live: true, key: `fo:${d.id}` });
+    } else if (d.mode === 'kf') {
+      const rel = clamp(Math.round((e.clientX - d.clipLeft) / pxPerBar * barTicks), 0, d.length);
+      const v = clamp(1.5 * (1 - (e.clientY - d.clipTop) / d.clipH), 0, 1.5);
+      const pts = [...(d.pts)];
+      pts[d.idx] = { t: rel, v };
+      pts.sort((a, b) => a.t - b.t);
+      dispatch({ type: 'clip.update', id: d.id, patch: { gainPoints: pts }, live: true, key: `kf:${d.id}` });
+    }
+  }, [pxPerBar, barTicks, trackCount, rowH, dispatch]);
 
   const endDrag = useCallback(() => {
     drag.current = null;
     window.removeEventListener('pointermove', onMove);
     window.removeEventListener('pointerup', endDrag);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    bump((n) => n + 1);
+  }, [onMove]);
 
-  const onMove = useCallback((e) => {
-    const d = drag.current;
-    if (!d) return;
-    const dxBars = Math.round((e.clientX - d.startX) / pxPerBar);
-    if (d.mode === 'resize') {
-      const length = Math.max(barTicks, d.origLength + dxBars * barTicks);
-      dispatch({ type: 'clip.update', id: d.id, patch: { length }, live: true, key: `len:${d.id}` });
-    } else if (d.mode === 'move') {
-      const start = Math.max(0, d.origStart + dxBars * barTicks);
-      let track = d.track;
-      if (d.rowsTop != null) track = clamp(Math.floor((e.clientY - d.rowsTop) / ROW_H), 0, trackCount - 1);
-      dispatch({ type: 'clip.update', id: d.id, patch: { start, track }, live: true, key: `move:${d.id}` });
-    }
-  }, [pxPerBar, barTicks, trackCount, dispatch]);
-
-  const startDrag = useCallback((mode, clip, e) => {
-    const rowsTop = rowsRef.current ? rowsRef.current.getBoundingClientRect().top : null;
-    drag.current = {
-      mode, id: clip.id, track: clip.track,
-      startX: e.clientX, origStart: clip.start || 0, origLength: clip.length || barTicks, rowsTop,
-    };
+  const arm = useCallback((d) => {
+    drag.current = d;
     window.addEventListener('pointermove', onMove);
     window.addEventListener('pointerup', endDrag);
-  }, [onMove, endDrag, barTicks]);
+  }, [onMove, endDrag]);
 
   const onLaneDown = useCallback((e, track) => {
-    if (e.button === 2) return;
+    if (e.button === 2 || tool !== 'select') return;
     const laneRect = e.currentTarget.getBoundingClientRect();
     const bar = Math.max(0, Math.floor((e.clientX - laneRect.left) / pxPerBar));
     const start = bar * barTicks;
@@ -83,73 +102,129 @@ export default function ArrangeView() {
     const length = activePat ? patternTicks(activePat) : barTicks;
     dispatch({ type: 'clip.add', id, patternId: project.activePattern, track, start, length });
     setSel(id);
-    // Enter resize immediately so dragging right sets the length in one gesture.
-    startDrag('resize', { id, track, start, length }, e);
-  }, [pxPerBar, barTicks, activePat, project.activePattern, dispatch, startDrag]);
+    arm({ mode: 'resize', id, track, startX: e.clientX, origStart: start, origLength: length });
+  }, [tool, pxPerBar, barTicks, activePat, project.activePattern, dispatch, arm]);
 
-  const onClipDown = useCallback((e, clip) => {
+  const onClipDown = useCallback((e, clip, rect) => {
     e.stopPropagation();
     setSel(clip.id);
-    const r = e.currentTarget.getBoundingClientRect();
-    if (e.clientX > r.right - 10) startDrag('resize', clip, e);
-    else startDrag('move', clip, e);
-  }, [startDrag]);
+    if (tool === 'volume') {
+      // Add a volume keyframe at the click, then drag it.
+      const rel = clamp(Math.round((e.clientX - rect.left) / pxPerBar * barTicks), 0, clip.length);
+      const v = clamp(1.5 * (1 - (e.clientY - rect.top) / rect.height), 0, 1.5);
+      const pts = [...(clip.gainPoints || []), { t: rel, v }].sort((a, b) => a.t - b.t);
+      const idx = pts.findIndex((p) => p.t === rel && p.v === v);
+      dispatch({ type: 'clip.update', id: clip.id, patch: { gainPoints: pts } });
+      arm({ mode: 'kf', id: clip.id, idx, pts, clipLeft: rect.left, clipTop: rect.top, clipH: rect.height, length: clip.length });
+      return;
+    }
+    if (e.clientX > rect.right - 10) arm({ mode: 'resize', id: clip.id, track: clip.track, startX: e.clientX, origStart: clip.start, origLength: clip.length });
+    else arm({ mode: 'move', id: clip.id, track: clip.track, startX: e.clientX, startY: e.clientY, origStart: clip.start, origLength: clip.length, rowsTop: rowsRef.current ? rowsRef.current.getBoundingClientRect().top : null });
+  }, [tool, pxPerBar, barTicks, dispatch, arm]);
+
+  const onKfDown = useCallback((e, clip, i, rect) => {
+    e.stopPropagation();
+    setSel(clip.id);
+    const pts = clip.gainPoints || [];
+    if (e.button === 2 || e.shiftKey) {
+      dispatch({ type: 'clip.update', id: clip.id, patch: { gainPoints: pts.filter((_, idx) => idx !== i) } });
+      return;
+    }
+    arm({ mode: 'kf', id: clip.id, idx: i, pts, clipLeft: rect.left, clipTop: rect.top, clipH: rect.height, length: clip.length });
+  }, [dispatch, arm]);
+
+  const onFadeDown = useCallback((e, clip, side, rect) => {
+    e.stopPropagation();
+    setSel(clip.id);
+    arm({ mode: side, id: clip.id, length: clip.length, fadeIn: clip.fadeIn || 0, fadeOut: clip.fadeOut || 0, clipLeft: rect.left, clipRight: rect.right });
+  }, [arm]);
 
   useEffect(() => {
     const onKey = (e) => {
-      if ((e.key === 'Delete' || e.key === 'Backspace') && sel) {
-        dispatch({ type: 'clip.remove', id: sel });
-        setSel(null);
-      }
+      if ((e.key === 'Delete' || e.key === 'Backspace') && sel) { dispatch({ type: 'clip.remove', id: sel }); setSel(null); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [sel, dispatch]);
 
-  const S = {
-    tool: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
-    label: { fontSize: 12, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--muted)' },
-    ghost: { height: 'var(--ctl-sm)', padding: '0 14px', borderRadius: 'var(--r-sm)', border: '1px solid var(--line-strong)', background: 'var(--field)', color: 'var(--text-2)', fontSize: 13, cursor: 'pointer' },
-    zoom: { width: 'var(--ctl-sm)', height: 'var(--ctl-sm)', borderRadius: 'var(--r-sm)', border: '1px solid var(--line-3)', background: 'var(--field-2)', color: 'var(--text-2)', fontSize: 14, cursor: 'pointer' },
-    act: { height: 'var(--ctl)', padding: '0 16px', borderRadius: 'var(--r-md)', border: '1px solid var(--line-3)', background: 'var(--field-2)', color: 'var(--text-2)', fontSize: 14, cursor: 'pointer' },
-    ms: { width: 26, height: 26, flex: 'none', borderRadius: 'var(--r-xs)', border: 'none', color: 'var(--text-4)', fontSize: 11, fontWeight: 700, cursor: 'pointer' },
+  // Mini note-content preview: the clip's pattern notes as faint bars (tiled).
+  const notePreview = (clip, w, h) => {
+    const pat = patOf(clip.patternId);
+    if (!pat || !pat.notes) return null;
+    const flat = [];
+    for (const chId of Object.keys(pat.notes)) for (const n of pat.notes[chId]) flat.push(n);
+    if (!flat.length) return null;
+    const plen = Math.max(1, patternTicks(pat));
+    let lo = 127; let hi = 0;
+    for (const n of flat) { if (n.k < lo) lo = n.k; if (n.k > hi) hi = n.k; }
+    const span = Math.max(6, hi - lo);
+    const reps = Math.min(16, Math.ceil(clip.length / plen));
+    const rects = [];
+    for (let r = 0; r < reps && rects.length < 260; r++) {
+      for (const n of flat) {
+        const x = (((r * plen) + n.t) / clip.length) * w;
+        if (x > w) continue;
+        const nw = Math.max(1.5, (n.d / clip.length) * w);
+        const y = h - 6 - ((n.k - lo) / span) * (h - 12);
+        rects.push(<rect key={`${r}-${rects.length}`} x={x} y={y} width={nw} height={2.5} rx={1} fill="rgba(0,0,0,0.45)" />);
+      }
+    }
+    return <g>{rects}</g>;
   };
 
+  // Volume envelope + fades as an overlay path.
+  const envelope = (clip, w, h) => {
+    const yOf = (v) => (1 - clamp(v, 0, 1.5) / 1.5) * h;
+    const pts = clip.gainPoints && clip.gainPoints.length ? clip.gainPoints : null;
+    const fi = px(clip.fadeIn || 0);
+    const fo = px(clip.fadeOut || 0);
+    let d;
+    if (pts) {
+      d = `M0,${yOf(pts[0].v).toFixed(1)}` + pts.map((p) => `L${((p.t / clip.length) * w).toFixed(1)},${yOf(p.v).toFixed(1)}`).join('') + `L${w.toFixed(1)},${yOf(pts[pts.length - 1].v).toFixed(1)}`;
+    } else {
+      const g = clip.gain == null ? 1 : clip.gain;
+      d = `M0,${yOf(g).toFixed(1)}L${w.toFixed(1)},${yOf(g).toFixed(1)}`;
+    }
+    return (
+      <>
+        {fi > 0 && <line x1="0" y1={h} x2={fi} y2={yOf(1) * 0 + 2} stroke="var(--tl-fade-line)" strokeWidth="1.5" />}
+        {fo > 0 && <line x1={w - fo} y1="2" x2={w} y2={h} stroke="var(--tl-fade-line)" strokeWidth="1.5" />}
+        <path d={d} fill="none" stroke="var(--tl-volume-line)" strokeWidth="1.5" opacity="0.9" />
+      </>
+    );
+  };
+
+  const btn = { height: 'var(--ctl)', padding: '0 16px', borderRadius: 'var(--r-md)', border: '1px solid var(--line-3)', background: 'var(--field-2)', color: 'var(--text-2)', fontSize: 14, cursor: 'pointer' };
+  const zbtn = { width: 'var(--ctl-sm)', height: 'var(--ctl-sm)', borderRadius: 'var(--r-sm)', border: '1px solid var(--line-3)', background: 'var(--field-2)', color: 'var(--text-2)', fontSize: 14, cursor: 'pointer' };
+  const toolBtn = (on) => ({ ...btn, ...(on ? { border: 'none', background: 'var(--accent)', color: 'var(--accent-ink)', fontWeight: 700 } : {}) });
   const loopOn = project.loop !== false && project.loopEnd > project.loopStart;
 
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 16, fontFamily: 'var(--font-ui)', height: '100%', width: '100%', minWidth: 0, boxSizing: 'border-box', padding: '16px 20px 10px' }}>
-      {/* toolbar */}
-      <div style={S.tool}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
         <h2 style={{ margin: 0, fontSize: 19, fontWeight: 700, letterSpacing: '-.015em', color: 'var(--text)' }}>Arrangement</h2>
-        <span style={S.label}>Placing</span>
-        <select
-          value={project.activePattern}
-          onChange={(e) => dispatch({ type: 'pattern.select', id: e.target.value })}
-          style={{ ...S.ghost, color: 'var(--text)' }}
-        >
+        <span style={{ fontSize: 12, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--muted)' }}>Placing</span>
+        <select value={project.activePattern} onChange={(e) => dispatch({ type: 'pattern.select', id: e.target.value })} style={{ ...btn, height: 'var(--ctl-sm)', color: 'var(--text)' }}>
           {project.patterns.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
-        <span style={{ ...S.label, marginLeft: 6 }}>Snap</span>
-        <span style={{ ...S.ghost, display: 'inline-flex', alignItems: 'center' }}>Bar</span>
-        <button style={S.zoom} title="Zoom in" onClick={() => setPxPerBar((v) => clamp(v * 1.25, 16, 240))}>+</button>
-        <button style={S.zoom} title="Zoom out" onClick={() => setPxPerBar((v) => clamp(v * 0.8, 16, 240))}>−</button>
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button style={{ ...S.act, border: 'none', background: 'var(--accent)', color: 'var(--accent-ink)', fontWeight: 600 }} onClick={() => play('song')}>Play song</button>
-          <button style={S.act} onClick={() => dispatch({ type: 'track.add' })}>+ Track</button>
-          <button style={S.act} onClick={() => { const at = engine.playing ? engine.currentPosition() : 0; dispatch({ type: 'marker.add', tick: Math.round(at / barTicks) * barTicks }); }}>+ Marker</button>
-          <button
-            style={{ ...S.act, ...(loopOn ? { border: '1px solid var(--accent)', background: 'transparent', color: 'var(--accent)', fontWeight: 600 } : {}) }}
-            onClick={() => dispatch({ type: 'patch', patch: { loop: project.loop === false } })}
-          >Loop</button>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{ fontSize: 12, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--muted)' }}>Track h</span>
+          <button style={zbtn} title="Shorter tracks" onClick={() => setRowH((v) => clamp(v - 12, 40, 160))}>−</button>
+          <button style={zbtn} title="Taller tracks" onClick={() => setRowH((v) => clamp(v + 12, 40, 160))}>+</button>
+          <span style={{ fontSize: 12, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--muted)' }}>Zoom</span>
+          <button style={zbtn} title="Zoom in" onClick={() => setPxPerBar((v) => clamp(v * 1.25, 16, 240))}>+</button>
+          <button style={zbtn} title="Zoom out" onClick={() => setPxPerBar((v) => clamp(v * 0.8, 16, 240))}>−</button>
+          <button style={toolBtn(tool === 'select')} onClick={() => setTool('select')}>Select</button>
+          <button style={toolBtn(tool === 'volume')} onClick={() => setTool('volume')} title="Draw volume keyframes on clips (click adds, drag moves, shift/right-click removes)">Volume</button>
+          <button style={{ ...btn, border: 'none', background: 'var(--accent)', color: 'var(--accent-ink)', fontWeight: 600 }} onClick={() => play('song')}>Play song</button>
+          <button style={btn} onClick={() => dispatch({ type: 'track.add' })}>+ Track</button>
+          <button style={{ ...btn, ...(loopOn ? { border: '1px solid var(--accent)', background: 'transparent', color: 'var(--accent)', fontWeight: 600 } : {}) }} onClick={() => dispatch({ type: 'patch', patch: { loop: project.loop === false } })}>Loop</button>
         </div>
       </div>
 
-      {/* card */}
       <div style={{ border: '1px solid var(--line)', borderRadius: 'var(--r-lg)', overflow: 'hidden', background: 'var(--card)', flex: 1, minHeight: 0, minWidth: 0, display: 'flex' }}>
-        <div ref={scrollRef} style={{ overflow: 'auto', position: 'relative', flex: 1, minWidth: 0 }}>
+        <div style={{ overflow: 'auto', position: 'relative', flex: 1, minWidth: 0 }}>
           <div style={{ width: LABEL_W + laneW, minWidth: '100%', position: 'relative' }}>
-            {/* ruler */}
             <div style={{ display: 'flex', height: 44, borderBottom: '1px solid var(--line)', background: 'var(--panel)' }}>
               <div style={{ width: LABEL_W, flex: 'none', position: 'sticky', left: 0, zIndex: 3, background: 'var(--panel)', display: 'flex', alignItems: 'center', padding: '0 16px', fontSize: 11, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--muted)', borderRight: '1px solid var(--line)' }}>Track</div>
               <div style={{ position: 'relative', width: laneW, height: '100%' }}>
@@ -159,43 +234,48 @@ export default function ArrangeView() {
               </div>
             </div>
 
-            {/* rows */}
             <div ref={rowsRef}>
               {tracks.map((t) => {
                 const dimmed = isMuted(t) || (anySolo && !isSolo(t));
                 return (
-                  <div key={t} style={{ display: 'flex', height: ROW_H, borderBottom: '1px solid var(--line-weak)' }}>
+                  <div key={t} style={{ display: 'flex', height: rowH, borderBottom: '1px solid var(--line-weak)' }}>
                     <div style={{ width: LABEL_W, flex: 'none', position: 'sticky', left: 0, zIndex: 2, background: 'var(--card)', display: 'flex', alignItems: 'center', gap: 8, padding: '0 12px', borderRight: '1px solid var(--line)' }}>
                       <span style={{ width: 4, height: 24, borderRadius: 'var(--r-xs)', background: trackColor(t), flex: 'none' }} />
                       <span style={{ flex: 1, minWidth: 40, fontSize: 13.5, fontWeight: 500, color: clipsOf(t).length ? 'var(--text)' : 'var(--text-4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{trackName(t)}</span>
-                      <button style={{ ...S.ms, background: isMuted(t) ? 'var(--rec)' : 'var(--meter-track)', color: isMuted(t) ? '#fff' : 'var(--text-4)' }} onClick={() => dispatch({ type: 'track.mute', track: t })} title="Mute">M</button>
-                      <button style={{ ...S.ms, background: isSolo(t) ? 'var(--warn)' : 'var(--meter-track)', color: isSolo(t) ? 'var(--accent-ink)' : 'var(--text-4)' }} onClick={() => dispatch({ type: 'track.solo', track: t })} title="Solo">S</button>
+                      <button style={{ width: 26, height: 26, flex: 'none', borderRadius: 'var(--r-xs)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: isMuted(t) ? 'var(--rec)' : 'var(--meter-track)', color: isMuted(t) ? '#fff' : 'var(--text-4)', fontSize: 11, fontWeight: 700, cursor: 'pointer' }} onClick={() => dispatch({ type: 'track.mute', track: t })} title="Mute">M</button>
+                      <button style={{ width: 26, height: 26, flex: 'none', borderRadius: 'var(--r-xs)', border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: isSolo(t) ? 'var(--warn)' : 'var(--meter-track)', color: isSolo(t) ? 'var(--accent-ink)' : 'var(--text-4)', fontSize: 11, fontWeight: 700, cursor: 'pointer' }} onClick={() => dispatch({ type: 'track.solo', track: t })} title="Solo">S</button>
                     </div>
                     <div
                       onPointerDown={(e) => onLaneDown(e, t)}
-                      style={{ position: 'relative', flex: 1, minWidth: laneW, background: 'var(--gridsurface)', backgroundImage: 'linear-gradient(90deg, var(--grid-line) 1px, transparent 1px)', backgroundSize: `${pxPerBar}px 100%`, cursor: 'crosshair', opacity: dimmed ? 0.5 : 1 }}
+                      style={{ position: 'relative', flex: 1, minWidth: laneW, background: 'var(--gridsurface)', backgroundImage: 'linear-gradient(90deg, var(--grid-line) 1px, transparent 1px)', backgroundSize: `${pxPerBar}px 100%`, cursor: tool === 'volume' ? 'crosshair' : 'crosshair', opacity: dimmed ? 0.5 : 1 }}
                     >
                       {clipsOf(t).map((clip) => {
-                        const left = (clip.start / barTicks) * pxPerBar;
-                        const width = Math.max(6, (clip.length / barTicks) * pxPerBar);
+                        const left = px(clip.start);
+                        const width = Math.max(6, px(clip.length));
                         const selected = sel === clip.id;
+                        const ch = trackColor(t);
+                        const ih = rowH - 16; // inner content height
                         return (
                           <div
                             key={clip.id}
-                            onPointerDown={(e) => onClipDown(e, clip)}
+                            onPointerDown={(e) => onClipDown(e, clip, e.currentTarget.getBoundingClientRect())}
                             onDoubleClick={(e) => { e.stopPropagation(); dispatch({ type: 'pattern.select', id: clip.patternId }); setUi({ view: 'piano' }); }}
-                            style={{ position: 'absolute', left, top: 8, bottom: 8, width, borderRadius: 'var(--r-sm)', background: trackColor(t), opacity: 0.9, boxShadow: selected ? '0 0 0 2px var(--text)' : 'none', display: 'flex', alignItems: 'center', padding: '0 10px', gap: 6, fontSize: 12, fontWeight: 600, color: 'var(--accent-ink)', cursor: 'grab', overflow: 'hidden', whiteSpace: 'nowrap' }}
+                            style={{ position: 'absolute', left, top: 8, height: rowH - 16, width, borderRadius: 'var(--r-sm)', background: hexA(ch, 0.9), boxShadow: selected ? '0 0 0 2px var(--text)' : 'none', overflow: 'hidden', cursor: tool === 'volume' ? 'crosshair' : 'grab', color: 'var(--accent-ink)' }}
                           >
-                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{patName(clip.patternId)}</span>
-                            {selected && (
-                              <button
-                                onPointerDown={(e) => e.stopPropagation()}
-                                onClick={(e) => { e.stopPropagation(); dispatch({ type: 'clip.remove', id: clip.id }); setSel(null); }}
-                                style={{ marginLeft: 'auto', flex: 'none', width: 16, height: 16, borderRadius: 'var(--r-xs)', border: 'none', background: 'rgba(0,0,0,.35)', color: 'var(--accent-ink)', fontSize: 11, cursor: 'pointer', lineHeight: 1 }}
-                                title="Delete clip"
-                              >×</button>
-                            )}
-                            <span style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 8, cursor: 'ew-resize' }} />
+                            <span style={{ position: 'absolute', left: 8, top: 4, fontSize: 11, fontWeight: 700, pointerEvents: 'none', textShadow: '0 1px 2px rgba(0,0,0,.4)' }}>{patName(clip.patternId)}</span>
+                            <svg width={width} height={ih} style={{ position: 'absolute', left: 0, top: 0, pointerEvents: 'none' }} viewBox={`0 0 ${width} ${ih}`} preserveAspectRatio="none">
+                              {notePreview(clip, width, ih)}
+                              {envelope(clip, width, ih)}
+                            </svg>
+                            {/* keyframe dots */}
+                            {(clip.gainPoints || []).map((p, i) => {
+                              const cx = (p.t / clip.length) * width;
+                              const cy = (1 - clamp(p.v, 0, 1.5) / 1.5) * ih;
+                              return <span key={i} onPointerDown={(e) => onKfDown(e, clip, i, e.currentTarget.parentElement.getBoundingClientRect())} title="Drag to move · shift/right-click to remove" style={{ position: 'absolute', left: cx - 5, top: cy - 5, width: 10, height: 10, borderRadius: '50%', background: selected ? 'var(--accent)' : 'var(--text)', border: '1px solid rgba(0,0,0,.4)', cursor: 'ns-resize' }} />;
+                            })}
+                            {/* fade handles (top corners) */}
+                            <span onPointerDown={(e) => onFadeDown(e, clip, 'fadeIn', e.currentTarget.parentElement.getBoundingClientRect())} title="Drag: fade in" style={{ position: 'absolute', left: 0, top: 0, width: 10, height: 10, cursor: 'ew-resize', borderLeft: '2px solid var(--tl-fade-line)', borderTop: '2px solid var(--tl-fade-line)' }} />
+                            <span onPointerDown={(e) => onFadeDown(e, clip, 'fadeOut', e.currentTarget.parentElement.getBoundingClientRect())} title="Drag: fade out" style={{ position: 'absolute', right: 0, top: 0, width: 10, height: 10, cursor: 'ew-resize', borderRight: '2px solid var(--tl-fade-line)', borderTop: '2px solid var(--tl-fade-line)' }} />
                           </div>
                         );
                       })}
@@ -205,15 +285,15 @@ export default function ArrangeView() {
               })}
             </div>
 
-            {/* playhead */}
             <div ref={playheadRef} style={{ position: 'absolute', left: LABEL_W, top: 44, bottom: 0, width: 2, background: 'var(--text)', opacity: 0, pointerEvents: 'none', zIndex: 1 }} />
           </div>
         </div>
       </div>
 
-      {/* meta */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, fontSize: 12.5, color: 'var(--muted)' }}>
-        <span>Click a lane to place the selected pattern · drag the right edge to lengthen · drag to move · double-click opens it in the piano roll · Delete removes it</span>
+        <span>{tool === 'volume'
+          ? 'Volume: click a clip to add a keyframe · drag points to shape the fade · shift/right-click removes · drag the top corners for fade in/out'
+          : 'Click a lane to place the pattern · drag right edge to lengthen · drag to move · double-click opens the piano roll · Delete removes'}</span>
         <span style={{ marginLeft: 'auto', fontVariantNumeric: 'tabular-nums' }}>{project.playlist.length} clips · {bars} bars</span>
       </div>
     </section>
