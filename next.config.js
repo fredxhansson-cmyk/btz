@@ -3,12 +3,13 @@ const csp = [
   "default-src 'self'",
   "img-src 'self' data: blob: https://img.clerk.com https://*.clerk.com",
   "media-src 'self' data: blob:",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com https://js.stripe.com",
+  // https: + wasm-unsafe-eval = load third-party WAM 2.0 plugins (code + WASM) at runtime.
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https: https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com https://js.stripe.com",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' data: https://fonts.gstatic.com",
-  // wss: = real-time collaboration signaling (WebRTC); replicate.delivery = AI stem outputs fetched client-side.
-  "connect-src 'self' data: blob: wss: https://*.clerk.accounts.dev https://*.clerk.com https://clerk-telemetry.com https://api.stripe.com https://replicate.delivery https://*.replicate.delivery",
-  "worker-src 'self' blob:",
+  // wss: = collaboration signaling; https: = WAM plugin assets; replicate.delivery = AI stem outputs.
+  "connect-src 'self' data: blob: wss: https: https://*.clerk.accounts.dev https://*.clerk.com https://clerk-telemetry.com https://api.stripe.com https://replicate.delivery https://*.replicate.delivery",
+  "worker-src 'self' blob: https:",
   "frame-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com https://js.stripe.com https://hooks.stripe.com https://accounts.google.com",
   "frame-ancestors 'none'",
 ].join('; ');
