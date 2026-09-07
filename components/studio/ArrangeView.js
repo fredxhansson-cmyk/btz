@@ -15,7 +15,8 @@ const hexA = (hex, a) => {
 };
 
 export default function ArrangeView() {
-  const { project, dispatch, ui, setUi, engine, play, collab, setPresence } = useStudio();
+  const { project, dispatch, ui, setUi, engine, play, collab, setPresence, dropAudioOnTimeline, setHint } = useStudio();
+  const [dropTrack, setDropTrack] = useState(-1);
   const LABEL_W = ui.touch ? 112 : 190; // narrower track column on phones = more lane visible
   const [pxPerBar, setPxPerBar] = useState(64);
   const [rowH, setRowH] = useState(64);
@@ -108,6 +109,20 @@ export default function ArrangeView() {
     dispatch({ type: 'clip.add', id, patternId: project.activePattern, track, start: bar * barTicks, length });
     setSel(id);
   }, [tool, pxPerBar, barTicks, activePat, project.activePattern, dispatch]);
+
+  // Drag & drop an audio (or video) file straight onto a track.
+  const onLaneDrop = useCallback(async (e, track) => {
+    e.preventDefault(); setDropTrack(-1);
+    const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (!file) return;
+    const laneRect = e.currentTarget.getBoundingClientRect();
+    const bar = Math.max(0, Math.floor((e.clientX - laneRect.left) / pxPerBar));
+    if (file.type.startsWith('audio/') || /\.(mp3|wav|ogg|oga|m4a|aac|flac|opus)$/i.test(file.name)) {
+      if (dropAudioOnTimeline) await dropAudioOnTimeline(file, track, bar * barTicks);
+    } else if (file.type.startsWith('video/') || /\.(mp4|mov|webm|mkv|m4v)$/i.test(file.name)) {
+      try { const url = URL.createObjectURL(file); setUi({ videoSrc: url, videoName: file.name, view: 'video' }); if (setHint) setHint('Video loaded in the Video view for scoring to picture.'); } catch (er) { /* noop */ }
+    } else if (setHint) setHint('Drop an audio or video file onto the timeline.');
+  }, [pxPerBar, barTicks, dropAudioOnTimeline, setUi, setHint]);
 
   const onClipDown = useCallback((e, clip, rect) => {
     e.stopPropagation();
@@ -285,7 +300,10 @@ export default function ArrangeView() {
                     <div
                       onPointerDown={(e) => onLaneDown(e, t)}
                       onDoubleClick={(e) => onLaneDouble(e, t)}
-                      style={{ position: 'relative', flex: 1, minWidth: laneW, background: 'var(--gridsurface)', backgroundImage: 'linear-gradient(90deg, var(--grid-line) 1px, transparent 1px)', backgroundSize: `${pxPerBar}px 100%`, cursor: tool === 'volume' ? 'crosshair' : 'default', opacity: dimmed ? 0.5 : 1 }}
+                      onDragOver={(e) => { e.preventDefault(); if (dropTrack !== t) setDropTrack(t); }}
+                      onDragLeave={() => setDropTrack((v) => (v === t ? -1 : v))}
+                      onDrop={(e) => onLaneDrop(e, t)}
+                      style={{ position: 'relative', flex: 1, minWidth: laneW, background: dropTrack === t ? 'var(--accent-soft)' : 'var(--gridsurface)', backgroundImage: 'linear-gradient(90deg, var(--grid-line) 1px, transparent 1px)', backgroundSize: `${pxPerBar}px 100%`, cursor: tool === 'volume' ? 'crosshair' : 'default', opacity: dimmed ? 0.5 : 1, outline: dropTrack === t ? '2px dashed var(--accent)' : 'none', outlineOffset: -2 }}
                     >
                       {clipsOf(t).map((clip) => {
                         const left = px(clip.start);
