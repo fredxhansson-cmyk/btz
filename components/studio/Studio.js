@@ -10,6 +10,7 @@ import AskFuse from './AskFuse';
 import CollabButton from './CollabButton';
 import WamPanel from './WamPanel';
 import MarketPanel from './MarketPanel';
+import PlaySurface from './PlaySurface';
 import Mixer from './Mixer';
 import MixerColumn from './MixerColumn';
 import MasteringView from './Mastering';
@@ -485,6 +486,7 @@ function Workspace({ installPrompt, onInstalled }) {
         )}
       </footer>
       {!ui.touch && <AskFuse />}
+      <PlaySurface />
     </div>
   );
 }
