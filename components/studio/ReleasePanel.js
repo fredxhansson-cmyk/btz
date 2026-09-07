@@ -15,15 +15,18 @@ function download(name, text, mime = 'text/plain') {
 }
 
 export default function ReleasePanel({ onClose }) {
-  const { project, exportAudio, setHint, me } = useStudio();
+  const { project, exportAudio, renderMasterBlob, setHint, me } = useStudio();
   const [title, setTitle] = useState(project.name || 'Untitled');
   const [artist, setArtist] = useState((me && me.name) || '');
   const [genre, setGenre] = useState('Electronic');
   const [tags, setTags] = useState('');
   const [busy, setBusy] = useState(false);
   const [dist, setDist] = useState(false);
+  const [pub, setPub] = useState(false);
+  const [link, setLink] = useState('');
 
   useEffect(() => { fetch('/api/distribute').then((r) => r.json()).then((d) => setDist(!!d.enabled)).catch(() => {}); }, []);
+  useEffect(() => { fetch('/api/publish').then((r) => r.json()).then((d) => setPub(!!d.enabled)).catch(() => {}); }, []);
 
   const metadata = () => ({
     title: title.trim(), artist: artist.trim(), genre, tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
@@ -32,6 +35,25 @@ export default function ReleasePanel({ onClose }) {
 
   const exportMaster = async () => { setBusy(true); try { await exportAudio({ scope: 'song', format: 'mp3', bitrate: 320 }); setHint('Mastered track exported (MP3 320).'); } finally { setBusy(false); } };
   const releaseSheet = () => { download(`${(title || 'release').replace(/\s+/g, '_')}_release.json`, JSON.stringify(metadata(), null, 2), 'application/json'); setHint('Release sheet downloaded — upload it with your track to any distributor.'); };
+
+  const publish = async () => {
+    setBusy(true);
+    setLink('');
+    try {
+      setHint('Rendering master…');
+      const blob = await renderMasterBlob({ format: 'mp3', bitrate: 320 });
+      const dataUrl = await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(blob); });
+      const audioBase64 = String(dataUrl).split(',')[1];
+      setHint('Publishing…');
+      const r = await fetch('/api/publish', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ audioBase64, name: title, format: 'mp3', metadata: metadata() }),
+      });
+      const d = await r.json();
+      if (d && d.ok && d.url) { setLink(d.url); setHint('Published — shareable link ready.'); }
+      else setHint(d && d.error ? `Publish: ${d.error}` : 'Publish failed.');
+    } catch (e) { setHint(`Publish failed: ${e.message}`); } finally { setBusy(false); }
+  };
 
   const distribute = async () => {
     setBusy(true);
@@ -72,13 +94,27 @@ export default function ReleasePanel({ onClose }) {
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button type="button" className={`${s.btn} ${s.on}`} disabled={busy} onClick={exportMaster}>{busy ? 'Rendering…' : 'Export master (MP3)'}</button>
             <button type="button" className={s.btn} onClick={releaseSheet}>Download release sheet</button>
+            {pub && <button type="button" className={`${s.btn} ${s.on}`} disabled={busy} onClick={publish}>🔗 Publish (shareable link)</button>}
             {dist && <button type="button" className={s.btn} disabled={busy} onClick={distribute}>Distribute to streaming →</button>}
           </div>
 
+          {link && (
+            <div className={s.helpBox} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <span>Live at</span>
+              <a href={link} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', wordBreak: 'break-all' }}>{link}</a>
+              <button type="button" className={s.btn} onClick={() => { navigator.clipboard.writeText(link).then(() => setHint('Link copied.')).catch(() => {}); }}>Copy</button>
+            </div>
+          )}
+
           <div className={s.helpBox}>
-            {dist
-              ? 'Distribution is connected — “Distribute” submits your master + metadata to the configured service.'
-              : 'Export the mastered MP3 and the release sheet, then upload both to your distributor (DistroKid, Amuse, etc.). Direct one-click distribution activates when a distributor API is configured (docs/ACTIVATION.md).'}
+            {'Two ways to release: '}
+            <b>Publish</b>
+            {' puts the mastered track online at a public link you can share and stream — instantly, self-hosted'}
+            {pub ? '' : ' (activates when cloud storage is configured — BLOB_READ_WRITE_TOKEN)'}
+            {'. '}
+            <b>Distribute</b>
+            {' sends it to Spotify/Apple via a distributor — '}
+            {dist ? 'connected.' : 'this needs a distributor account/API (DistroKid, Amuse, etc.); until then export the master + release sheet and upload them there. See docs/ACTIVATION.md.'}
           </div>
         </div>
       </div>
