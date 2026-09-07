@@ -369,7 +369,6 @@ function Workspace({ installPrompt, onInstalled }) {
       )}
 
       <div className={s.body}>
-        {false && null}
         {ui.touch && ui.browserOpen && (
           <div className={s.sideBackdrop} onPointerDown={() => setUi({ browserOpen: false })} />
         )}
