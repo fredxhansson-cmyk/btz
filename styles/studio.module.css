@@ -348,8 +348,8 @@
 }
 
 /* ----------------------------------------------------------- channel rack */
-.rackBody { flex: 1; min-height: 0; display: flex; }
-.rackScroll { flex: 1; overflow: auto; padding-bottom: 8px; position: relative; }
+.rackBody { flex: 1; min-height: 0; display: flex; padding: 16px 20px; }
+.rackScroll { flex: 1; overflow: auto; padding-bottom: 8px; position: relative; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); }
 .rulerRow { display: flex; position: sticky; top: 0; z-index: 3; background: var(--panel); border-bottom: 1px solid var(--line); }
 .chanLeftSpacer { width: 330px; flex: none; }
 .ruler { position: relative; display: flex; height: 20px; }
@@ -364,29 +364,29 @@
   pointer-events: none; opacity: 0; z-index: 2;
 }
 
-.chanRow { display: flex; align-items: center; height: 30px; border-bottom: 1px solid var(--gridsurface); }
+.chanRow { display: flex; align-items: center; height: 56px; border-top: 1px solid var(--line-weak); }
 .chanRow:hover { background: rgba(255,255,255,0.02); }
-.chanSel { background: rgba(214,255,63,0.07); }
-.chanLeft { width: 330px; flex: none; display: flex; align-items: center; gap: 5px; padding-right: 8px; }
-.chanColor { width: 4px; height: 24px; border-radius: 2px; flex: none; }
+.chanSel { background: var(--selected); }
+.chanLeft { width: 330px; flex: none; display: flex; align-items: center; gap: 6px; padding: 0 12px; }
+.chanColor { width: 4px; height: 30px; border-radius: var(--r-xs); flex: none; }
 .led { background: transparent; border: 0; padding: 0 2px; cursor: pointer; }
 .ledDot {
   display: block; width: 9px; height: 9px; border-radius: 50%;
   background: #35393f; border: 1px solid var(--card);
 }
-.ledOn { background: var(--accent); box-shadow: 0 0 7px rgba(214,255,63,0.75); }
+.ledOn { background: var(--accent); }
 .chanName {
   flex: 1; min-width: 0; text-align: left; background: var(--surface); border: 1px solid var(--line);
   color: var(--text); padding: 4px 7px; border-radius: 4px; cursor: pointer; font-size: 13px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.chanName:hover { background: #31363e; color: #fff; }
+.chanName:hover { background: var(--hover-strong); color: var(--text); }
 .tinyBtn {
-  width: 24px; height: 24px; border-radius: var(--r-4); flex: none; cursor: pointer;
-  background: var(--surface); border: 1px solid var(--line-2); color: var(--text-2); font-size: 12.5px; line-height: 1;
+  width: 28px; height: 28px; border-radius: var(--r-xs); flex: none; cursor: pointer;
+  background: var(--meter-track); border: none; color: var(--text-4); font-size: 12px; font-weight: 700; line-height: 1;
 }
-.muteOn { background: var(--red); color: #2a0000; border-color: #7a1f1f; }
-.soloOn { background: var(--accent); color: var(--accent-ink); border-color: var(--accent-ink); }
+.muteOn { background: var(--rec); color: #fff; border-color: var(--rec); }
+.soloOn { background: var(--warn); color: var(--accent-ink); border-color: var(--warn); }
 .fxOn { background: var(--green); color: #052b0f; }
 .miniKnobs { display: flex; gap: 2px; }
 .insBadge {
@@ -400,16 +400,16 @@
 }
 .xBtn:hover { color: var(--red); background: rgba(255,90,90,0.12); }
 
-.stepRow { display: flex; }
+.stepRow { display: flex; align-items: center; }
 .step {
-  position: relative; width: 30px; height: 28px; margin: 0 2px; flex: none; cursor: pointer;
-  background: var(--panel2); border: 1px solid var(--line); border-radius: var(--r-cell);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  position: relative; width: 30px; height: 44px; margin: 0 2px; flex: none; cursor: pointer;
+  background: var(--step-off); border: 1px solid var(--line-weak); border-radius: var(--r-sm);
 }
-.step:hover { border-color: #545b64; }
-.stepBeat { background: var(--step-bar); }
-.stepBar { background: var(--step-bar); }
-.stepOn { box-shadow: 0 0 8px rgba(255,255,255,0.12), inset 0 1px 0 rgba(255,255,255,0.25); border-color: rgba(0,0,0,0.6); }
+.step:hover { border-color: var(--line-4); }
+.stepBeat { background: var(--step-bar); border-color: var(--line-2); }
+.stepBar { background: var(--step-bar); border-color: var(--line-2); }
+/* Lit step = solid channel accent (set inline), no glow (BUILD_SPEC rule 3). */
+.stepOn { border-color: transparent; }
 
 .rackFoot {
   display: flex; align-items: center; gap: 10px; padding: 5px 10px;

@@ -184,7 +184,7 @@ export default function ChannelRack() {
     if (!engine.playing || ui.mode !== 'pattern') { el.style.opacity = '0'; return; }
     const offset = spacerRef.current ? spacerRef.current.offsetWidth : 330;
     el.style.opacity = '1';
-    el.style.height = `${20 + project.channels.length * 30}px`;
+    el.style.height = `${44 + project.channels.length * 56}px`;
     const step = Math.floor(engine.currentPosition() / STEP_TICKS);
     el.style.transform = `translateX(${offset + step * STEP_W}px)`;
   });
