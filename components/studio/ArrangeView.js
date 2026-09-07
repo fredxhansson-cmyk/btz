@@ -146,11 +146,33 @@ export default function ArrangeView() {
 
   useEffect(() => {
     const onKey = (e) => {
-      if ((e.key === 'Delete' || e.key === 'Backspace') && sel) { dispatch({ type: 'clip.remove', id: sel }); setSel(null); }
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+      const clip = sel ? project.playlist.find((c) => c.id === sel) : null;
+      const mod = e.metaKey || e.ctrlKey;
+      if ((e.key === 'Delete' || e.key === 'Backspace') && sel) {
+        e.preventDefault(); dispatch({ type: 'clip.remove', id: sel }); setSel(null);
+      } else if (clip && (e.key === 'e' || e.key === 'E') && mod) {
+        // Split at the playhead (or the clip's midpoint when stopped).
+        e.preventDefault();
+        const pos = engine.playing ? engine.currentPosition() : clip.start + Math.floor(clip.length / 2);
+        if (pos > clip.start && pos < clip.start + clip.length) dispatch({ type: 'clip.split', id: clip.id, at: pos });
+      } else if (clip && (e.key === 'd' || e.key === 'D') && mod) {
+        // Duplicate the selected clip right after itself.
+        e.preventDefault();
+        const id = uid('cl');
+        dispatch({ type: 'clip.add', id, patternId: clip.patternId, track: clip.track, start: clip.start + clip.length, length: clip.length });
+        setSel(id);
+      } else if (clip && (e.key === 'l' || e.key === 'L') && mod) {
+        // Loop-extend: append another copy back-to-back.
+        e.preventDefault();
+        const id = uid('cl');
+        dispatch({ type: 'clip.add', id, patternId: clip.patternId, track: clip.track, start: clip.start + clip.length, length: clip.length });
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [sel, dispatch]);
+  }, [sel, project.playlist, engine, dispatch]);
 
   // Subtle note-content preview: a tidy mini piano-roll, low-contrast so it
   // reads as texture, not noise. Skipped on tiny clips.
@@ -309,7 +331,7 @@ export default function ArrangeView() {
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, fontSize: 12.5, color: 'var(--muted)' }}>
         <span>{tool === 'volume'
           ? 'Volume: click a clip to add a keyframe · drag points to shape the fade · shift/right-click removes · drag the top corners for fade in/out'
-          : 'Double-click a lane to add the pattern · drag to move · drag the right edge to lengthen · double-click a clip to edit it in the piano roll · Delete removes'}</span>
+          : 'Double-click a lane to add · drag to move · drag right edge to lengthen · double-click a clip to edit · ⌘E split · ⌘D duplicate · Delete removes'}</span>
         <span style={{ marginLeft: 'auto', fontVariantNumeric: 'tabular-nums' }}>{project.playlist.length} clips · {bars} bars</span>
       </div>
     </section>
