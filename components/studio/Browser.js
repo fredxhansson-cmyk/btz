@@ -49,10 +49,15 @@ function CategoryGroup({ title, sounds, cats, defaultOpen = false, extraTop = nu
 }
 
 function SoundRow({ sound, onRemove, index = 0 }) {
-  const { dispatch, engine, setHint, setUi, addSampleSound } = useStudio();
+  const { dispatch, engine, setHint, setUi, addSampleSound, replaceInstrument, ui, project } = useStudio();
   const isSample = sound.kind === 'sample';
   const preview = () => (isSample ? engine.previewSampleUrl(sound.url) : engine.previewSound(sound));
   const add = () => {
+    // Replace mode: swap the sound on the selected track instead of adding a new one.
+    if (ui.pickMode === 'replace' && project.selectedChannel) {
+      replaceInstrument(project.selectedChannel, sound);
+      return;
+    }
     if (isSample) { addSampleSound(sound); return; }
     dispatch({ type: 'sound.add', sound });
     engine.previewSound(sound);
@@ -95,6 +100,10 @@ export default function Browser() {
   const mySounds = useMemo(() => userSounds.filter((x) => !(x.tags || []).includes('ai')), [userSounds]);
 
   const dropUser = (id) => { setUserSounds(removeUserSound(id)); };
+  const selectedName = useMemo(() => {
+    const c = project.channels.find((x) => x.id === project.selectedChannel);
+    return c ? c.name : '';
+  }, [project.channels, project.selectedChannel]);
 
   // Keyboard browsing: ↑/↓ move a highlight through the currently-shown sound
   // rows (auditioning each), Enter adds the highlighted sound. Operates on the
@@ -138,6 +147,21 @@ export default function Browser() {
           onChange={(e) => setQuery(e.target.value)}
         />
         {query && <button type="button" className={s.xBtn} onClick={() => setQuery('')}>×</button>}
+      </div>
+
+      <div className={s.pickModeRow}>
+        <span className={s.pickModeLabel}>Picking a sound:</span>
+        <button
+          type="button"
+          className={ui.pickMode === 'replace' ? s.pickModeBtn : `${s.pickModeBtn} ${s.pickModeOn}`}
+          onClick={() => setUi({ pickMode: 'new' })}
+        >＋ New track</button>
+        <button
+          type="button"
+          className={ui.pickMode === 'replace' ? `${s.pickModeBtn} ${s.pickModeOn}` : s.pickModeBtn}
+          onClick={() => setUi({ pickMode: 'replace' })}
+          title="Swap the sound on the selected track instead of adding a new one"
+        >⟳ Replace {selectedName ? `“${selectedName}”` : 'selected'}</button>
       </div>
 
       {!query && (
