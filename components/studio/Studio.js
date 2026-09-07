@@ -14,6 +14,7 @@ import PlaySurface from './PlaySurface';
 import Mixer from './Mixer';
 import MixerColumn from './MixerColumn';
 import MasteringView from './Mastering';
+import Notation from './Notation';
 import VideoPanel from './VideoPanel';
 import LiveInputsPanel from './LiveInputsPanel';
 import WorkspacePanel from './WorkspacePanel';
@@ -44,10 +45,10 @@ const KEYMAP = {
 
 // Distinct glyphs — but the text label under each is what carries the meaning.
 const NAV_ICONS = {
-  playlist: '▤', rack: '🎛', piano: '🎹', drums: '▦', mixer: '🎚', automation: '∿', mastering: '◆', video: '🎬', liveinputs: '🎤', workspace: '⊞',
+  playlist: '▤', rack: '🎛', piano: '🎹', drums: '▦', mixer: '🎚', automation: '∿', mastering: '◆', notation: '𝄞', video: '🎬', liveinputs: '🎤', workspace: '⊞',
 };
 const NAV_SHORT = {
-  playlist: 'Arrange', rack: 'Instr', piano: 'Piano', drums: 'Beat', automation: 'Auto', mixer: 'Mixer', mastering: 'Master', video: 'Video', liveinputs: 'Inputs', workspace: 'Custom',
+  playlist: 'Arrange', rack: 'Instr', piano: 'Piano', drums: 'Beat', automation: 'Auto', mixer: 'Mixer', mastering: 'Master', notation: 'Score', video: 'Video', liveinputs: 'Inputs', workspace: 'Custom',
 };
 
 const TABS = [
@@ -58,6 +59,7 @@ const TABS = [
   { id: 'automation', label: 'Automation', hint: 'F10' },
   { id: 'mixer', label: 'Mixer', hint: 'F9' },
   { id: 'mastering', label: 'Mastering', hint: 'F11' },
+  { id: 'notation', label: 'Notation', hint: '' },
   { id: 'video', label: 'Video', hint: '' },
   { id: 'liveinputs', label: 'Live inputs', hint: '' },
   { id: 'workspace', label: 'Workspace', hint: '' },
@@ -173,6 +175,7 @@ function Workspace({ installPrompt, onInstalled }) {
       case 'automation': return <Automation />;
       case 'mixer': return <Mixer />;
       case 'mastering': return <MasteringView />;
+      case 'notation': return <Notation />;
       case 'video': return <VideoPanel />;
       case 'liveinputs': return <LiveInputsPanel />;
       case 'workspace': return <WorkspacePanel />;
