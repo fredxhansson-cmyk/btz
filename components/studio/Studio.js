@@ -112,6 +112,24 @@ function Workspace({ installPrompt, onInstalled }) {
     try { localStorage.setItem('btz.onboarding.v1', '1'); } catch (e) { /* ignore */ }
   };
 
+  // Web Audio starts suspended and can only be resumed from inside a user
+  // gesture. Unlock it on the very first pointer/key interaction so playback
+  // and previews always make sound, whatever control the user touches first.
+  useEffect(() => {
+    const unlock = () => {
+      try {
+        engine.ensureContext();
+        if (engine.ctx && engine.ctx.state === 'suspended') engine.ctx.resume();
+      } catch (e) { /* ignore */ }
+    };
+    window.addEventListener('pointerdown', unlock);
+    window.addEventListener('keydown', unlock);
+    return () => {
+      window.removeEventListener('pointerdown', unlock);
+      window.removeEventListener('keydown', unlock);
+    };
+  }, [engine]);
+
   // Touch layout: bottom navigation, slide-over browser and bigger targets.
   useEffect(() => {
     const apply = () => setUi({ touch: isCoarsePointer() || window.innerWidth < 900 });

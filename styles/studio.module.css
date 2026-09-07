@@ -367,7 +367,7 @@
 .chanRow { display: flex; align-items: center; height: 56px; border-top: 1px solid var(--line-weak); }
 .chanRow:hover { background: rgba(255,255,255,0.02); }
 .chanSel { background: var(--selected); }
-.chanLeft { width: 330px; flex: none; display: flex; align-items: center; gap: 6px; padding: 0 12px; }
+.chanLeft { width: 330px; flex: none; display: flex; align-items: center; gap: 6px; padding: 0 12px; overflow: hidden; }
 .chanColor { width: 4px; height: 30px; border-radius: var(--r-xs); flex: none; }
 .led { background: transparent; border: 0; padding: 0 2px; cursor: pointer; }
 .ledDot {
@@ -376,13 +376,14 @@
 }
 .ledOn { background: var(--accent); }
 .chanName {
-  flex: 1; min-width: 0; text-align: left; background: var(--surface); border: 1px solid var(--line);
-  color: var(--text); padding: 4px 7px; border-radius: 4px; cursor: pointer; font-size: 13px;
+  flex: 1; min-width: 64px; text-align: left; background: transparent; border: 0;
+  color: var(--text); padding: 0 4px; border-radius: 4px; cursor: pointer; font-size: 13.5px; font-weight: 600;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.chanName:hover { background: var(--hover-strong); color: var(--text); }
+.chanName:hover { color: var(--accent); }
 .tinyBtn {
   width: 28px; height: 28px; border-radius: var(--r-xs); flex: none; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
   background: var(--meter-track); border: none; color: var(--text-4); font-size: 12px; font-weight: 700; line-height: 1;
 }
 .muteOn { background: var(--rec); color: #fff; border-color: var(--rec); }
@@ -755,14 +756,14 @@
 .soundRow { display: flex; align-items: center; gap: 6px; border-radius: var(--r-8); padding: 1px 2px; }
 .soundRow:hover { background: var(--hover-strong); }
 .previewBtn {
-  width: 40px; height: 40px; flex: none; border-radius: var(--r-10); cursor: pointer;
-  display: grid; place-items: center; padding-left: 2px;
-  background: var(--accent-soft); border: 1.5px solid var(--accent);
-  color: var(--accent); font-size: 17px; line-height: 1;
-  transition: transform 0.08s ease, background 0.12s ease;
+  width: 26px; height: 26px; flex: none; border-radius: var(--r-sm); cursor: pointer;
+  display: grid; place-items: center;
+  background: transparent; border: 1px solid var(--line-3);
+  color: var(--text-3); font-size: 11px; line-height: 1;
+  transition: transform 0.08s ease, background 0.12s ease, color 0.12s ease;
 }
-.previewBtn:hover { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); box-shadow: var(--glow-accent); }
-.previewBtn:active { transform: scale(0.92); }
+.previewBtn:hover { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+.previewBtn:active { transform: scale(0.9); }
 .soundName {
   flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px;
   background: transparent; border: 0; color: var(--text); text-align: left;

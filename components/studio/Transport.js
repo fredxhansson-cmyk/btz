@@ -12,7 +12,7 @@ function Menu({ label, items, openId, setOpenId }) {
         type="button"
         className={open ? `${s.menuBtn} ${s.on}` : s.menuBtn}
         onClick={() => setOpenId(open ? null : label)}
-        onMouseEnter={() => openId && setOpenId(label)}
+        onMouseEnter={() => setOpenId(label)}
         aria-haspopup="true"
         aria-expanded={open}
       >
