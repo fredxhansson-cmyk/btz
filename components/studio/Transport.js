@@ -274,16 +274,14 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOp
         <div className={s.timeLabel}>TEMPO</div>
       </div>
 
-      <button
-        type="button"
-        className={`${ui.metronome ? `${s.btn} ${s.on}` : s.btn} ${s.deskOnly}`}
-        onClick={() => setUi({ metronome: !ui.metronome })}
-        title="Metronome"
-      >MET</button>
-
-      <div className={`${s.group} ${s.deskOnly}`}>
+      <div className={`${s.metGroup} ${s.deskOnly}`}>
+        <button
+          type="button"
+          className={ui.metronome ? s.on : undefined}
+          onClick={() => setUi({ metronome: !ui.metronome })}
+          title="Metronome"
+        >MET</button>
         <select
-          className={s.select}
           value={`${project.sig ? project.sig.num : 4}/${project.sig ? project.sig.den : 4}`}
           onChange={(e) => {
             const [num, den] = e.target.value.split('/').map(Number);
@@ -295,7 +293,7 @@ export default function Transport({ onOpenRecord, onOpenAi, onOpenSettings, onOp
         </select>
         <button
           type="button"
-          className={project.countIn ? `${s.btn} ${s.on}` : s.btn}
+          className={project.countIn ? s.on : undefined}
           onClick={() => dispatch({ type: 'patch', patch: { countIn: ((project.countIn || 0) + 1) % 3 } })}
           title="Count-in bars before recording"
         >{project.countIn ? `${project.countIn} bar${project.countIn > 1 ? 's' : ''} in` : 'No count-in'}</button>

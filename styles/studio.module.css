@@ -93,13 +93,14 @@
   border-left: 4px solid currentColor; border-right: 4px solid currentColor;
   vertical-align: middle;
 }
+/* Record armed = solid record-red fill, no glow (BUILD_SPEC rule 3). */
 .recOn {
-  background: var(--rec-bg); border-color: var(--rec-line); color: var(--rec);
-  animation: recPulse 1s ease-in-out infinite;
+  background: var(--color-record); border-color: var(--color-record); color: #fff;
+  animation: recPulse 1.2s ease-in-out infinite;
 }
 @keyframes recPulse {
-  0% { box-shadow: 0 0 0 0 var(--rec); }
-  70%, 100% { box-shadow: 0 0 0 5px transparent; }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 .modeSw { display: flex; border: 1px solid var(--line-3); border-radius: var(--r-8); overflow: hidden; }
@@ -107,22 +108,34 @@
   background: var(--field-2); border: 0; color: var(--dim); padding: 8px 11px;
   cursor: pointer; font-size: 12.5px; letter-spacing: 0.6px;
 }
-/* HUD spec: active segment = 2px coral underline, not a filled/glow pill. */
-.seg.on { background: transparent; color: var(--accent); font-weight: 700; box-shadow: inset 0 -2px 0 0 var(--accent); }
+/* Segmented control (DEVELOPER_SPEC §4): active = text-primary fill + bg-colour
+   text (chrome-level nav exception to "coral = active"). Matches the concept. */
+.seg.on { background: var(--color-text-primary); color: var(--color-bg); font-weight: 700; }
 
 .timeBox, .tempo { display: flex; flex-direction: column; align-items: center; }
 .timeDisp, .tempoVal {
-  font-family: inherit; font-variant-numeric: tabular-nums;
-  font-size: 14px; font-weight: 600; color: var(--text); background: var(--card);
-  border: 1px solid var(--line); border-radius: var(--r-8); padding: 5px 12px; min-width: 92px; text-align: center;
+  font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+  font-size: 16px; font-weight: 600; letter-spacing: 0.01em; color: var(--text);
+  background: transparent; border: 0; padding: 2px 6px; min-width: 92px; text-align: center;
 }
-.tempoVal { min-width: 70px; cursor: text; }
+/* Tempo readout in coral, per the concept image. */
+.tempoVal { min-width: 60px; cursor: text; color: var(--color-coral); }
 .tempoInput {
-  width: 70px; font-family: inherit; font-size: 14px; font-weight: 600; text-align: center;
-  background: var(--card); color: var(--text); border: 1px solid var(--accent); border-radius: var(--r-8); padding: 5px 6px;
+  width: 64px; font-family: var(--font-mono); font-size: 16px; font-weight: 600; text-align: center;
+  background: var(--card); color: var(--color-coral); border: 1px solid var(--accent); border-radius: var(--r-8); padding: 3px 6px;
 }
 .timeLabel { font-size: 10.5px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 3px; }
 .tempo { cursor: text; }
+
+/* Concept: MET / 4-4 / count-in as one bordered pill with divider lines. */
+.metGroup { display: inline-flex; align-items: stretch; border: 1px solid var(--line-3); border-radius: 6px; overflow: hidden; }
+.metGroup > * {
+  border: 0; border-right: 1px solid var(--line-3); border-radius: 0; background: transparent;
+  color: var(--text-2); font-size: 11px; font-weight: 600; padding: 6px 9px; cursor: pointer; white-space: nowrap;
+}
+.metGroup > *:last-child { border-right: 0; }
+.metGroup > *:hover { background: var(--hover-strong); color: var(--text); }
+.metGroup > .on { color: var(--accent); background: transparent; }
 
 .masterBox { display: flex; align-items: center; gap: 8px; }
 .meter { width: 92px; height: 8px; background: var(--meter-track); border: 1px solid var(--line); border-radius: var(--r-cell); overflow: hidden; }
@@ -141,7 +154,7 @@
   display: flex; align-items: center; gap: 7px;
 }
 .tab:hover { color: var(--text); }
-.tab.on { color: #fff; border-bottom-color: var(--accent); background: rgba(214,255,63,0.08); }
+.tab.on { color: var(--text); border-bottom-color: var(--accent); background: transparent; }
 .tabHint { font-size: 10.5px; color: var(--muted); border: 1px solid var(--line-3); border-radius: 3px; padding: 0 3px; }
 
 /* ------------------------------------------------------------------ body */
@@ -266,14 +279,23 @@
   display: flex; align-items: center; gap: 8px; padding: 6px 10px;
   background: var(--panel); border-bottom: 1px solid var(--line); flex-wrap: wrap;
 }
-.panelTitle { font-size: 14px; color: var(--text); letter-spacing: 0.4px; }
+.panelTitle { font-family: var(--font-ui); font-weight: 700; font-size: 15px; color: var(--text); letter-spacing: -0.01em; }
 .group { display: flex; align-items: center; gap: 5px; }
-.btn {
-  background: var(--surface); border: 1px solid var(--line); color: var(--text);
-  padding: 7px 13px; border-radius: var(--r-8); cursor: pointer; font-size: 13px;
+/* Concept toolbar: three clean rows (title/placing/tools · actions · meta),
+   no wrap-chaos, no help paragraph. */
+.plToolbar {
+  display: flex; flex-direction: column; gap: 8px; padding: 12px 16px;
+  background: var(--panel); border-bottom: 1px solid var(--line);
 }
-.btn:hover { background: #3a3f48; }
-.btn.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent-ink); }
+.plRow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.plMeta { font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); letter-spacing: 0.02em; }
+/* Ghost buttons per DEVELOPER_SPEC §4 — transparent, line-based, coral only when on. */
+.btn {
+  background: transparent; border: 1px solid var(--line-3); color: var(--text-2);
+  padding: 6px 12px; border-radius: 7px; cursor: pointer; font-size: 12px;
+}
+.btn:hover { border-color: var(--text-2); color: var(--text); }
+.btn.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
 .select {
   background: var(--panel); border: 1px solid var(--line); color: var(--text);
   padding: 4px 6px; border-radius: 4px; font-size: 12.5px; cursor: pointer; max-width: 190px;
@@ -882,13 +904,13 @@
 .micBtn {
   display: inline-flex; align-items: center; gap: 7px; height: var(--hit); padding: 0 14px;
   border-radius: var(--r-10); cursor: pointer;
-  background: var(--rec-bg); border: 1.5px solid var(--rec-line); color: var(--rec);
+  background: transparent; border: 1.5px solid var(--color-record); color: var(--color-record);
   font-size: 12px; font-weight: 700; letter-spacing: 0.6px; white-space: nowrap;
-  transition: background 0.12s ease, box-shadow 0.12s ease, transform 0.08s ease;
+  transition: background 0.12s ease, transform 0.08s ease;
 }
-.micGlyph { font-size: 17px; line-height: 1; filter: saturate(1.2); }
+.micGlyph { font-size: 17px; line-height: 1; }
 .micLbl { line-height: 1; }
-.micBtn:hover { background: var(--rec-hover); border-color: var(--rec); box-shadow: 0 0 16px -4px var(--rec); }
+.micBtn:hover { background: rgba(241,56,62,0.12); }
 .micBtn:active { transform: scale(0.96); }
 .touch .micLbl { display: none; }
 .touch .micBtn { padding: 0 12px; }

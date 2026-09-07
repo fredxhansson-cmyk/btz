@@ -25,7 +25,7 @@ function Section({ title, children, defaultOpen = false, count }) {
   );
 }
 
-function SoundRow({ sound, onRemove }) {
+function SoundRow({ sound, onRemove, index = 0 }) {
   const { dispatch, engine, setHint, setUi } = useStudio();
   return (
     <div className={s.soundRow}>
@@ -47,7 +47,7 @@ function SoundRow({ sound, onRemove }) {
         }}
         title={`Add ${sound.name}${sound.tags && sound.tags.length ? ` · ${sound.tags.join(', ')}` : ''}`}
       >
-        <span className={s.swatch} style={{ background: soundColor(sound) }} />
+        <span className={s.swatch} style={{ background: soundColor(sound, index) }} />
         <span className={s.laneText}>{sound.name}</span>
       </button>
       {onRemove && (
@@ -91,7 +91,7 @@ export default function Browser() {
       {query ? (
         <div className={s.sideList}>
           <div className={s.sideCaption}>{results.length} matches</div>
-          {results.map((sd) => <SoundRow key={sd.id} sound={sd} onRemove={sd.user ? dropUser : null} />)}
+          {results.map((sd, i) => <SoundRow key={sd.id} sound={sd} index={i} onRemove={sd.user ? dropUser : null} />)}
           {!results.length && <div className={s.helpBox}>No sounds matched.</div>}
         </div>
       ) : (
@@ -100,7 +100,7 @@ export default function Browser() {
             {DRUM_CATS.map((cat) => (
               <div key={cat} className={s.catBlock}>
                 <div className={s.catLabel}>{cat}</div>
-                {DRUM_SOUNDS.filter((sd) => sd.cat === cat).map((sd) => <SoundRow key={sd.id} sound={sd} />)}
+                {DRUM_SOUNDS.filter((sd) => sd.cat === cat).map((sd, i) => <SoundRow key={sd.id} sound={sd} index={i} />)}
               </div>
             ))}
           </Section>
@@ -109,13 +109,13 @@ export default function Browser() {
             {INST_CATS.map((cat) => (
               <div key={cat} className={s.catBlock}>
                 <div className={s.catLabel}>{cat}</div>
-                {INST_SOUNDS.filter((sd) => sd.cat === cat).map((sd) => <SoundRow key={sd.id} sound={sd} />)}
+                {INST_SOUNDS.filter((sd) => sd.cat === cat).map((sd, i) => <SoundRow key={sd.id} sound={sd} index={i} />)}
               </div>
             ))}
           </Section>
 
           <Section title="AI sounds" count={aiSounds.length}>
-            {aiSounds.map((sd) => <SoundRow key={sd.id} sound={sd} onRemove={dropUser} />)}
+            {aiSounds.map((sd, i) => <SoundRow key={sd.id} sound={sd} index={i} onRemove={dropUser} />)}
             {!aiSounds.length && (
               <div className={s.helpBox}>
                 Open <b>Fuse Brain</b> and generate sounds — the ones you save land here and
@@ -125,7 +125,7 @@ export default function Browser() {
           </Section>
 
           <Section title="My sounds" count={mySounds.length}>
-            {mySounds.map((sd) => <SoundRow key={sd.id} sound={sd} onRemove={dropUser} />)}
+            {mySounds.map((sd, i) => <SoundRow key={sd.id} sound={sd} index={i} onRemove={dropUser} />)}
             {!mySounds.length && (
               <div className={s.helpBox}>Tweak a sound and press "Save sound" in the instrument panel.</div>
             )}

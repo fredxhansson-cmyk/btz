@@ -6,6 +6,15 @@ import { BAR_TICKS, PPQ, snapTicks, SNAPS, clamp, uid } from '../../lib/studio/c
 import { patternTicks, songLength } from '../../lib/studio/sequencer';
 import { longPress, pinchZoom } from '../../lib/studio/touch';
 
+// Clip fill = the track accent at low opacity with a full-opacity border of the
+// same accent (concept/DEVELOPER_SPEC §3). Small hex→rgba helper for canvas.
+const hexA = (hex, a) => {
+  if (!hex || hex[0] !== '#') return hex;
+  const h = hex.slice(1);
+  const n = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+  return `rgba(${parseInt(n.slice(0, 2), 16)},${parseInt(n.slice(2, 4), 16)},${parseInt(n.slice(4, 6), 16)},${a})`;
+};
+
 const LABEL_W = 96;
 const HEAD_H = 24;
 const TRACK_H = 56;
@@ -111,16 +120,19 @@ export default function Playlist() {
       const y = HEAD_H + clip.track * TRACK_H;
       if (x + cw < LABEL_W || x > w) continue;
       const selected = drag.current && drag.current.id === clip.id;
-      ctx.fillStyle = pat.color;
-      ctx.globalAlpha = trackMuted(clip.track) ? 0.25 : 0.85;
-      ctx.fillRect(Math.max(LABEL_W, x), y + 2, x < LABEL_W ? cw - (LABEL_W - x) : cw, TRACK_H - 5);
+      const clipW = x < LABEL_W ? cw - (LABEL_W - x) : cw;
+      ctx.fillStyle = hexA(pat.color, 0.18);
+      ctx.globalAlpha = trackMuted(clip.track) ? 0.45 : 1;
+      ctx.fillRect(Math.max(LABEL_W, x), y + 2, clipW, TRACK_H - 5);
       ctx.globalAlpha = 1;
-      ctx.strokeStyle = selected ? '#fff' : 'rgba(0,0,0,0.6)';
-      ctx.strokeRect(Math.max(LABEL_W, x) + 0.5, y + 2.5, Math.max(2, (x < LABEL_W ? cw - (LABEL_W - x) : cw) - 1), TRACK_H - 6);
+      ctx.lineWidth = selected ? 2 : 1;
+      ctx.strokeStyle = selected ? pat.color : hexA(pat.color, 0.75);
+      ctx.strokeRect(Math.max(LABEL_W, x) + 0.5, y + 2.5, Math.max(2, clipW - 1), TRACK_H - 6);
+      ctx.lineWidth = 1;
 
       // repeat separators
       const plen = patternTicks(pat);
-      ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+      ctx.strokeStyle = hexA(pat.color, 0.35);
       for (let off = plen; off < clip.length; off += plen) {
         const rx = x + off * v.pxPerTick;
         if (rx < LABEL_W || rx > w) continue;
@@ -129,8 +141,8 @@ export default function Playlist() {
         ctx.lineTo(Math.round(rx) + 0.5, y + TRACK_H - 4);
         ctx.stroke();
       }
-      ctx.fillStyle = 'rgba(0,0,0,0.75)';
-      ctx.font = '10px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      ctx.font = '600 10px ' + (token('--font-ui') || 'system-ui, sans-serif');
       ctx.save();
       ctx.beginPath();
       ctx.rect(Math.max(LABEL_W, x), y, cw, TRACK_H);
@@ -654,43 +666,36 @@ export default function Playlist() {
 
   return (
     <div className={s.panel}>
-      <div className={s.panelHead}>
-        <span className={s.panelTitle}>Arrangement</span>
-        <span className={s.dim}>Placing:</span>
-        <select
-          className={s.select}
-          value={project.activePattern}
-          onChange={(e) => dispatch({ type: 'pattern.select', id: e.target.value })}
-        >
-          {project.patterns.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>
-        <div className={s.group}>
+      <div className={s.plToolbar}>
+        <div className={s.plRow}>
+          <span className={s.panelTitle}>Arrangement</span>
+          <span className={s.dim}>Placing:</span>
+          <select
+            className={s.select}
+            value={project.activePattern}
+            onChange={(e) => dispatch({ type: 'pattern.select', id: e.target.value })}
+          >
+            {project.patterns.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
           <span className={s.dim}>Snap</span>
           <select className={s.select} value={ui.snap} onChange={(e) => setUi({ snap: e.target.value })}>
             {SNAPS.map((sn) => <option key={sn.id} value={sn.id}>{sn.label}</option>)}
           </select>
-        </div>
-        <div className={s.group}>
+          <div className={s.spacer} />
           <button
             type="button"
             className={tool === 'select' ? `${s.btn} ${s.on}` : s.btn}
             onClick={() => setTool('select')}
             title="Select, move, resize and fade clips"
-          >▦ Select</button>
+          >Select</button>
           <button
             type="button"
             className={tool === 'pen' ? `${s.btn} ${s.on}` : s.btn}
             onClick={() => setTool((t) => (t === 'pen' ? 'select' : 'pen'))}
             title="Pen: click a clip to add volume keyframes, drag to move, shift/right-click to remove"
-          >✎ Volume</button>
+          >Volume</button>
         </div>
-        <div className={s.group}>
-          <span className={s.dim}>Zoom</span>
-          <button type="button" className={s.btn} title="Zoom in" onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 1.25, 0.02, 1.2); draw(); }}>+</button>
-          <button type="button" className={s.btn} title="Zoom out" onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 0.8, 0.02, 1.2); draw(); }}>−</button>
-        </div>
-        <div className={s.group}>
-          <span className={s.dim}>Tracks</span>
+        <div className={s.plRow}>
           <button type="button" className={s.btn} title="Add an arrangement track" onClick={() => dispatch({ type: 'track.add' })}>＋ Track</button>
           <button
             type="button"
@@ -698,45 +703,47 @@ export default function Playlist() {
             title="Remove the last arrangement track (and any clips on it)"
             onClick={() => { if (window.confirm('Remove the last track and any clips on it?')) dispatch({ type: 'track.remove' }); }}
           >－ Track</button>
-        </div>
-        <button type="button" className={s.btn} onClick={() => play('song')}>Play song</button>
-        <button
-          type="button"
-          className={s.btn}
-          title="Add a marker at the playhead (double-click a marker to remove)"
-          onClick={() => { const v = view.current; const at = engine.playing ? engine.currentPosition() : v.scrollX / v.pxPerTick; dispatch({ type: 'marker.add', tick: Math.round(at / barLen) * barLen }); }}
-        >+ Marker</button>
-        <button
-          type="button"
-          className={s.btn}
-          title="Add a tempo change from the playhead (double-click to remove)"
-          onClick={() => {
-            const v = view.current;
-            const at = engine.playing ? engine.currentPosition() : v.scrollX / v.pxPerTick;
-            const bpm = parseFloat(window.prompt('Tempo (BPM) from here on', String(Math.round(project.bpm))));
-            if (!Number.isNaN(bpm)) dispatch({ type: 'tempo.add', tick: Math.round(at / barLen) * barLen, bpm });
-          }}
-        >+ Tempo</button>
-        <button
-          type="button"
-          className={project.loop !== false && project.loopEnd > project.loopStart ? `${s.btn} ${s.on}` : s.btn}
-          onClick={() => dispatch({ type: 'patch', patch: { loop: project.loop === false } })}
-          title="Shift+drag in the ruler to set a loop region"
-        >Loop</button>
-        {project.loopEnd > project.loopStart && (
+          <button type="button" className={s.btn} onClick={() => play('song')}>Play song</button>
           <button
             type="button"
             className={s.btn}
-            onClick={() => dispatch({ type: 'patch', patch: { loopStart: 0, loopEnd: 0 } })}
-          >Clear loop</button>
-        )}
-        <div className={s.spacer} />
-        <span className={s.dim}>
+            title="Add a marker at the playhead (double-click a marker to remove)"
+            onClick={() => { const v = view.current; const at = engine.playing ? engine.currentPosition() : v.scrollX / v.pxPerTick; dispatch({ type: 'marker.add', tick: Math.round(at / barLen) * barLen }); }}
+          >+ Marker</button>
+          <button
+            type="button"
+            className={s.btn}
+            title="Add a tempo change from the playhead (double-click to remove)"
+            onClick={() => {
+              const v = view.current;
+              const at = engine.playing ? engine.currentPosition() : v.scrollX / v.pxPerTick;
+              const bpm = parseFloat(window.prompt('Tempo (BPM) from here on', String(Math.round(project.bpm))));
+              if (!Number.isNaN(bpm)) dispatch({ type: 'tempo.add', tick: Math.round(at / barLen) * barLen, bpm });
+            }}
+          >+ Tempo</button>
+          <button
+            type="button"
+            className={project.loop !== false && project.loopEnd > project.loopStart ? `${s.btn} ${s.on}` : s.btn}
+            onClick={() => dispatch({ type: 'patch', patch: { loop: project.loop === false } })}
+            title="Shift+drag in the ruler to set a loop region"
+          >Loop</button>
+          {project.loopEnd > project.loopStart && (
+            <button
+              type="button"
+              className={s.btn}
+              onClick={() => dispatch({ type: 'patch', patch: { loopStart: 0, loopEnd: 0 } })}
+            >Clear loop</button>
+          )}
+          <div className={s.spacer} />
+          <span className={s.dim}>Zoom</span>
+          <button type="button" className={s.btn} title="Zoom in" onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 1.25, 0.02, 1.2); draw(); }}>+</button>
+          <button type="button" className={s.btn} title="Zoom out" onClick={() => { view.current.pxPerTick = clamp(view.current.pxPerTick * 0.8, 0.02, 1.2); draw(); }}>−</button>
+        </div>
+        <div className={s.plMeta}>
           {tool === 'pen'
-            ? 'Pen: click a clip to add volume points · drag to move · shift/right-click to remove'
-            : 'Drag top corners = fade in/out · drag the volume line = clip level · overlap clips on a track = auto crossfade · Ctrl+click = split · Alt+click = duplicate'}
-          {' · '}{project.playlist.length} clips · {bars} bars
-        </span>
+            ? 'Volume: click a clip to add points · drag to move · shift/right-click removes'
+            : `${project.playlist.length} clips · ${bars} bars`}
+        </div>
       </div>
       <div className={s.canvasWrap} ref={wrapRef}>
         <canvas

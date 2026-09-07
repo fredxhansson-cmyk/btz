@@ -1,0 +1,164 @@
+/* BTZ design tokens — dark (default) + light theme.
+   Placeholder name "BTZ" throughout — see DEVELOPER_SPEC.md §11.
+   Map these onto your existing tokens.css variable names as needed;
+   names below are descriptive, not prescriptive. */
+
+:root,
+[data-theme="dark"] {
+  /* Surfaces */
+  --color-bg: #080b12;            /* app background */
+  --color-chrome: #0b1017;        /* toolbar / top bar */
+  --color-panel: #0f141d;         /* default panel (sidebar, card) */
+  --color-panel-nested: #1a2029;  /* card-on-card, step cells, chips */
+  --color-panel-deep: #03060b;    /* recessed wells: piano roll bg, waveform bg */
+  --color-field: #151b24;         /* input/select background */
+  --color-hover: #1a2029;         /* generic hover overlay (= panel-nested) */
+  --color-selected: #232a35;      /* selected row/menu item background */
+  --color-pressed: #05070c;       /* pressed/active background (darker than bg) */
+
+  /* Lines */
+  --color-border-subtle: rgba(255,255,255,0.06);
+  --color-border-default: rgba(255,255,255,0.10);
+  --color-border-strong: rgba(255,255,255,0.18);
+
+  /* Text */
+  --color-text-primary: #eef2f9;
+  --color-text-secondary: #b0b8c5;
+  --color-text-muted: #6b727e;
+
+  /* Accents */
+  --color-coral: #ff746e;
+  --color-coral-hover: #ff857d;
+  --color-coral-pressed: #f75d59;
+  --color-coral-ink: #1c0202;      /* text/icon ON coral */
+
+  --color-lime: #85c425;
+  --color-lime-ink: #050f00;
+
+  --color-blue: #36b2ff;
+  --color-blue-ink: #000b1f;
+
+  /* Semantic */
+  --color-record: #f1383e;        /* record-armed */
+  --color-success: #3fc168;       /* on-target / success */
+  --color-warning: #edb417;
+  --color-focus-ring: var(--color-blue);
+
+  /* Canvas: piano roll */
+  --pr-note-fill: var(--color-lime);
+  --pr-note-selected: var(--color-coral);
+  --pr-note-ghost: rgba(238,242,249,0.18);
+  --pr-grid-bar: rgba(255,255,255,0.14);
+  --pr-grid-beat: rgba(255,255,255,0.08);
+  --pr-grid-sub: rgba(255,255,255,0.04);
+  --pr-key-white: #eef2f9;
+  --pr-key-black: #1a2029;
+
+  /* Canvas: arrangement/timeline */
+  --tl-clip-fill: rgba(255,116,110,0.18);   /* per-track accent at 18% — swap hue per track color */
+  --tl-clip-border: var(--color-coral);
+  --tl-fade-line: rgba(238,242,249,0.6);
+  --tl-volume-line: var(--color-text-primary);
+  --tl-keyframe-dot: var(--color-text-primary);
+  --tl-playhead: var(--color-text-primary);
+  --tl-loop-fill: rgba(255,116,110,0.12);
+  --tl-loop-border: var(--color-coral);
+  --tl-marker: var(--color-warning);
+  --tl-take-a: var(--color-panel);
+  --tl-take-b: var(--color-panel-nested);
+
+  /* Canvas: mixer meter */
+  --meter-low: var(--color-lime);
+  --meter-mid: var(--color-warning);
+  --meter-hot: var(--color-record);
+  --meter-peak: var(--color-record);
+  --fader-track: var(--color-border-default);
+  --fader-cap: var(--color-text-primary);
+
+  /* Canvas: spectrum / mastering */
+  --spectrum-bar: var(--color-blue);
+  --spectrum-reference-line: rgba(238,242,249,0.4);
+  --lufs-under: var(--color-blue);
+  --lufs-on-target: var(--color-lime);
+  --lufs-over: var(--color-record);
+  --eq-curve-line: var(--color-coral);
+
+  /* Waveform */
+  --waveform-fill: var(--color-blue);
+  --waveform-selected: var(--color-coral);
+}
+
+[data-theme="light"] {
+  --color-bg: #eef2f9;
+  --color-chrome: #e5e8ec;
+  --color-panel: #ffffff;
+  --color-panel-nested: #f3f4f6;
+  --color-panel-deep: #dcdee1;
+  --color-field: #ffffff;
+  --color-hover: #eceef1;
+  --color-selected: #e3e6ea;
+  --color-pressed: #d7dae0;
+
+  --color-border-subtle: rgba(8,11,18,0.06);
+  --color-border-default: rgba(8,11,18,0.12);
+  --color-border-strong: rgba(8,11,18,0.24);
+
+  --color-text-primary: #080b12;
+  --color-text-secondary: #343b45;
+  --color-text-muted: #5d646f;
+
+  /* Accents stay the same hue family; ink flips */
+  --color-coral: #ff5851;
+  --color-coral-hover: #ff6b64;
+  --color-coral-pressed: #e6423c;
+  --color-coral-ink: #ffffff;
+
+  --color-lime: #5f9a12;
+  --color-lime-ink: #ffffff;
+
+  --color-blue: #0f8fe0;
+  --color-blue-ink: #ffffff;
+
+  --color-record: #d4232a;
+  --color-success: #23984a;
+  --color-warning: #b3860a;
+  --color-focus-ring: var(--color-blue);
+
+  --pr-note-fill: var(--color-lime);
+  --pr-note-selected: var(--color-coral);
+  --pr-note-ghost: rgba(8,11,18,0.16);
+  --pr-grid-bar: rgba(8,11,18,0.16);
+  --pr-grid-beat: rgba(8,11,18,0.09);
+  --pr-grid-sub: rgba(8,11,18,0.05);
+  --pr-key-white: #ffffff;
+  --pr-key-black: #dcdee1;
+
+  --tl-clip-fill: rgba(255,88,81,0.14);
+  --tl-clip-border: var(--color-coral);
+  --tl-fade-line: rgba(8,11,18,0.5);
+  --tl-volume-line: var(--color-text-primary);
+  --tl-keyframe-dot: var(--color-text-primary);
+  --tl-playhead: var(--color-text-primary);
+  --tl-loop-fill: rgba(255,88,81,0.1);
+  --tl-loop-border: var(--color-coral);
+  --tl-marker: var(--color-warning);
+  --tl-take-a: var(--color-panel);
+  --tl-take-b: var(--color-panel-nested);
+
+  --meter-low: var(--color-lime);
+  --meter-mid: var(--color-warning);
+  --meter-hot: var(--color-record);
+  --meter-peak: var(--color-record);
+  --fader-track: var(--color-border-default);
+  --fader-cap: var(--color-text-primary);
+
+  --spectrum-bar: var(--color-blue);
+  --spectrum-reference-line: rgba(8,11,18,0.35);
+  --lufs-under: var(--color-blue);
+  --lufs-on-target: var(--color-lime);
+  --lufs-over: var(--color-record);
+  --eq-curve-line: var(--color-coral);
+
+  --waveform-fill: var(--color-blue);
+  --waveform-selected: var(--color-coral);
+}

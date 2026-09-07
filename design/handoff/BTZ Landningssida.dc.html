@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(15% 0.015 260) radial-gradient(oklch(100% 0 0 / 0.05) 1px, transparent 1px); background-size: 28px 28px; font-family: 'Sora', sans-serif; }
+  @keyframes btz-pulse { 0%, 100% { transform: scaleY(0.35); } 50% { transform: scaleY(1); } }
+  @keyframes btz-float { 0%, 100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(-12px, 14px) rotate(6deg); } }
+  @keyframes btz-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes btz-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+  @keyframes btz-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes btz-rotate-rev { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+  @keyframes btz-glow-pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+  @keyframes btz-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+</style>
+</helmet>
+
+<div style="background: oklch(15% 0.015 260); color: oklch(96% 0.01 260); min-height: 100vh; overflow-x: hidden;">
+
+  <!-- Nav -->
+  <nav style="display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; max-width: 1240px; margin: 0 auto; padding: 24px 24px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="display: flex; align-items: flex-end; gap: 3px; height: 22px;">
+        <div style="width: 5px; height: 60%; background: oklch(75% 0.19 25); border-radius: 2px;"></div>
+        <div style="width: 5px; height: 100%; background: oklch(75% 0.19 130); border-radius: 2px;"></div>
+        <div style="width: 5px; height: 40%; background: oklch(75% 0.19 250); border-radius: 2px;"></div>
+      </div>
+      <span style="font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -0.02em;">BTZ</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 32px; flex-wrap: wrap;">
+      <a href="#features" style="color: oklch(85% 0.01 260); text-decoration: none; font-size: 15px;">Features</a>
+      <a href="#pricing" style="color: oklch(85% 0.01 260); text-decoration: none; font-size: 15px;">Pricing</a>
+      <a href="#download" style="color: oklch(85% 0.01 260); text-decoration: none; font-size: 15px;">Download</a>
+    </div>
+    <a href="#pricing" style="background: oklch(96% 0.01 260); color: oklch(15% 0.015 260); text-decoration: none; padding: 11px 22px; border-radius: 100px; font-weight: 600; font-size: 15px; transition: background 0.3s cubic-bezier(0.16,1,0.3,1);" style-hover="background: oklch(75% 0.19 25); color: oklch(15% 0.05 25);">Start free</a>
+  </nav>
+
+  <!-- Hero -->
+  <section style="max-width: 1240px; margin: 0 auto; padding: 60px 24px 100px; display: grid; grid-template-columns: minmax(0,1.1fr) minmax(0,0.9fr); gap: 48px; align-items: center; position: relative;">
+    <div style="position: relative; z-index: 1;">
+      <div style="display: inline-block; padding: 6px 14px; border-radius: 100px; background: oklch(19% 0.02 260); color: oklch(75% 0.19 25); font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 24px; animation: btz-rise 0.7s ease-out both;">Your music studio, reimagined</div>
+      <h1 style="font-family: 'Manrope', sans-serif; font-weight: 700; font-size: clamp(38px, 5.5vw, 68px); line-height: 1.03; letter-spacing: -0.02em; margin: 0 0 22px; animation: btz-rise 0.7s ease-out 0.08s both;">Your studio.<br>Anywhere.<br>Right in the browser.</h1>
+      <p style="font-size: clamp(17px, 1.6vw, 20px); line-height: 1.55; color: oklch(78% 0.02 260); max-width: 480px; margin: 0 0 36px; animation: btz-rise 0.7s ease-out 0.16s both;">Drums, piano roll, mixer and mastering, all in one workspace. No installs, no friction — just the idea and you.</p>
+      <div style="display: flex; gap: 16px; flex-wrap: wrap; animation: btz-rise 0.7s ease-out 0.24s both;">
+        <a href="#pricing" style="background: oklch(75% 0.19 25); color: oklch(15% 0.05 25); text-decoration: none; padding: 15px 28px; border-radius: 100px; font-weight: 700; font-size: 16px; transition: background 0.3s cubic-bezier(0.16,1,0.3,1), transform 0.3s cubic-bezier(0.16,1,0.3,1);" style-hover="background: oklch(80% 0.19 25); transform: translateY(-2px);">Start free</a>
+        <a href="#features" style="background: transparent; color: oklch(96% 0.01 260); text-decoration: none; padding: 15px 28px; border-radius: 100px; font-weight: 600; font-size: 16px; border: 1px solid oklch(100% 0 0 / 0.16); transition: border-color 0.3s cubic-bezier(0.16,1,0.3,1), transform 0.3s cubic-bezier(0.16,1,0.3,1);" style-hover="border-color: oklch(75% 0.19 25); border-width: 2px; transform: translateY(-2px);">See the features</a>
+      </div>
+      <p style="margin: 24px 0 0; font-size: 14px; color: oklch(60% 0.02 260);">No account needed to try it.</p>
+    </div>
+    <div style="position: relative; height: 420px; display: flex; align-items: center; justify-content: center;">
+      <div style="position: absolute; width: 320px; height: 320px; border-radius: 50%; background: oklch(75% 0.19 25); opacity: 0.16; filter: blur(70px);"></div>
+      <div style="position: relative; z-index: 1; width: 300px; display: flex; flex-direction: column; gap: 16px; padding: 24px; background: oklch(19% 0.02 260); border-radius: 12px; border: 1px solid oklch(100% 0 0 / 0.08); overflow: hidden;">
+        <div style="position: absolute; top: -1px; left: -1px; width: 16px; height: 16px; border-top: 2px solid oklch(75% 0.19 25); border-left: 2px solid oklch(75% 0.19 25); border-radius: 4px 0 0 0;"></div>
+        <div style="position: absolute; top: -1px; right: -1px; width: 16px; height: 16px; border-top: 2px solid oklch(75% 0.19 25); border-right: 2px solid oklch(75% 0.19 25); border-radius: 0 4px 0 0;"></div>
+        <div style="position: absolute; bottom: -1px; left: -1px; width: 16px; height: 16px; border-bottom: 2px solid oklch(75% 0.19 25); border-left: 2px solid oklch(75% 0.19 25); border-radius: 0 0 0 4px;"></div>
+        <div style="position: absolute; bottom: -1px; right: -1px; width: 16px; height: 16px; border-bottom: 2px solid oklch(75% 0.19 25); border-right: 2px solid oklch(75% 0.19 25); border-radius: 0 0 4px 0;"></div>
+        <div style="display: flex; align-items: center; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: oklch(50% 0.02 260); letter-spacing: 0.03em;">
+          <span>SESSION_04471</span>
+          <span style="color: oklch(75% 0.19 130);">● LIVE</span>
+        </div>
+        <div style="position: relative; height: 140px; display: flex; align-items: center; justify-content: center;">
+          <div style="position: absolute; width: 140px; height: 140px; border-radius: 50%; background: conic-gradient(oklch(75% 0.19 25) 0deg, transparent 70deg, transparent 360deg); animation: btz-rotate 4s linear infinite; -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px)); opacity: 0.9;"></div>
+          <div style="position: absolute; width: 140px; height: 140px; border-radius: 50%; border: 1px solid oklch(75% 0.19 25 / 0.15);"></div>
+          <div style="position: absolute; width: 108px; height: 108px; border-radius: 50%; border: 1px dashed oklch(75% 0.19 25 / 0.3); animation: btz-rotate-rev 14s linear infinite;"></div>
+          <div style="position: absolute; width: 108px; height: 108px; animation: btz-rotate 3s linear infinite;">
+            <div style="position: absolute; top: -3px; left: 50%; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: oklch(75% 0.19 25); border: 1px solid oklch(75% 0.19 25);"></div>
+          </div>
+          <div style="position: relative; width: 78px; height: 78px; border-radius: 50%; background: oklch(19% 0.02 260); border: 1px solid oklch(75% 0.19 25 / 0.4); display: flex; align-items: center; justify-content: center;">
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 600; color: oklch(75% 0.19 25);">128</span>
+          </div>
+        </div>
+        <div style="height: 1px; background: oklch(100% 0 0 / 0.08);"></div>
+        <div style="display: flex; align-items: center; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: oklch(55% 0.02 260);">
+          <span>128.00 BPM</span>
+          <span style="color: oklch(75% 0.19 25); font-weight: 600; display: flex; align-items: center; gap: 6px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(75% 0.19 25); animation: btz-blink 1.4s ease-in-out infinite;"></span>Playing</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" style="max-width: 1240px; margin: 0 auto; padding: 40px 24px 100px;">
+    <div style="max-width: 560px; margin: 0 0 48px;">
+      <h2 style="font-family: 'Manrope', sans-serif; font-weight: 700; font-size: clamp(28px, 3.5vw, 40px); letter-spacing: -0.01em; margin: 0 0 14px;">Everything you need. One window.</h2>
+      <p style="font-size: 17px; line-height: 1.6; color: oklch(75% 0.02 260); margin: 0;">Six tools, one workspace. Build the beat, shape the melody, mix and release — without switching apps.</p>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
+
+      <div style="background: oklch(19% 0.02 260); border: 1px solid oklch(100% 0 0 / 0.06); border-radius: 12px; padding: 28px; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), border-color 0.35s cubic-bezier(0.16,1,0.3,1);" style-hover="transform: translateY(-4px); border-color: oklch(75% 0.19 25);">
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; width: 68px; margin-bottom: 20px;">
+          <div style="aspect-ratio: 1; border-radius: 3px; background: oklch(75% 0.19 25);"></div>
+          <div style="aspect-ratio: 1; border-radius: 3px; background: oklch(30% 0.02 260);"></div>
+          <div style="aspect-ratio: 1; border-radius: 3px; background: oklch(30% 0.02 260);"></div>
+          <div style="aspect-ratio: 1; border-radius: 3px; background: oklch(75% 0.19 25);"></div>
+          <div style="aspect-ratio: 1; border-radius: 3px; background: oklch(30% 0.02 260);"></div>
+          <div style="aspect-ratio: 1; border-radius: 3px; background: oklch(75% 0.19 25);"></div>
+          <div style="aspect-ratio: 1; border-radius: 3px; background: oklch(30% 0.02 260);"></div>
+          <div style="aspect-ratio: 1; border-radius: 3px; background: oklch(30% 0.02 260);"></div>
+        </div>
+        <h3 style="font-family: 'Manrope', sans-serif; font-size: 19px; font-weight: 600; margin: 0 0 8px;">Drum machine</h3>
+        <p style="font-size: 15px; line-height: 1.55; color: oklch(72% 0.02 260); margin: 0;">Build beats in seconds with a step sequencer, ready-made kits and full control over the groove.</p>
+      </div>
+
+      <div style="background: oklch(19% 0.02 260); border: 1px solid oklch(100% 0 0 / 0.06); border-radius: 12px; padding: 28px; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), border-color 0.35s cubic-bezier(0.16,1,0.3,1);" style-hover="transform: translateY(-4px); border-color: oklch(75% 0.19 130);">
+        <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; margin-bottom: 20px;">
+          <div style="height: 8px; width: 40%; background: oklch(75% 0.19 130); border-radius: 4px;"></div>
+          <div style="height: 8px; width: 70%; margin-left: 15%; background: oklch(75% 0.19 130); border-radius: 4px;"></div>
+          <div style="height: 8px; width: 30%; margin-left: 55%; background: oklch(75% 0.19 130); border-radius: 4px;"></div>
+        </div>
+        <h3 style="font-family: 'Manrope', sans-serif; font-size: 19px; font-weight: 600; margin: 0 0 8px;">Piano roll</h3>
+        <p style="font-size: 15px; line-height: 1.55; color: oklch(72% 0.02 260); margin: 0;">Draw in chords and melodies by hand, or record live with a MIDI keyboard.</p>
+      </div>
+
+      <div style="background: oklch(19% 0.02 260); border: 1px solid oklch(100% 0 0 / 0.06); border-radius: 12px; padding: 28px; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), border-color 0.35s cubic-bezier(0.16,1,0.3,1);" style-hover="transform: translateY(-4px); border-color: oklch(75% 0.19 250);">
+        <div style="display: flex; align-items: flex-end; gap: 8px; height: 42px; margin-bottom: 20px;">
+          <div style="width: 6px; height: 55%; background: oklch(75% 0.19 250); border-radius: 3px;"></div>
+          <div style="width: 6px; height: 100%; background: oklch(75% 0.19 250); border-radius: 3px;"></div>
+          <div style="width: 6px; height: 70%; background: oklch(75% 0.19 250); border-radius: 3px;"></div>
+          <div style="width: 6px; height: 35%; background: oklch(75% 0.19 250); border-radius: 3px;"></div>
+        </div>
+        <h3 style="font-family: 'Manrope', sans-serif; font-size: 19px; font-weight: 600; margin: 0 0 8px;">Mixer</h3>
+        <p style="font-size: 15px; line-height: 1.55; color: oklch(72% 0.02 260); margin: 0;">Balance every track with EQ, compression and sends — visual, in real time.</p>
+      </div>
+
+      <div style="background: oklch(19% 0.02 260); border: 1px solid oklch(100% 0 0 / 0.06); border-radius: 12px; padding: 28px; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), border-color 0.35s cubic-bezier(0.16,1,0.3,1);" style-hover="transform: translateY(-4px); border-color: oklch(75% 0.19 130);">
+        <div style="width: 52px; height: 52px; border-radius: 50%; border: 6px solid oklch(75% 0.19 130); margin-bottom: 20px;"></div>
+        <h3 style="font-family: 'Manrope', sans-serif; font-size: 19px; font-weight: 600; margin: 0 0 8px;">Mastering</h3>
+        <p style="font-size: 15px; line-height: 1.55; color: oklch(72% 0.02 260); margin: 0;">Give the track its final polish with one click, or fine-tune every detail yourself.</p>
+      </div>
+
+      <div style="background: oklch(19% 0.02 260); border: 1px solid oklch(100% 0 0 / 0.06); border-radius: 12px; padding: 28px; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), border-color 0.35s cubic-bezier(0.16,1,0.3,1);" style-hover="transform: translateY(-4px); border-color: oklch(75% 0.19 25);">
+        <div style="width: 24px; height: 24px; border-radius: 50%; background: oklch(75% 0.19 25); margin-bottom: 20px;"></div>
+        <h3 style="font-family: 'Manrope', sans-serif; font-size: 19px; font-weight: 600; margin: 0 0 8px;">Recording</h3>
+        <p style="font-size: 15px; line-height: 1.55; color: oklch(72% 0.02 260); margin: 0;">Sing an idea, record a guitar, or drag an audio file straight into the project.</p>
+      </div>
+
+      <div style="background: oklch(19% 0.02 260); border: 1px solid oklch(100% 0 0 / 0.06); border-radius: 12px; padding: 28px; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), border-color 0.35s cubic-bezier(0.16,1,0.3,1);" style-hover="transform: translateY(-4px); border-color: oklch(75% 0.19 250);">
+        <div style="display: flex; align-items: flex-end; gap: 4px; height: 30px; margin-bottom: 20px;">
+          <div style="width: 5px; height: 100%; background: oklch(75% 0.19 250); border-radius: 2px;"></div>
+          <div style="width: 5px; height: 60%; background: oklch(75% 0.19 250); border-radius: 2px;"></div>
+          <div style="width: 5px; height: 80%; background: oklch(75% 0.19 250); border-radius: 2px;"></div>
+          <div style="width: 5px; height: 40%; background: oklch(75% 0.19 250); border-radius: 2px;"></div>
+          <div style="width: 5px; height: 90%; background: oklch(75% 0.19 250); border-radius: 2px;"></div>
+          <div style="width: 5px; height: 55%; background: oklch(75% 0.19 250); border-radius: 2px;"></div>
+        </div>
+        <h3 style="font-family: 'Manrope', sans-serif; font-size: 19px; font-weight: 600; margin: 0 0 8px;">Sound library</h3>
+        <p style="font-size: 15px; line-height: 1.55; color: oklch(72% 0.02 260); margin: 0;">Thousands of loops and samples sorted by genre, ready to drag in.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Offline strip -->
+  <section style="background: oklch(96% 0.01 260); color: oklch(15% 0.015 260); padding: 56px 24px;">
+    <div style="max-width: 1240px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;">
+      <h2 style="font-family: 'Manrope', sans-serif; font-weight: 700; font-size: clamp(24px, 3vw, 34px); letter-spacing: -0.01em; margin: 0; max-width: 620px;">Works offline. On the train, in the rehearsal room, without wifi — ideas don't wait.</h2>
+      <a href="#download" style="background: oklch(15% 0.015 260); color: oklch(96% 0.01 260); text-decoration: none; padding: 15px 28px; border-radius: 100px; font-weight: 600; font-size: 16px; white-space: nowrap;">Learn more</a>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section id="pricing" style="max-width: 1240px; margin: 0 auto; padding: 100px 24px;">
+    <div style="text-align: center; max-width: 560px; margin: 0 auto 40px;">
+      <h2 style="font-family: 'Manrope', sans-serif; font-weight: 700; font-size: clamp(28px, 3.5vw, 40px); letter-spacing: -0.01em; margin: 0 0 14px;">Simple pricing</h2>
+      <p style="font-size: 17px; line-height: 1.6; color: oklch(75% 0.02 260); margin: 0;">Start free. Upgrade when you're ready to export for real.</p>
+    </div>
+
+    <div style="display: flex; justify-content: center; margin-bottom: 44px;">
+      <div style="display: inline-flex; background: oklch(19% 0.02 260); border-radius: 100px; padding: 4px; border: 1px solid oklch(100% 0 0 / 0.06);">
+        <button onClick="{{ toggleBilling }}" style="{{ monthlyBtnStyle }}">Monthly</button>
+        <button onClick="{{ toggleBilling }}" style="{{ yearlyBtnStyle }}">Yearly <span style="opacity: 0.7; font-weight: 500;">−20%</span></button>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 800px; margin: 0 auto;">
+      <div style="background: oklch(19% 0.02 260); border: 1px solid oklch(100% 0 0 / 0.06); border-radius: 14px; padding: 36px;">
+        <h3 style="font-family: 'Manrope', sans-serif; font-size: 20px; font-weight: 600; margin: 0 0 8px;">Free</h3>
+        <p style="font-size: 14px; color: oklch(70% 0.02 260); margin: 0 0 24px;">For trying things out and sketching ideas.</p>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 44px; font-weight: 700; margin-bottom: 24px;">0 kr</div>
+        <ul style="list-style: none; padding: 0; margin: 0 0 28px; display: flex; flex-direction: column; gap: 12px; font-size: 15px; color: oklch(85% 0.01 260);">
+          <li>Drum machine and piano roll</li>
+          <li>3 projects</li>
+          <li>Basic sound library</li>
+        </ul>
+        <a href="#" style="display: block; text-align: center; background: transparent; color: oklch(96% 0.01 260); text-decoration: none; padding: 13px; border-radius: 100px; font-weight: 600; font-size: 15px; border: 1px solid oklch(100% 0 0 / 0.16); transition: border-color 0.3s cubic-bezier(0.16,1,0.3,1);" style-hover="border-color: oklch(75% 0.19 25);">Get started</a>
+      </div>
+      <div style="background: oklch(75% 0.19 25 / 0.1); border: 1px solid oklch(75% 0.19 25 / 0.4); border-radius: 14px; padding: 36px;">
+        <h3 style="font-family: 'Manrope', sans-serif; font-size: 20px; font-weight: 600; margin: 0 0 8px;">Pro</h3>
+        <p style="font-size: 14px; color: oklch(70% 0.02 260); margin: 0 0 24px;">For finishing and exporting.</p>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 44px; font-weight: 700; margin-bottom: 4px;">{{ proPrice }} <span style="font-size: 17px; font-weight: 500; color: oklch(75% 0.02 260); font-family: 'Sora', sans-serif;">kr/mo</span></div>
+        <p style="font-size: 13px; color: oklch(70% 0.02 260); margin: 0 0 20px;">{{ proBillingNote }}</p>
+        <ul style="list-style: none; padding: 0; margin: 0 0 28px; display: flex; flex-direction: column; gap: 12px; font-size: 15px; color: oklch(90% 0.01 260);">
+          <li>Unlimited projects</li>
+          <li>Full sound library</li>
+          <li>Mastering and high-quality export</li>
+          <li>Offline mode</li>
+        </ul>
+        <a href="#" style="display: block; text-align: center; background: oklch(75% 0.19 25); color: oklch(15% 0.05 25); text-decoration: none; padding: 13px; border-radius: 100px; font-weight: 700; font-size: 15px; transition: background 0.3s cubic-bezier(0.16,1,0.3,1);" style-hover="background: oklch(80% 0.19 25);">Upgrade</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download -->
+  <section id="download" style="max-width: 1240px; margin: 0 auto; padding: 40px 24px 100px;">
+    <div style="max-width: 560px; margin: 0 0 40px;">
+      <h2 style="font-family: 'Manrope', sans-serif; font-weight: 700; font-size: clamp(28px, 3.5vw, 40px); letter-spacing: -0.01em; margin: 0 0 14px;">Take it with you</h2>
+      <p style="font-size: 17px; line-height: 1.6; color: oklch(75% 0.02 260); margin: 0;">Same project, same library — in the browser, on the desktop, or in your pocket.</p>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+      <div style="background: oklch(19% 0.02 260); border: 1px solid oklch(100% 0 0 / 0.06); border-radius: 12px; padding: 28px;">
+        <h3 style="font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 600; margin: 0 0 8px;">Web</h3>
+        <p style="font-size: 14px; line-height: 1.55; color: oklch(72% 0.02 260); margin: 0 0 20px;">Open it instantly, nothing to install.</p>
+        <a href="#" style="color: oklch(75% 0.19 25); text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block; transition: transform 0.25s cubic-bezier(0.16,1,0.3,1);" style-hover="transform: translateX(4px);">Open the studio →</a>
+      </div>
+      <div style="background: oklch(19% 0.02 260); border: 1px solid oklch(100% 0 0 / 0.06); border-radius: 12px; padding: 28px;">
+        <h3 style="font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 600; margin: 0 0 8px;">Desktop</h3>
+        <p style="font-size: 14px; line-height: 1.55; color: oklch(72% 0.02 260); margin: 0 0 20px;">For Mac and Windows, with offline mode.</p>
+        <a href="#" style="color: oklch(75% 0.19 25); text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block; transition: transform 0.25s cubic-bezier(0.16,1,0.3,1);" style-hover="transform: translateX(4px);">Download →</a>
+      </div>
+      <div style="background: oklch(19% 0.02 260); border: 1px solid oklch(100% 0 0 / 0.06); border-radius: 12px; padding: 28px;">
+        <h3 style="font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 600; margin: 0 0 8px;">Mobile</h3>
+        <p style="font-size: 14px; line-height: 1.55; color: oklch(72% 0.02 260); margin: 0 0 20px;">iOS and Android, for ideas on the go.</p>
+        <a href="#" style="color: oklch(75% 0.19 25); text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block; transition: transform 0.25s cubic-bezier(0.16,1,0.3,1);" style-hover="transform: translateX(4px);">Download →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="border-top: 1px solid oklch(100% 0 0 / 0.08);">
+    <div style="max-width: 1240px; margin: 0 auto; padding: 64px 24px 40px; display: flex; flex-direction: column; gap: 40px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 32px; flex-wrap: wrap;">
+        <div style="max-width: 340px;">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: flex-end; gap: 3px; height: 20px;">
+              <div style="width: 4px; height: 60%; background: oklch(75% 0.19 25); border-radius: 2px;"></div>
+              <div style="width: 4px; height: 100%; background: oklch(75% 0.19 130); border-radius: 2px;"></div>
+              <div style="width: 4px; height: 40%; background: oklch(75% 0.19 250); border-radius: 2px;"></div>
+            </div>
+            <span style="font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 20px;">BTZ</span>
+          </div>
+          <p style="font-size: 14px; line-height: 1.6; color: oklch(65% 0.02 260); margin: 0;">The music studio that fits in your browser.</p>
+        </div>
+        <div style="display: flex; gap: 64px; flex-wrap: wrap;">
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <span style="font-size: 13px; font-weight: 600; color: oklch(55% 0.02 260); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px;">Product</span>
+            <a href="#features" style="color: oklch(80% 0.01 260); text-decoration: none; font-size: 14px;">Features</a>
+            <a href="#pricing" style="color: oklch(80% 0.01 260); text-decoration: none; font-size: 14px;">Pricing</a>
+            <a href="#download" style="color: oklch(80% 0.01 260); text-decoration: none; font-size: 14px;">Download</a>
+          </div>
+        </div>
+        <a href="#pricing" style="background: oklch(96% 0.01 260); color: oklch(15% 0.015 260); text-decoration: none; padding: 13px 24px; border-radius: 100px; font-weight: 600; font-size: 15px; align-self: flex-start; transition: background 0.3s cubic-bezier(0.16,1,0.3,1);" style-hover="background: oklch(75% 0.19 25);">Start your first track</a>
+      </div>
+      <p style="font-size: 13px; color: oklch(50% 0.02 260); margin: 0;">© 2026 BTZ.</p>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { yearly: false };
+  renderVals() {
+    const y = this.state.yearly;
+    const activeStyle = "border: none; border-bottom: 2px solid oklch(75% 0.19 25); background: oklch(96% 0.01 260); color: oklch(15% 0.015 260); padding: 9px 20px; border-radius: 100px; font-weight: 600; font-size: 14px; cursor: pointer;";
+    const inactiveStyle = "border: none; background: transparent; color: oklch(80% 0.01 260); padding: 9px 20px; border-radius: 100px; font-weight: 600; font-size: 14px; cursor: pointer;";
+    return {
+      toggleBilling: () => this.setState(s => ({ yearly: !s.yearly })),
+      monthlyBtnStyle: y ? inactiveStyle : activeStyle,
+      yearlyBtnStyle: y ? activeStyle : inactiveStyle,
+      proPrice: y ? "79" : "99",
+      proBillingNote: y ? "Billed yearly" : "Billed monthly",
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: oklch(90% 0.005 260); font-family: 'Sora', sans-serif; }
+  @keyframes fuse-boot { 0% { opacity: 0; transform: scale(0.98); } 100% { opacity: 1; transform: scale(1); } }
+  @keyframes fuse-meter { 0%, 100% { transform: scaleY(0.5); } 50% { transform: scaleY(1); } }
+</style>
+</helmet>
+
+<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 30px 16px;">
+  <div style="max-width: 1400px; width: 100%;">
+    <p style="text-align: center; font-size: 13px; color: oklch(45% 0.02 260); margin: 0 0 14px; text-transform: uppercase; letter-spacing: 0.06em;">Concept — Arrangement view</p>
+
+    <div style="width: 100%; height: 780px; background: oklch(15% 0.015 260) radial-gradient(oklch(100% 0 0 / 0.04) 1px, transparent 1px); background-size: 24px 24px; color: oklch(96% 0.01 260); font-family: 'Sora', sans-serif; border-radius: 12px; border: 1px solid oklch(100% 0 0 / 0.08); position: relative; overflow: hidden; display: flex; flex-direction: column; animation: fuse-boot 0.4s cubic-bezier(0.16,1,0.3,1) both;">
+
+      <div style="position: absolute; top: 0; left: 0; width: 18px; height: 18px; border-top: 2px solid oklch(75% 0.19 25 / 0.5); border-left: 2px solid oklch(75% 0.19 25 / 0.5); z-index: 3;"></div>
+      <div style="position: absolute; top: 0; right: 0; width: 18px; height: 18px; border-top: 2px solid oklch(75% 0.19 25 / 0.5); border-right: 2px solid oklch(75% 0.19 25 / 0.5); z-index: 3;"></div>
+      <div style="position: absolute; bottom: 0; left: 0; width: 18px; height: 18px; border-bottom: 2px solid oklch(75% 0.19 25 / 0.5); border-left: 2px solid oklch(75% 0.19 25 / 0.5); z-index: 3;"></div>
+      <div style="position: absolute; bottom: 0; right: 0; width: 18px; height: 18px; border-bottom: 2px solid oklch(75% 0.19 25 / 0.5); border-right: 2px solid oklch(75% 0.19 25 / 0.5); z-index: 3;"></div>
+
+      <!-- Top bar -->
+      <div style="display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-bottom: 1px solid oklch(100% 0 0 / 0.08); flex-shrink: 0;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="display: flex; align-items: flex-end; gap: 3px; height: 16px;">
+            <div style="width: 4px; height: 60%; background: oklch(75% 0.19 25); border-radius: 2px;"></div>
+            <div style="width: 4px; height: 100%; background: oklch(75% 0.19 130); border-radius: 2px;"></div>
+            <div style="width: 4px; height: 40%; background: oklch(75% 0.19 250); border-radius: 2px;"></div>
+          </div>
+          <span style="font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 15px; flex-shrink: 0;">Fuse</span>
+        </div>
+        <span style="font-size: 11px; color: oklch(60% 0.02 260); flex-shrink: 0;">File</span>
+        <span style="font-size: 11px; color: oklch(60% 0.02 260); flex-shrink: 0;">Edit</span>
+        <span style="font-size: 11px; color: oklch(60% 0.02 260); flex-shrink: 0;">View</span>
+        <div style="flex-shrink: 1; min-width: 0; width: 140px; background: oklch(21% 0.02 260); border: 1px solid oklch(100% 0 0 / 0.08); border-radius: 8px; padding: 7px 10px; font-size: 11px; color: oklch(50% 0.02 260); display: flex; align-items: center; justify-content: space-between; overflow: hidden;">
+          <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Search…</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: oklch(45% 0.02 260); border: 1px solid oklch(100% 0 0 / 0.1); border-radius: 4px; padding: 1px 5px; flex-shrink: 0; margin-left: 4px;">⌘K</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+          <div style="width: 28px; height: 28px; border-radius: 8px; background: oklch(21% 0.02 260); display: flex; align-items: center; justify-content: center; font-size: 12px;">▶</div>
+          <div style="width: 28px; height: 28px; border-radius: 8px; background: oklch(21% 0.02 260); display: flex; align-items: center; justify-content: center; font-size: 12px;">■</div>
+          <div style="width: 28px; height: 28px; border-radius: 8px; background: oklch(63% 0.22 25); display: flex; align-items: center; justify-content: center; font-size: 12px;">●</div>
+        </div>
+        <div style="display: inline-flex; align-items: center; gap: 2px; background: oklch(21% 0.02 260); border-radius: 8px; padding: 3px; flex-shrink: 0;">
+          <div style="padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; border-bottom: 2px solid oklch(63% 0.22 25); color: oklch(63% 0.22 25); white-space: nowrap;">MIC / LINE</div>
+        </div>
+        <div style="display: inline-flex; align-items: center; gap: 2px; background: oklch(21% 0.02 260); border-radius: 8px; padding: 3px; flex-shrink: 0;">
+          <div style="padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; background: oklch(96% 0.01 260); color: oklch(15% 0.015 260); border-bottom: 2px solid oklch(75% 0.19 25);">PAT</div>
+          <div style="padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 500; color: oklch(60% 0.02 260);">SONG</div>
+        </div>
+        <div style="text-align: right; flex-shrink: 0;">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; white-space: nowrap;">001:1:00</div>
+          <div style="font-size: 8px; color: oklch(50% 0.02 260); text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;">Bar:Beat:Tick</div>
+        </div>
+        <div style="text-align: right; flex-shrink: 0;">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: oklch(75% 0.19 25);">130.0</div>
+          <div style="font-size: 8px; color: oklch(50% 0.02 260); text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;">Tempo</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0; border: 1px solid oklch(100% 0 0 / 0.1); border-radius: 6px; overflow: hidden; flex-shrink: 0;">
+          <div style="font-size: 10px; color: oklch(60% 0.02 260); padding: 5px 7px; white-space: nowrap; border-right: 1px solid oklch(100% 0 0 / 0.1);">MET</div>
+          <div style="font-size: 10px; color: oklch(60% 0.02 260); padding: 5px 7px; white-space: nowrap; border-right: 1px solid oklch(100% 0 0 / 0.1);">4/4</div>
+          <div style="font-size: 10px; color: oklch(60% 0.02 260); padding: 5px 7px; white-space: nowrap;">No count-in</div>
+        </div>
+        <div style="width: 28px; height: 28px; border-radius: 50%; border: 1px solid oklch(75% 0.19 25 / 0.5); display: flex; align-items: center; justify-content: center; font-size: 11px; font-family: 'JetBrains Mono', monospace; color: oklch(75% 0.19 25); flex-shrink: 0; margin-right: 4px;">M</div>
+      </div>
+
+      <div style="flex: 1; display: flex; min-height: 0;">
+
+        <!-- Sidebar -->
+        <div style="width: 200px; border-right: 1px solid oklch(100% 0 0 / 0.08); padding: 14px; display: flex; flex-direction: column; gap: 14px; flex-shrink: 0; overflow-y: auto;">
+          <div style="font-size: 10px; color: oklch(45% 0.02 260); text-transform: uppercase; letter-spacing: 0.05em;">Views</div>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <div style="padding: 8px 10px; border-radius: 6px; background: oklch(23% 0.02 260); border-left: 2px solid oklch(75% 0.19 25); font-size: 12px; font-weight: 600; color: oklch(75% 0.19 25);">Arrange</div>
+            <div style="padding: 8px 10px; border-radius: 6px; font-size: 12px; color: oklch(60% 0.02 260); border-left: 2px solid transparent;">Instr</div>
+            <div style="padding: 8px 10px; border-radius: 6px; font-size: 12px; color: oklch(60% 0.02 260); border-left: 2px solid transparent;">Piano</div>
+            <div style="padding: 8px 10px; border-radius: 6px; font-size: 12px; color: oklch(60% 0.02 260); border-left: 2px solid transparent;">Beat</div>
+            <div style="padding: 8px 10px; border-radius: 6px; font-size: 12px; color: oklch(60% 0.02 260); border-left: 2px solid transparent;">Mixer</div>
+            <div style="padding: 8px 10px; border-radius: 6px; font-size: 12px; color: oklch(60% 0.02 260); border-left: 2px solid transparent;">Master</div>
+          </div>
+          <div style="background: oklch(21% 0.02 260); border: 1px solid oklch(100% 0 0 / 0.08); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: oklch(50% 0.02 260);">Search sounds…</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <span style="font-size: 11px; padding: 5px 10px; border-radius: 100px; background: oklch(23% 0.02 260); border: 1px solid oklch(75% 0.19 25); color: oklch(75% 0.19 25);">808</span>
+            <span style="font-size: 11px; padding: 5px 10px; border-radius: 100px; background: oklch(23% 0.02 260); border: 1px solid oklch(100% 0 0 / 0.08); color: oklch(65% 0.02 260);">trap</span>
+            <span style="font-size: 11px; padding: 5px 10px; border-radius: 100px; background: oklch(23% 0.02 260); border: 1px solid oklch(100% 0 0 / 0.08); color: oklch(65% 0.02 260);">house</span>
+            <span style="font-size: 11px; padding: 5px 10px; border-radius: 100px; background: oklch(23% 0.02 260); border: 1px solid oklch(100% 0 0 / 0.08); color: oklch(65% 0.02 260);">techno</span>
+          </div>
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: oklch(50% 0.02 260); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px;"><span>Drums</span><span style="font-family: 'JetBrains Mono', monospace;">45</span></div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div style="display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-radius: 6px;"><div style="width: 18px; height: 18px; border-radius: 4px; background: oklch(75% 0.19 25); flex-shrink: 0;"></div><span style="font-size: 12px;">808 Deep</span></div>
+              <div style="display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-radius: 6px;"><div style="width: 18px; height: 18px; border-radius: 4px; background: oklch(75% 0.19 130); flex-shrink: 0;"></div><span style="font-size: 12px;">909 Punch</span></div>
+              <div style="display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-radius: 6px;"><div style="width: 18px; height: 18px; border-radius: 4px; background: oklch(75% 0.19 250); flex-shrink: 0;"></div><span style="font-size: 12px;">Acoustic Kick</span></div>
+              <div style="display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-radius: 6px;"><div style="width: 18px; height: 18px; border-radius: 4px; background: oklch(75% 0.19 25); flex-shrink: 0;"></div><span style="font-size: 12px;">Trap 808 Long</span></div>
+              <div style="display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-radius: 6px;"><div style="width: 18px; height: 18px; border-radius: 4px; background: oklch(75% 0.19 130); flex-shrink: 0;"></div><span style="font-size: 12px;">LoFi Thump</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Arrangement -->
+        <div style="flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0;">
+          <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+            <span style="font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 15px;">Arrangement</span>
+            <span style="font-size: 12px; color: oklch(55% 0.02 260);">Placing: <b style="color: oklch(90% 0.01 260); font-weight: 600;">Pattern 1</b></span>
+            <span style="font-size: 12px; color: oklch(55% 0.02 260);">Snap: <b style="color: oklch(90% 0.01 260); font-weight: 600;">1/16</b></span>
+            <div style="margin-left: auto; display: flex; gap: 8px;">
+              <div style="padding: 6px 12px; border-radius: 7px; background: oklch(75% 0.19 25); color: oklch(15% 0.05 25); font-size: 12px; font-weight: 700;">Select</div>
+              <div style="padding: 6px 12px; border-radius: 7px; border: 1px solid oklch(100% 0 0 / 0.12); font-size: 12px; color: oklch(70% 0.02 260);">Volume</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; font-size: 12px;">
+            <div style="padding: 6px 12px; border-radius: 7px; border: 1px solid oklch(100% 0 0 / 0.12); color: oklch(70% 0.02 260);">+ Track</div>
+            <div style="padding: 6px 12px; border-radius: 7px; border: 1px solid oklch(100% 0 0 / 0.12); color: oklch(70% 0.02 260);">− Track</div>
+            <div style="padding: 6px 12px; border-radius: 7px; border: 1px solid oklch(100% 0 0 / 0.12); color: oklch(70% 0.02 260);">Play song</div>
+            <div style="padding: 6px 12px; border-radius: 7px; border: 1px solid oklch(100% 0 0 / 0.12); color: oklch(70% 0.02 260);">+ Marker</div>
+            <div style="padding: 6px 12px; border-radius: 7px; border: 1px solid oklch(100% 0 0 / 0.12); color: oklch(70% 0.02 260);">Loop</div>
+          </div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: oklch(45% 0.02 260); margin-bottom: 2px;">1 clip · 7 bars</div>
+          <div style="flex: 1; background: oklch(12% 0.015 260); border-radius: 10px; position: relative; overflow: hidden; min-height: 0;">
+            <div style="display: flex; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: oklch(40% 0.02 260); padding: 6px 12px 0;">
+              <span style="width: 15%;">1</span><span style="width: 15%;">5</span><span style="width: 15%;">9</span><span style="width: 15%;">13</span><span style="width: 15%;">17</span>
+            </div>
+            <div style="position: absolute; top: 26px; left: 12px; width: 26%; height: 66px; background: oklch(75% 0.19 25 / 0.16); border: 1px solid oklch(75% 0.19 25); border-radius: 6px; padding: 6px 10px; font-size: 12px; font-weight: 600; color: oklch(90% 0.05 25);">Pattern 1</div>
+            <div style="position: absolute; inset: 26px 0 0 0; background-image: repeating-linear-gradient(to right, oklch(100% 0 0 / 0.05) 0, oklch(100% 0 0 / 0.05) 1px, transparent 1px, transparent 14.28%); "></div>
+          </div>
+        </div>
+
+        <!-- Mixer -->
+        <div style="width: 300px; border-left: 1px solid oklch(100% 0 0 / 0.08); padding: 14px; display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; overflow-y: auto;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span style="font-size: 11px; color: oklch(50% 0.02 260); text-transform: uppercase; letter-spacing: 0.05em;">Mixer</span>
+            <span style="font-size: 11px; color: oklch(75% 0.19 25); display: flex; align-items: center; gap: 3px;">Mastering →</span>
+          </div>
+          <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0;">
+              <div style="width: 26px; height: 26px; border-radius: 50%; border: 2px solid oklch(75% 0.19 25); font-size: 10px; display: flex; align-items: center; justify-content: center; color: oklch(75% 0.19 25); font-weight: 600;">C</div>
+              <div style="width: 4px; height: 110px; background: oklch(100% 0 0 / 0.1); border-radius: 2px; position: relative;"><div style="position: absolute; left: -6px; bottom: 60px; width: 16px; height: 8px; border-radius: 2px; background: oklch(96% 0.01 260);"></div></div>
+              <div style="display: flex; gap: 4px; font-size: 9px; color: oklch(50% 0.02 260);"><span>M</span><span>S</span></div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0;">
+              <div style="width: 26px; height: 26px; border-radius: 50%; border: 2px solid oklch(75% 0.19 130); font-size: 10px; display: flex; align-items: center; justify-content: center; color: oklch(75% 0.19 130); font-weight: 600;">C</div>
+              <div style="width: 4px; height: 110px; background: oklch(100% 0 0 / 0.1); border-radius: 2px; position: relative;"><div style="position: absolute; left: -6px; bottom: 80px; width: 16px; height: 8px; border-radius: 2px; background: oklch(96% 0.01 260);"></div></div>
+              <div style="display: flex; gap: 4px; font-size: 9px; color: oklch(50% 0.02 260);"><span>M</span><span>S</span></div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0;">
+              <div style="width: 26px; height: 26px; border-radius: 50%; border: 2px solid oklch(75% 0.19 250); font-size: 10px; display: flex; align-items: center; justify-content: center; color: oklch(75% 0.19 250); font-weight: 600;">C</div>
+              <div style="width: 4px; height: 110px; background: oklch(100% 0 0 / 0.1); border-radius: 2px; position: relative;"><div style="position: absolute; left: -6px; bottom: 40px; width: 16px; height: 8px; border-radius: 2px; background: oklch(96% 0.01 260);"></div></div>
+              <div style="display: flex; gap: 4px; font-size: 9px; color: oklch(50% 0.02 260);"><span>M</span><span>S</span></div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0;">
+              <div style="width: 26px; height: 26px; border-radius: 50%; border: 2px solid oklch(75% 0.19 25); font-size: 10px; display: flex; align-items: center; justify-content: center; color: oklch(75% 0.19 25); font-weight: 600;">C</div>
+              <div style="width: 4px; height: 110px; background: oklch(100% 0 0 / 0.1); border-radius: 2px; position: relative;"><div style="position: absolute; left: -6px; bottom: 95px; width: 16px; height: 8px; border-radius: 2px; background: oklch(96% 0.01 260);"></div></div>
+              <div style="display: flex; gap: 4px; font-size: 9px; color: oklch(50% 0.02 260);"><span>M</span><span>S</span></div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 9px; color: oklch(45% 0.02 260);">
+            <span style="width: 34px; text-align: center;">Ins 1</span><span style="width: 34px; text-align: center;">Ins 2</span><span style="width: 34px; text-align: center;">Ins 3</span><span style="width: 34px; text-align: center;">Ins 4</span>
+          </div>
+
+          <div style="height: 1px; background: oklch(100% 0 0 / 0.08); margin: 4px 0;"></div>
+          <div style="font-size: 11px; color: oklch(50% 0.02 260); text-transform: uppercase; letter-spacing: 0.05em;">Mastering chain</div>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 4px; border-bottom: 1px solid oklch(100% 0 0 / 0.06);"><span style="display: flex; align-items: center; gap: 8px; font-size: 12px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(75% 0.19 25);"></span>Eq3</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: oklch(50% 0.02 260);">on</span></div>
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 4px; border-bottom: 1px solid oklch(100% 0 0 / 0.06);"><span style="display: flex; align-items: center; gap: 8px; font-size: 12px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(75% 0.19 25);"></span>Multiband</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: oklch(50% 0.02 260);">on</span></div>
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 4px; border-bottom: 1px solid oklch(100% 0 0 / 0.06);"><span style="display: flex; align-items: center; gap: 8px; font-size: 12px;"><span style="width: 6px; height: 6px; border-radius: 50%; border: 1px solid oklch(45% 0.02 260);"></span>Comp</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: oklch(45% 0.02 260);">off</span></div>
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 4px;"><span style="display: flex; align-items: center; gap: 8px; font-size: 12px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(75% 0.19 25);"></span>Dist</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: oklch(50% 0.02 260);">on</span></div>
+          </div>
+          <div style="margin-top: auto; display: flex; align-items: center; justify-content: space-between; font-size: 12px;">
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="width: 7px; height: 7px; border-radius: 50%; background: oklch(75% 0.19 25);"></span>Clean master</span>
+            <span style="font-family: 'JetBrains Mono', monospace; color: oklch(60% 0.02 260);">−14 LUFS</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom bar -->
+      <div style="display: flex; align-items: center; gap: 16px; padding: 10px 18px; border-top: 1px solid oklch(100% 0 0 / 0.08); font-size: 12px; color: oklch(50% 0.02 260); flex-shrink: 0;">
+        <span>Press PLAY to start. Browse the Browser on the left.</span>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 11px;">
+          <span style="border: 1px solid oklch(75% 0.19 25); color: oklch(75% 0.19 25); border-radius: 100px; padding: 5px 14px; font-family: 'Sora', sans-serif; font-weight: 600;">Install app</span>
+          <div style="display: flex; align-items: flex-end; gap: 2px; height: 12px;">
+            <div style="width: 3px; height: 100%; background: oklch(75% 0.19 25); border-radius: 1px; transform-origin: bottom; animation: fuse-meter 0.47s ease-in-out infinite;"></div>
+            <div style="width: 3px; height: 100%; background: oklch(75% 0.19 25); border-radius: 1px; transform-origin: bottom; animation: fuse-meter 0.47s ease-in-out infinite 0.16s;"></div>
+            <div style="width: 3px; height: 100%; background: oklch(75% 0.19 25); border-radius: 1px; transform-origin: bottom; animation: fuse-meter 0.47s ease-in-out infinite 0.32s;"></div>
+          </div>
+          <span>Octave 4</span>
+          <span>130.0 BPM</span>
+          <span>PATTERN</span>
+        </div>
+      </div>
+    </div>
+    <p style="text-align: center; font-size: 14px; color: oklch(45% 0.02 260); margin: 16px 0 0;">Arrangement view — coral/lime/blue channel accents, monospace readouts, one HUD frame around the whole window.</p>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
