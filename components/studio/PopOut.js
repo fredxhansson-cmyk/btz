@@ -22,7 +22,7 @@ export default function PopOut({ title, theme, onClose, children }) {
     b.style.margin = '0';
     b.style.background = 'var(--bg)';
     b.style.color = 'var(--text)';
-    b.style.fontFamily = "'Instrument Sans', system-ui, -apple-system, sans-serif";
+    b.style.fontFamily = "'Manrope', system-ui, -apple-system, sans-serif";
     container.style.cssText = 'height:100vh;display:flex;flex-direction:column;overflow:hidden;';
     b.appendChild(container);
 

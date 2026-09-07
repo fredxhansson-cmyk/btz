@@ -37,11 +37,11 @@ export default function Pricing() {
   return (
     <>
       <Head><title>Fuse — Pricing</title></Head>
-      <main style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', fontFamily: "'Instrument Sans', system-ui, sans-serif", padding: 'clamp(28px,6vw,72px) 20px' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', fontFamily: "var(--font-ui, 'Manrope', system-ui, sans-serif)", padding: 'clamp(28px,6vw,72px) 20px' }}>
         <div style={{ maxWidth: 1040, margin: '0 auto' }}>
           <Link href="/" style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: 14 }}>← Back to the studio</Link>
-          <h1 style={{ fontSize: 'clamp(28px,5vw,44px)', fontWeight: 700, letterSpacing: '-0.02em', margin: '18px 0 6px' }}>
-            B<span style={{ color: 'var(--accent)' }}>TZ</span> pricing
+          <h1 style={{ fontSize: 'clamp(28px,5vw,44px)', fontWeight: 800, letterSpacing: '-0.02em', margin: '18px 0 6px' }}>
+            Fuse<span style={{ color: 'var(--accent)' }}> pricing</span>
           </h1>
           <p style={{ color: 'var(--text-3)', fontSize: 16, margin: '0 0 36px' }}>
             A full AI music studio in your browser — priced far below every desktop DAW.
@@ -50,12 +50,11 @@ export default function Pricing() {
             {PLANS.map((p) => (
               <div key={p.id} style={{
                 background: 'var(--card)', border: `1px solid ${p.accent ? 'var(--accent)' : 'var(--line)'}`,
-                borderRadius: 16, padding: 24, display: 'flex', flexDirection: 'column',
-                boxShadow: p.accent ? '0 0 40px -12px var(--accent-glow)' : 'none',
+                borderRadius: 14, padding: 24, display: 'flex', flexDirection: 'column',
               }}>
                 {p.accent && <span style={{ alignSelf: 'flex-start', fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--accent-ink)', background: 'var(--accent)', borderRadius: 999, padding: '3px 10px', marginBottom: 10 }}>Most popular</span>}
                 <div style={{ fontSize: 18, fontWeight: 600 }}>{p.name}</div>
-                <div style={{ margin: '10px 0 2px' }}><span style={{ fontSize: 34, fontWeight: 700 }}>{p.price}</span> <span style={{ color: 'var(--muted)', fontSize: 14 }}>{p.per}</span></div>
+                <div style={{ margin: '10px 0 2px' }}><span style={{ fontSize: 34, fontWeight: 700, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{p.price}</span> <span style={{ color: 'var(--muted)', fontSize: 14 }}>{p.per}</span></div>
                 <div style={{ color: 'var(--text-3)', fontSize: 14, marginBottom: 16 }}>{p.tagline}</div>
                 <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 22px', display: 'flex', flexDirection: 'column', gap: 9, flex: 1 }}>
                   {p.features.map((f) => (
