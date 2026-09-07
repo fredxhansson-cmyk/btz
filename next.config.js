@@ -6,7 +6,8 @@ const csp = [
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com https://js.stripe.com",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' data: https://fonts.gstatic.com",
-  "connect-src 'self' data: blob: https://*.clerk.accounts.dev https://*.clerk.com https://clerk-telemetry.com https://api.stripe.com",
+  // wss: = real-time collaboration signaling (WebRTC); replicate.delivery = AI stem outputs fetched client-side.
+  "connect-src 'self' data: blob: wss: https://*.clerk.accounts.dev https://*.clerk.com https://clerk-telemetry.com https://api.stripe.com https://replicate.delivery https://*.replicate.delivery",
   "worker-src 'self' blob:",
   "frame-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com https://js.stripe.com https://hooks.stripe.com https://accounts.google.com",
   "frame-ancestors 'none'",
