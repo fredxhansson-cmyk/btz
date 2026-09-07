@@ -92,8 +92,8 @@
    instead of rendering as a coloured emoji. Uses currentColor to inherit
    the button's text colour in every state. */
 .pauseGlyph {
-  display: inline-block; width: 12px; height: 13px; box-sizing: border-box;
-  border-left: 4px solid currentColor; border-right: 4px solid currentColor;
+  display: inline-block; width: 16px; height: 17px; box-sizing: border-box;
+  border-left: 5px solid currentColor; border-right: 5px solid currentColor;
   vertical-align: middle;
 }
 /* Record armed = solid record-red fill, no glow (BUILD_SPEC rule 3). */
