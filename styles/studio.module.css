@@ -416,7 +416,10 @@
 .muteOn { background: var(--rec); color: #fff; border-color: var(--rec); }
 .soloOn { background: var(--warn); color: var(--accent-ink); border-color: var(--warn); }
 .fxOn { background: var(--green); color: #052b0f; }
-.miniKnobs { display: flex; gap: 2px; }
+.miniKnobs { display: flex; gap: 4px; }
+/* Rack mini knobs are dial-only (no value label) — don't reserve the full
+   52px the labelled knobs need, or the row overflows and clips the INS badge. */
+.miniKnobs .knob { width: 26px; }
 .insBadge {
   background: var(--surface); border: 1px solid var(--line2); color: var(--text-3);
   font-size: 11.5px; padding: 4px 8px; border-radius: var(--r-4); cursor: pointer; flex: none;
