@@ -353,7 +353,7 @@
 .rackBody { flex: 1; min-height: 0; display: flex; padding: 16px 20px; }
 .rackScroll { flex: 1; overflow: auto; padding-bottom: 8px; position: relative; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); }
 .rulerRow { display: flex; position: sticky; top: 0; z-index: 3; background: var(--panel); border-bottom: 1px solid var(--line); }
-.chanLeftSpacer { width: 330px; flex: none; }
+.chanLeftSpacer { width: 408px; flex: none; }
 .ruler { position: relative; display: flex; height: 20px; }
 .rulerTick {
   flex: none; font-size: 10.5px; color: var(--muted); border-left: 1px solid var(--panel);
@@ -369,7 +369,23 @@
 .chanRow { display: flex; align-items: center; height: 56px; border-top: 1px solid var(--line-weak); }
 .chanRow:hover { background: rgba(255,255,255,0.02); }
 .chanSel { background: var(--selected); }
-.chanLeft { width: 330px; flex: none; display: flex; align-items: center; gap: 6px; padding: 0 12px; overflow: hidden; }
+.chanLeft { width: 408px; flex: none; display: flex; align-items: center; gap: 6px; padding: 0 12px; overflow: hidden; }
+/* Obvious grab handle for drag-to-reorder. */
+.chanGrip {
+  flex: none; cursor: grab; color: var(--text-3); font-size: 15px; line-height: 1;
+  padding: 4px 3px; border-radius: var(--r-4); user-select: none;
+}
+.chanGrip:hover { color: var(--text); background: var(--hover); }
+.chanGrip:active { cursor: grabbing; }
+/* Clearly-visible per-track reorder / delete buttons. */
+.rowAct {
+  width: 26px; height: 26px; border-radius: var(--r-4); flex: none; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--surface); border: 1px solid var(--line-3); color: var(--text-2);
+  font-size: 11px; line-height: 1;
+}
+.rowAct:hover { color: var(--text); border-color: var(--text-3); background: var(--hover); }
+.rowActDel:hover { color: var(--red); border-color: var(--red); background: rgba(255,90,90,0.12); }
 .chanColor { width: 4px; height: 30px; border-radius: var(--r-xs); flex: none; }
 .led { background: transparent; border: 0; padding: 0 2px; cursor: pointer; }
 .ledDot {
@@ -528,7 +544,7 @@
 
 @media (max-width: 900px) {
   .side { display: none; }
-  .chanLeft, .chanLeftSpacer { width: 200px; }
+  .chanLeft, .chanLeftSpacer { width: 320px; }
   .timeBox { display: none; }
 }
 
@@ -737,7 +753,7 @@
   .tabHint { display: none; }
   .step { width: 30px; height: 26px; }
   .miniKnobs, .insBadge { display: none; }
-  .chanLeft, .chanLeftSpacer { width: 170px; }
+  .chanLeft, .chanLeftSpacer { width: 240px; }
   .chanName { font-size: 12.5px; }
   .bigStep { width: 44px; height: 64px; }
   .dmBody { flex-direction: column; }

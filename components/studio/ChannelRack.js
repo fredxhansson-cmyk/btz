@@ -39,12 +39,13 @@ function ChannelRow({ channel, pattern, steps, selected, dnd }) {
     >
       <div className={s.chanLeft}>
         <span
-          className={s.chanColor}
-          style={{ background: channel.color, cursor: 'grab' }}
+          className={s.chanGrip}
           draggable
-          title="Drag to reorder"
+          title="Drag to reorder this track"
           onDragStart={dnd ? dnd.onDragStart : undefined}
-        />
+          aria-label="Drag to reorder"
+        >⠿</span>
+        <span className={s.chanColor} style={{ background: channel.color }} />
         <button
           type="button"
           className={s.led}
@@ -107,22 +108,22 @@ function ChannelRow({ channel, pattern, steps, selected, dnd }) {
         </button>
         <button
           type="button"
-          className={s.tinyBtn}
+          className={s.rowAct}
           title="Move track up"
           onClick={() => dispatch({ type: 'channel.move', id: channel.id, dir: -1 })}
         >▲</button>
         <button
           type="button"
-          className={s.tinyBtn}
+          className={s.rowAct}
           title="Move track down"
           onClick={() => dispatch({ type: 'channel.move', id: channel.id, dir: 1 })}
         >▼</button>
         <button
           type="button"
-          className={s.xBtn}
+          className={`${s.rowAct} ${s.rowActDel}`}
           title="Delete track"
           onClick={() => dispatch({ type: 'channel.remove', id: channel.id })}
-        >×</button>
+        >✕</button>
       </div>
 
       <div
