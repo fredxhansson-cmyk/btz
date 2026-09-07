@@ -6,6 +6,7 @@ import Browser from './Browser';
 import ChannelRack from './ChannelRack';
 import PianoRoll from './PianoRoll';
 import ArrangeView from './ArrangeView';
+import AskFuse from './AskFuse';
 import Mixer from './Mixer';
 import MixerColumn from './MixerColumn';
 import MasteringView from './Mastering';
@@ -473,6 +474,7 @@ function Workspace({ installPrompt, onInstalled }) {
           </>
         )}
       </footer>
+      {!ui.touch && <AskFuse />}
     </div>
   );
 }
