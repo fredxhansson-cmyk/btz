@@ -9,6 +9,7 @@ import ArrangeView from './ArrangeView';
 import AskFuse from './AskFuse';
 import CollabButton from './CollabButton';
 import WamPanel from './WamPanel';
+import MarketPanel from './MarketPanel';
 import Mixer from './Mixer';
 import MixerColumn from './MixerColumn';
 import MasteringView from './Mastering';
@@ -106,6 +107,7 @@ function Workspace({ installPrompt, onInstalled }) {
   const [cmdOpen, setCmdOpen] = useState(false);
   const [projectsOpen, setProjectsOpen] = useState(false);
   const [wamOpen, setWamOpen] = useState(false);
+  const [marketOpen, setMarketOpen] = useState(false);
 
   // Show the welcome guide on the first visit; reopenable via the Guide tab.
   useEffect(() => {
@@ -339,6 +341,7 @@ function Workspace({ installPrompt, onInstalled }) {
       {cmdOpen && <CommandPalette actions={commands} onClose={() => setCmdOpen(false)} />}
       {projectsOpen && <ProjectsModal onClose={() => setProjectsOpen(false)} />}
       {wamOpen && <WamPanel onClose={() => setWamOpen(false)} />}
+      {marketOpen && <MarketPanel onClose={() => setMarketOpen(false)} />}
       {detached.map((id) => (
         <PopOut key={id} title={labelFor(id)} theme={ui.theme} onClose={() => attach(id)}>
           {viewFor(id)}
@@ -384,6 +387,7 @@ function Workspace({ installPrompt, onInstalled }) {
             <button type="button" className={s.tabTool} onClick={() => setRecOpen(true)}>Record</button>
             <button type="button" className={s.tabTool} onClick={() => setUi({ pluginOpen: !ui.pluginOpen })}>Instrument</button>
             <button type="button" className={s.tabTool} onClick={() => setWamOpen(true)}>Plugins</button>
+            <button type="button" className={s.tabTool} onClick={() => setMarketOpen(true)}>Market</button>
             <button type="button" className={s.tabTool} onClick={detach}>Pop out</button>
             <button type="button" className={s.tabTool} onClick={() => setProjectsOpen(true)}>Projects</button>
             <button type="button" className={s.tabTool} onClick={() => setOnboard(true)}>Guide</button>
