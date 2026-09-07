@@ -1154,10 +1154,17 @@
   grid-auto-rows: min-content; align-content: start; overflow: auto; background: var(--stage);
 }
 .wsCard {
-  display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+  position: relative; display: flex; flex-direction: column; min-height: 0; overflow: hidden;
   border: 1px solid var(--line-3); border-radius: var(--r-md); background: var(--panel);
 }
 .wsCardOver { border-color: var(--accent); box-shadow: var(--glow-accent); }
+/* Drag-to-resize handles on the block edges/corner. */
+.wsResizeR { position: absolute; top: 0; right: 0; width: 7px; height: 100%; cursor: ew-resize; z-index: 4; }
+.wsResizeB { position: absolute; left: 0; bottom: 0; height: 7px; width: 100%; cursor: ns-resize; z-index: 4; }
+.wsResizeBR { position: absolute; right: 0; bottom: 0; width: 14px; height: 14px; cursor: nwse-resize; z-index: 5; }
+.wsResizeR:hover, .wsResizeB:hover, .wsResizeBR:hover { background: var(--accent-soft); }
+.wsResizeBR { border-right: 2px solid var(--line-4); border-bottom: 2px solid var(--line-4); }
+.wsResizeBR:hover { border-color: var(--accent); }
 .wsCardHead {
   display: flex; align-items: center; gap: 6px; padding: 5px 8px; flex-wrap: nowrap;
   background: var(--surface); border-bottom: 1px solid var(--line); cursor: grab;

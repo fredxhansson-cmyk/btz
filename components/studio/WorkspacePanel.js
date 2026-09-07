@@ -104,6 +104,24 @@ export default function WorkspacePanel() {
     setPanels((list) => { const a = [...list]; const [m] = a.splice(from, 1); a.splice(i, 0, m); return a; });
   };
 
+  // Drag the block's edges/corner to resize — right = width (columns),
+  // bottom = height, corner = both.
+  const gridRef = useRef(null);
+  const startResize = (i, mode, e) => {
+    e.preventDefault(); e.stopPropagation();
+    const gw = gridRef.current ? gridRef.current.clientWidth : 0;
+    const colW = gw ? (gw - (cols - 1) * 12) / cols : 0;
+    const startX = e.clientX; const startY = e.clientY;
+    const startH = panels[i].h; const startSpan = panels[i].span;
+    const move = (ev) => {
+      if (mode.indexOf('h') >= 0) patch(i, { h: clamp(Math.round(startH + (ev.clientY - startY)), 200, 1200) });
+      if (mode.indexOf('w') >= 0 && colW) patch(i, { span: clamp(startSpan + Math.round((ev.clientX - startX) / colW), 1, cols) });
+    };
+    const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+
   return (
     <div className={s.panel}>
       <div className={s.panelHead}>
@@ -142,7 +160,7 @@ export default function WorkspacePanel() {
         <button type="button" className={`${s.btn} ${s.on}`} onClick={add}>＋ Block</button>
       </div>
 
-      <div className={s.wsGrid} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+      <div className={s.wsGrid} ref={gridRef} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
         {panels.map((p, i) => (
           <div
             key={p.key}
@@ -176,6 +194,9 @@ export default function WorkspacePanel() {
               <button type="button" className={s.xBtn} title="Remove block" onClick={() => remove(i)}>×</button>
             </div>
             <div className={s.wsCardBody}>{renderBlock(p.view)}</div>
+            <span className={s.wsResizeR} onPointerDown={(e) => startResize(i, 'w', e)} title="Drag to resize width" />
+            <span className={s.wsResizeB} onPointerDown={(e) => startResize(i, 'h', e)} title="Drag to resize height" />
+            <span className={s.wsResizeBR} onPointerDown={(e) => startResize(i, 'wh', e)} title="Drag to resize" />
           </div>
         ))}
         {!panels.length && (
