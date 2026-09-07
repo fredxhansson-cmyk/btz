@@ -73,26 +73,39 @@ const PRIMARY_TABS = ['playlist', 'rack', 'piano', 'drums', 'mixer', 'mastering'
 // Compact dropdown for the tab bar (view overflow + tools), closes on outside click.
 function NavMenu({ label, active, items, align = 'left' }) {
   const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState(null);
   const ref = useRef(null);
+  const btnRef = useRef(null);
   useEffect(() => {
     if (!open) return undefined;
+    // Position the menu with fixed coordinates so it escapes the tab bar's
+    // overflow:auto (which otherwise clips it) and stacks above the view.
+    if (btnRef.current) {
+      const r = btnRef.current.getBoundingClientRect();
+      setPos(align === 'right'
+        ? { top: r.bottom + 4, right: Math.max(6, window.innerWidth - r.right) }
+        : { top: r.bottom + 4, left: r.left });
+    }
     const onDown = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
     const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    const onScroll = () => setOpen(false);
     document.addEventListener('pointerdown', onDown);
     document.addEventListener('keydown', onKey);
-    return () => { document.removeEventListener('pointerdown', onDown); document.removeEventListener('keydown', onKey); };
-  }, [open]);
+    window.addEventListener('resize', onScroll);
+    return () => { document.removeEventListener('pointerdown', onDown); document.removeEventListener('keydown', onKey); window.removeEventListener('resize', onScroll); };
+  }, [open, align]);
   return (
     <div className={s.menuWrap} ref={ref}>
       <button
+        ref={btnRef}
         type="button"
         className={active || open ? `${s.tabTool} ${s.on}` : s.tabTool}
         onClick={() => setOpen((o) => !o)}
       >
         {label}<span className={s.menuCaret} aria-hidden="true"> ▾</span>
       </button>
-      {open && (
-        <div className={s.dropdown} role="menu" style={align === 'right' ? { left: 'auto', right: 0 } : undefined}>
+      {open && pos && (
+        <div className={s.dropdown} role="menu" style={{ position: 'fixed', zIndex: 120, left: 'auto', right: 'auto', ...pos }}>
           {items.map((it) => (
             <button key={it.label} type="button" className={it.active ? `${s.dropItem} ${s.on}` : s.dropItem} role="menuitem" onClick={() => { setOpen(false); it.onClick(); }}>
               <span>{it.label}</span>
