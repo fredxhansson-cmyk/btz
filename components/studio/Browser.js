@@ -7,7 +7,7 @@ import { BAR_TICKS } from '../../lib/studio/constants';
 import { TEMPLATES } from '../../lib/studio/project';
 import { KITS } from '../../lib/studio/drums';
 import {
-  DRUM_SOUNDS, INST_SOUNDS, DRUM_CATS, INST_CATS, searchLibrary,
+  DRUM_SOUNDS, INST_SOUNDS, SAMPLE_SOUNDS, DRUM_CATS, INST_CATS, searchLibrary,
   soundColor, loadUserSounds, removeUserSound,
 } from '../../lib/studio/library';
 
@@ -26,7 +26,16 @@ function Section({ title, children, defaultOpen = false, count }) {
 }
 
 function SoundRow({ sound, onRemove, index = 0 }) {
-  const { dispatch, engine, setHint, setUi } = useStudio();
+  const { dispatch, engine, setHint, setUi, addSampleSound } = useStudio();
+  const isSample = sound.kind === 'sample';
+  const preview = () => (isSample ? engine.previewSampleUrl(sound.url) : engine.previewSound(sound));
+  const add = () => {
+    if (isSample) { addSampleSound(sound); return; }
+    dispatch({ type: 'sound.add', sound });
+    engine.previewSound(sound);
+    setHint(`${sound.name} added as a channel.`);
+    setUi({ view: 'rack', browserOpen: false });
+  };
   return (
     <div className={s.soundRow}>
       <button
@@ -34,17 +43,12 @@ function SoundRow({ sound, onRemove, index = 0 }) {
         className={s.previewBtn}
         title={`Play ${sound.name}`}
         aria-label={`Play ${sound.name}`}
-        onPointerDown={(e) => { e.stopPropagation(); engine.previewSound(sound); }}
+        onPointerDown={(e) => { e.stopPropagation(); preview(); }}
       >▶</button>
       <button
         type="button"
         className={s.soundName}
-        onClick={() => {
-          dispatch({ type: 'sound.add', sound });
-          engine.previewSound(sound);
-          setHint(`${sound.name} added as a channel.`);
-          setUi({ view: 'rack', browserOpen: false });
-        }}
+        onClick={add}
         title={`Add ${sound.name}${sound.tags && sound.tags.length ? ` · ${sound.tags.join(', ')}` : ''}`}
       >
         <span className={s.swatch} style={{ background: soundColor(sound, index) }} />
@@ -96,7 +100,12 @@ export default function Browser() {
         </div>
       ) : (
         <>
-          <Section title="Drums" defaultOpen count={DRUM_SOUNDS.length}>
+          <Section title="Real kits — samples (CC0)" defaultOpen count={SAMPLE_SOUNDS.length}>
+            <div className={s.helpBox}>Real recorded one-shots — the pro-sounding, non-synth drums. Free to use (CC0).</div>
+            {SAMPLE_SOUNDS.map((sd, i) => <SoundRow key={sd.id} sound={sd} index={i} />)}
+          </Section>
+
+          <Section title="Drums — synth" count={DRUM_SOUNDS.length}>
             {DRUM_CATS.map((cat) => (
               <div key={cat} className={s.catBlock}>
                 <div className={s.catLabel}>{cat}</div>
