@@ -353,7 +353,7 @@
 .rackBody { flex: 1; min-height: 0; display: flex; padding: 16px 20px; }
 .rackScroll { flex: 1; overflow: auto; padding-bottom: 8px; position: relative; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); }
 .rulerRow { display: flex; position: sticky; top: 0; z-index: 3; background: var(--panel); border-bottom: 1px solid var(--line); }
-.chanLeftSpacer { width: 408px; flex: none; }
+.chanLeftSpacer { width: 440px; flex: none; }
 .ruler { position: relative; display: flex; height: 20px; }
 .rulerTick {
   flex: none; font-size: 10.5px; color: var(--muted); border-left: 1px solid var(--panel);
@@ -369,7 +369,7 @@
 .chanRow { display: flex; align-items: center; height: 56px; border-top: 1px solid var(--line-weak); }
 .chanRow:hover { background: rgba(255,255,255,0.02); }
 .chanSel { background: var(--selected); }
-.chanLeft { width: 408px; flex: none; display: flex; align-items: center; gap: 6px; padding: 0 12px; overflow: hidden; }
+.chanLeft { width: 440px; flex: none; display: flex; align-items: center; gap: 6px; padding: 0 12px; overflow: hidden; }
 /* Obvious grab handle for drag-to-reorder. */
 .chanGrip {
   flex: none; cursor: grab; color: var(--text-3); font-size: 15px; line-height: 1;
@@ -556,7 +556,7 @@
 
 @media (max-width: 900px) {
   .side { display: none; }
-  .chanLeft, .chanLeftSpacer { width: 320px; }
+  .chanLeft, .chanLeftSpacer { width: 400px; }
   .timeBox { display: none; }
 }
 
