@@ -7,6 +7,7 @@ import ChannelRack from './ChannelRack';
 import PianoRoll from './PianoRoll';
 import ArrangeView from './ArrangeView';
 import AskFuse from './AskFuse';
+import CollabButton from './CollabButton';
 import Mixer from './Mixer';
 import MixerColumn from './MixerColumn';
 import MasteringView from './Mastering';
@@ -375,6 +376,7 @@ function Workspace({ installPrompt, onInstalled }) {
             </button>
           ))}
           <div className={s.tabNavRight}>
+            <CollabButton />
             <button type="button" className={`${s.tabTool} ${s.tabToolAccent}`} onClick={() => setAiOpen(true)}>✨ Fuse Brain</button>
             <button type="button" className={s.tabTool} onClick={() => setRecOpen(true)}>Record</button>
             <button type="button" className={s.tabTool} onClick={() => setUi({ pluginOpen: !ui.pluginOpen })}>Instrument</button>
