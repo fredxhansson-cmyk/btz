@@ -11,6 +11,7 @@ import CollabButton from './CollabButton';
 import WamPanel from './WamPanel';
 import MarketPanel from './MarketPanel';
 import PlaySurface from './PlaySurface';
+import ReleasePanel from './ReleasePanel';
 import Mixer from './Mixer';
 import MixerColumn from './MixerColumn';
 import MasteringView from './Mastering';
@@ -111,6 +112,7 @@ function Workspace({ installPrompt, onInstalled }) {
   const [projectsOpen, setProjectsOpen] = useState(false);
   const [wamOpen, setWamOpen] = useState(false);
   const [marketOpen, setMarketOpen] = useState(false);
+  const [releaseOpen, setReleaseOpen] = useState(false);
 
   // Show the welcome guide on the first visit; reopenable via the Guide tab.
   useEffect(() => {
@@ -346,6 +348,7 @@ function Workspace({ installPrompt, onInstalled }) {
       {projectsOpen && <ProjectsModal onClose={() => setProjectsOpen(false)} />}
       {wamOpen && <WamPanel onClose={() => setWamOpen(false)} />}
       {marketOpen && <MarketPanel onClose={() => setMarketOpen(false)} />}
+      {releaseOpen && <ReleasePanel onClose={() => setReleaseOpen(false)} />}
       {detached.map((id) => (
         <PopOut key={id} title={labelFor(id)} theme={ui.theme} onClose={() => attach(id)}>
           {viewFor(id)}
@@ -392,6 +395,7 @@ function Workspace({ installPrompt, onInstalled }) {
             <button type="button" className={s.tabTool} onClick={() => setUi({ pluginOpen: !ui.pluginOpen })}>Instrument</button>
             <button type="button" className={s.tabTool} onClick={() => setWamOpen(true)}>Plugins</button>
             <button type="button" className={s.tabTool} onClick={() => setMarketOpen(true)}>Market</button>
+            <button type="button" className={s.tabTool} onClick={() => setReleaseOpen(true)}>Release</button>
             <button type="button" className={s.tabTool} onClick={detach}>Pop out</button>
             <button type="button" className={s.tabTool} onClick={() => setProjectsOpen(true)}>Projects</button>
             <button type="button" className={s.tabTool} onClick={() => setOnboard(true)}>Guide</button>
